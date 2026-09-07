@@ -1,0 +1,35 @@
+name: Frontend
+
+on:
+  pull_request:
+    paths:
+      - 'src/TeacherControl.web/**'
+      - '.github/workflows/frontend.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/TeacherControl.web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: src/TeacherControl.web/.nvmrc
+          cache: pnpm
+          cache-dependency-path: src/TeacherControl.web/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+
+      - run: pnpm typecheck
+
+      - run: pnpm build

@@ -1,0 +1,5 @@
+dist
+coverage
+pnpm-lock.yaml
+public/mockServiceWorker.js
+src/shared/api/generated
