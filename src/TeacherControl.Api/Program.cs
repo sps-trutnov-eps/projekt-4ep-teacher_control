@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
+using System.Reflection;
 
 namespace TeacherControl.Api;
 
@@ -45,12 +46,24 @@ public class Program
         builder.Services.AddScoped<TeacherBingoService>();
 
         var app = builder.Build();
+        var isOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
+        
+        if (!isOpenApiGeneration)
+        {
+            await using var scope = app.Services.CreateAsyncScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var pendingMigrations = (await db.Database.GetPendingMigrationsAsync()).ToArray();
+            if (pendingMigrations.Length > 0)
+            {
+                await db.Database.MigrateAsync();
+            }
+        }
 
-        // Configure the HTTP request pipeline.
+        app.MapOpenApi();
         if (app.Environment.IsDevelopment())
         {
-            app.MapOpenApi();
-            await DevelopmentAuthentication.SeedAsync(app.Services, app.Configuration);
+            if (!isOpenApiGeneration)
+                await DevelopmentAuthentication.SeedAsync(app.Services, app.Configuration);
             app.MapDevelopmentAuthentication();
         }
 
