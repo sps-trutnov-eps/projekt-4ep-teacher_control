@@ -200,4 +200,18 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 
+.DS_Store
+
+# Lokální konfigurace nástrojů
+.claude/
+
+# Editory
+**/.vscode/*
+!**/.vscode/extensions.json
+.idea/
+*.suo
+*.sw?
+
+
 src/.idea/
+

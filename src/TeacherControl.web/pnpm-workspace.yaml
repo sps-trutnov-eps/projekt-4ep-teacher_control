@@ -1,0 +1,4 @@
+# Konfigurace pnpm pro tuhle aplikaci. Není to monorepo workspace.
+# msw si worker soubor nekopíruje sám, je v public/mockServiceWorker.js přes `pnpm dlx msw init`.
+allowBuilds:
+  msw: false
