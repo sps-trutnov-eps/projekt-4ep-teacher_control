@@ -203,3 +203,10 @@ nunit-*.xml
 
 # Lokální konfigurace nástrojů
 .claude/
+
+# Editory
+**/.vscode/*
+!**/.vscode/extensions.json
+.idea/
+*.suo
+*.sw?

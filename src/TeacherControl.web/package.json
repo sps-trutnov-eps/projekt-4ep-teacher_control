@@ -11,7 +11,7 @@
     "typecheck": "tsc -b",
     "test": "vitest run --passWithNoTests",
     "format": "prettier --write .",
-    "gen:api": "openapi-typescript ../../docs/api/openapi.json -o src/shared/api/generated/schema.d.ts"
+    "gen:api": "openapi-typescript ../../docs/api/TeacherControl.Api.json -o src/shared/api/generated/schema.d.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
