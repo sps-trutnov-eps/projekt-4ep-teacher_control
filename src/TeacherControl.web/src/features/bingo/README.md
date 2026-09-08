@@ -1,5 +1,5 @@
 # F1 Bingo
 
-Vlastník: _doplní frontend master_
+Vlastník: _Volk_
 
 Tvar kódu zkopíruj z `features/rating`. Pravidla jsou v `AGENTS.md`. Routa: `/bingo`.

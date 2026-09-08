@@ -1,6 +1,6 @@
 # F6 Login
 
-Vlastník: _doplní frontend master_
+Vlastník: _Jiruš_
 
 Tvar kódu zkopíruj z `features/rating`. Pravidla jsou v `AGENTS.md`. Routa: `/login`.
 

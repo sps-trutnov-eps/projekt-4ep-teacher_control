@@ -9,9 +9,9 @@ import { FeatureTodo } from './FeatureTodo'
 export const APP_ROUTES = [
   { path: '/rating', label: 'F2 Rating', element: <RatingPage /> },
   { path: '/bingo', label: 'F1 Bingo', element: <FeatureTodo code="F1" name="Bingo" /> },
-  { path: '/hodnoceni', label: 'F3 Hodnocení', element: <FeatureTodo code="F3" name="Hodnocení" /> },
-  { path: '/absence', label: 'F4 Absence', element: <FeatureTodo code="F4" name="Absence" /> },
-  { path: '/hlasovani', label: 'F5 Hlasování', element: <FeatureTodo code="F5" name="Hlasování" /> },
+  { path: '/recenze', label: 'F3 Recenze', element: <FeatureTodo code="F3" name="Recenze" /> },
+  { path: '/abstence', label: 'F4 Abstence', element: <FeatureTodo code="F4" name="Abstence" /> },
+  { path: '/pololeti', label: 'F5 Pololetí', element: <FeatureTodo code="F5" name="Pololetí" /> },
   { path: '/login', label: 'F6 Login', element: <FeatureTodo code="F6" name="Login" /> },
 ]
 
