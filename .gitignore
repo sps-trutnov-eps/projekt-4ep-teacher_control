@@ -199,6 +199,7 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
 .DS_Store
 
 # Lokální konfigurace nástrojů
@@ -210,3 +211,7 @@ nunit-*.xml
 .idea/
 *.suo
 *.sw?
+
+
+src/.idea/
+
