@@ -9,4 +9,9 @@ public class AppDbContext : IdentityDbContext<UserEntity>
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
+    
+    public DbSet<TeacherEntity> Teachers { get; set; }
+    public DbSet<AwardEntity> Awards { get; set; }
+    public DbSet<ReviewEntity> Reviews { get; set; }
+    public DbSet<LateArrivalEntity> LateArrivals { get; set; }
 }
