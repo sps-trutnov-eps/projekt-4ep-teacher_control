@@ -14,4 +14,6 @@ public class AppDbContext : IdentityDbContext<UserEntity>
     public DbSet<AwardEntity> Awards { get; set; }
     public DbSet<ReviewEntity> Reviews { get; set; }
     public DbSet<LateArrivalEntity> LateArrivals { get; set; }
+    public DbSet<TeacherQuoteEntity> TeacherQuotes { get; set; }
+    
 }
