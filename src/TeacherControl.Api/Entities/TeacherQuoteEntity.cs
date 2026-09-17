@@ -11,5 +11,5 @@ public class TeacherQuoteEntity
     public required int TeacherId { get; set; }
     public required TeacherEntity Teacher { get; set; }
     
-    public bool IsActive { get; set; } = true;
+    public required bool IsActive { get; set; } = true;
 }
