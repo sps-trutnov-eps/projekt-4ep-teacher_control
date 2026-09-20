@@ -24,6 +24,9 @@ public class TeacherEntity
         /// Výchozí hodnota je střední, idk co používat jako výchozí, jestli nechat jako 5/5, nebo používat střed. — Matěj K
         /// </remarks>
     /// </summary>
-    public required float Mood { get; set; } = 3; 
-    
+    public required float Mood { get; set; } = 3;
+
+    // Last time a late-arrival or mood was submitted for this teacher — used by Abstence to enforce
+    // a 30-minute cooldown between submissions (shared between both kinds).
+    public DateTime? LastSubmissionAt { get; set; }
 }
