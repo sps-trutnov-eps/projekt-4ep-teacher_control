@@ -1,6 +1,12 @@
 name: Frontend
 
 on:
+  push:
+    branches:
+      - main
+      - staging
+      - feat/*
+
   pull_request:
     paths:
       - 'src/TeacherControl.web/**'
