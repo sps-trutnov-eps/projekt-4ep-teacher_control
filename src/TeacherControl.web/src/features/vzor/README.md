@@ -17,6 +17,7 @@ Co kde najdeš:
 | `components/VzorForm.tsx` | React Hook Form + Zod + notifikace |
 | `VzorPage.tsx` | `hasRole()` na část stránky |
 | `index.ts` | jediné, co featura pouští ven — `mocks.ts` sem nepatří |
+| `VzorPage.test.tsx` | test se stejnými providery jako appka, data z MSW |
 
 Endpoint `/vzor-items` neexistuje, běží jen na MSW. Proto volá `fetchJson()` a typ má v `types.ts`.
 Až tvůj endpoint bude v `docs/api/TeacherControl.Api.json`, spusť `pnpm gen:api`, volej `api.GET()`

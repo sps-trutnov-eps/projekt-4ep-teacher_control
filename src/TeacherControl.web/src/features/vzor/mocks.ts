@@ -11,11 +11,15 @@ let items: VzorItem[] = [
   },
 ]
 
-/** MSW handlery featury. Přidávej sem endpointy, které backend ještě nemá hotové. */
+/**
+ * MSW handlery featury. Přidávej sem endpointy, které backend ještě nemá hotové.
+ * Hvězdička na začátku cesty je potřeba, aby handler platil i v testech — v Node
+ * nemá relativní '/api/...' vůči čemu se přeložit.
+ */
 export const vzorHandlers = [
-  http.get('/api/vzor-items', () => HttpResponse.json(items)),
+  http.get('*/api/vzor-items', () => HttpResponse.json(items)),
 
-  http.post('/api/vzor-items', async ({ request }) => {
+  http.post('*/api/vzor-items', async ({ request }) => {
     const body = (await request.json()) as { title: string; note?: string }
 
     const created: VzorItem = {

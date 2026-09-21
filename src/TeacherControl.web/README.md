@@ -20,7 +20,7 @@ Nic dalšího nastavovat nemusíš, mocky se ve vývoji zapnou samy. Běží to 
 Před každým PR musí projít:
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm build
+pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
 ## Pět pravidel

@@ -80,10 +80,18 @@ ne do komponenty.
 Kód a názvy anglicky, texty pro uživatele česky. Komponenty `PascalCase.tsx`, ostatní `camelCase.ts`.
 Žádné default exporty, všechno pojmenovaně. Nepiš komentáře k samozřejmostem.
 
+## Testy
+
+Vitest + Testing Library, data z tvých MSW handlerů (`src/mocks/server.ts` je pouští v Node).
+Vzor je `features/vzor/VzorPage.test.tsx` — zkopíruj z něj `renderPage()` s providery a piš
+testy proti tomu, co uživatel vidí (`findByText`, `findByRole`), ne proti vnitřnostem komponent.
+
+Aspoň jeden test na featuru. Nehoň se za pokrytím.
+
 ## Před PR
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm build
+pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
 Musí projít všechno. Jeden PR = jedna featura. Neupravuj při tom konfiguraci ani cizí featury.
