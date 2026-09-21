@@ -27,7 +27,7 @@ pnpm lint && pnpm typecheck && pnpm build
 
 1. **`AGENTS.md` si tvůj AI agent načte sám** — jsou tam všechna pravidla, nemusíš mu je opisovat.
 2. **Sahej jen do své featury** (`src/features/<tvoje>/`). Do `shared/` a do konfigurace ne.
-3. **Tvar kódu kopíruj z `src/features/rating`** — je to hotová referenční featura.
+3. **Tvar kódu kopíruj z `src/features/vzor`** — je to hotová referenční featura.
 4. **Typy pro API se nepíšou ručně**, generují se z OpenAPI přes `pnpm gen:api`.
 5. **Uživatele ber jen přes `useAuth()`**, vlastní přihlášení nikdo nepíše — dělá se to ve featuře F6.
 

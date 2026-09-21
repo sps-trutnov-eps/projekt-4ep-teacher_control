@@ -1,6 +1,6 @@
 import { AppShell, Group, NavLink, Text, Title } from '@mantine/core'
 import { Link, useLocation } from 'react-router'
-import { DevUserSwitcher, useAuth } from '@/shared/auth'
+import { DevUserSwitcher, RequireAuth, useAuth } from '@/shared/auth'
 import { APP_ROUTES, AppRoutes } from './routes'
 
 export function App() {
@@ -32,7 +32,9 @@ export function App() {
       </AppShell.Navbar>
 
       <AppShell.Main>
-        <AppRoutes />
+        <RequireAuth>
+          <AppRoutes />
+        </RequireAuth>
       </AppShell.Main>
     </AppShell>
   )
