@@ -163,6 +163,10 @@ function getOrCreateUserStats(userId: string): UserBingoStats {
  * Spočítá počet dokončených řad, sloupců a diagonál na bingo desce.
  */
 function calculateBingoCount(cells: BingoCell[], size: number): number {
+  if (size < 2 || cells.length !== size * size) {
+    return 0
+  }
+
   let bingos = 0
 
   // Kontrola řad
@@ -199,26 +203,32 @@ function calculateBingoCount(cells: BingoCell[], size: number): number {
 /**
  * Vygeneruje novou náhodnou desku pro zadaného uživatele.
  */
-function createNewBoard(userId: string, size = DEFAULT_GRID_SIZE): BingoBoard {
+function createNewBoard(userId: string, requestedSize = DEFAULT_GRID_SIZE): BingoBoard {
+  const size = Math.max(2, Math.min(requestedSize, 6))
   const neededQuotes = size * size
+
   // Zamíchání hlášek
   const shuffled = [...teacherQuotes].sort(() => Math.random() - 0.5)
-  const selectedQuotes = shuffled.slice(0, Math.min(neededQuotes, shuffled.length))
 
   const cells: BingoCell[] = []
   let quoteIndex = 0
 
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
-      const quote = selectedQuotes[quoteIndex] || {
-        id: `q-fallback-${quoteIndex}`,
-        teacherId: 't-unknown',
-        teacherName: 'Učitel',
-        quote: `Běžná hláška #${quoteIndex + 1}`,
-        createdAt: new Date().toISOString(),
-      }
+      const quote =
+        shuffled.length > 0
+          ? shuffled[quoteIndex % shuffled.length]
+          : {
+              id: `q-fallback-${quoteIndex}`,
+              teacherId: 't-unknown',
+              teacherName: 'Učitel',
+              quote: `Běžná hláška #${quoteIndex + 1}`,
+              createdAt: new Date().toISOString(),
+            }
+
+      const randomSuffix = Math.random().toString(36).substring(2, 8)
       cells.push({
-        id: `cell-${r}-${c}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        id: `cell-${r}-${c}-${randomSuffix}`,
         row: r,
         col: c,
         quote,
@@ -229,7 +239,7 @@ function createNewBoard(userId: string, size = DEFAULT_GRID_SIZE): BingoBoard {
   }
 
   const board: BingoBoard = {
-    id: `board-${Date.now()}`,
+    id: `board-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
     userId,
     gridSize: size,
     cells,
@@ -260,71 +270,96 @@ export const bingoHandlers = [
   }),
 
   // 2. Vygenerování nové desky pro uživatele
-  http.post('/api/bingo/board/new', async ({ request }) => {
+  http.post('/api/bingo/board/new', async ({ request }: { request: Request }) => {
     const userId = getActiveUserId()
-    const url = new URL(request.url)
-    const sizeParam = url.searchParams.get('size')
-    const size = sizeParam ? parseInt(sizeParam, 10) : DEFAULT_GRID_SIZE
+    let size = DEFAULT_GRID_SIZE
 
-    const newBoard = createNewBoard(userId, Number.isNaN(size) ? DEFAULT_GRID_SIZE : size)
+    try {
+      const body = (await request.json()) as { size?: number }
+      if (body && typeof body.size === 'number') {
+        size = body.size
+      }
+    } catch {
+      const url = new URL(request.url)
+      const sizeParam = url.searchParams.get('size')
+      if (sizeParam) {
+        const parsed = parseInt(sizeParam, 10)
+        if (!Number.isNaN(parsed)) {
+          size = parsed
+        }
+      }
+    }
+
+    const newBoard = createNewBoard(userId, size)
     return HttpResponse.json(newBoard, { status: 201 })
   }),
 
   // 3. Označení / odznačení políčka a přepočet Bingo counteru
-  http.post('/api/bingo/cells/:cellId/toggle', ({ params }) => {
-    const { cellId } = params
-    const userId = getActiveUserId()
-    const board = userBoards.get(userId)
+  http.post(
+    '/api/bingo/cells/:cellId/toggle',
+    ({ params }: { params: { cellId?: string } }) => {
+      const rawCellId = params.cellId
+      const cellId = Array.isArray(rawCellId) ? rawCellId[0] : rawCellId
 
-    if (!board) {
-      return HttpResponse.json({ title: 'Deska nenalezena', status: 404 }, { status: 404 })
-    }
-
-    const cell = board.cells.find((c) => c.id === cellId)
-    if (!cell) {
-      return HttpResponse.json({ title: 'Políčko nenalezeno', status: 404 }, { status: 404 })
-    }
-
-    // Přepnutí stavu označení
-    cell.isMarked = !cell.isMarked
-
-    const previousCount = board.bingoCount
-    const newCount = calculateBingoCount(board.cells, board.gridSize)
-    board.bingoCount = newCount
-
-    const stats = getOrCreateUserStats(userId)
-    let newBingoAchieved = false
-
-    if (newCount > previousCount) {
-      const difference = newCount - previousCount
-      stats.totalBingos += difference
-      newBingoAchieved = true
-    } else if (newCount < previousCount) {
-      // V případě odznačení políčka
-      const difference = previousCount - newCount
-      stats.totalBingos = Math.max(0, stats.totalBingos - difference)
-    }
-
-    if (board.cells.every((c) => c.isMarked)) {
-      if (!board.isCompleted) {
-        board.isCompleted = true
-        stats.completedBoards++
+      if (!cellId) {
+        return HttpResponse.json({ title: 'Chybí ID políčka', status: 400 }, { status: 400 })
       }
-    } else {
-      board.isCompleted = false
-    }
 
-    const response: ToggleCellResponse = {
-      board,
-      newBingoAchieved,
-      totalBingos: stats.totalBingos,
-    }
+      const userId = getActiveUserId()
+      const board = userBoards.get(userId)
 
-    return HttpResponse.json(response)
-  }),
+      if (!board) {
+        return HttpResponse.json({ title: 'Deska nenalezena', status: 404 }, { status: 404 })
+      }
+
+      const cell = board.cells.find((c) => c.id === cellId)
+      if (!cell) {
+        return HttpResponse.json({ title: 'Políčko nenalezeno', status: 404 }, { status: 404 })
+      }
+
+      // Přepnutí stavu označení
+      cell.isMarked = !cell.isMarked
+
+      const previousCount = board.bingoCount
+      const newCount = calculateBingoCount(board.cells, board.gridSize)
+      board.bingoCount = newCount
+
+      const stats = getOrCreateUserStats(userId)
+      let newBingoAchieved = false
+
+      if (newCount > previousCount) {
+        const difference = newCount - previousCount
+        stats.totalBingos += difference
+        newBingoAchieved = true
+      } else if (newCount < previousCount) {
+        const difference = previousCount - newCount
+        stats.totalBingos = Math.max(0, stats.totalBingos - difference)
+      }
+
+      if (board.cells.length > 0 && board.cells.every((c) => c.isMarked)) {
+        if (!board.isCompleted) {
+          board.isCompleted = true
+          stats.completedBoards++
+        }
+      } else {
+        if (board.isCompleted) {
+          board.isCompleted = false
+          stats.completedBoards = Math.max(0, stats.completedBoards - 1)
+        }
+      }
+
+      const response: ToggleCellResponse = {
+        board,
+        newBingoAchieved,
+        totalBingos: stats.totalBingos,
+      }
+
+      return HttpResponse.json(response)
+    }
+  ),
 
   // 4. Seznam učitelských hlášek (s možností filtru podle teacherId)
-  http.get('/api/bingo/quotes', ({ request }) => {
+  http.get('/api/bingo/quotes', ({ request }: { request: Request }) => {
     const url = new URL(request.url)
     const teacherId = url.searchParams.get('teacherId')
 
@@ -336,10 +371,15 @@ export const bingoHandlers = [
   }),
 
   // 5. Přidání nové hlášky pro učitele (Teacher ID -> Quote)
-  http.post('/api/bingo/quotes', async ({ request }) => {
-    const body = (await request.json()) as CreateQuoteRequest
+  http.post('/api/bingo/quotes', async ({ request }: { request: Request }) => {
+    let body: Partial<CreateQuoteRequest>
+    try {
+      body = (await request.json()) as Partial<CreateQuoteRequest>
+    } catch {
+      return HttpResponse.json({ title: 'Neplatný formát JSON', status: 400 }, { status: 400 })
+    }
 
-    if (!body.teacherId || !body.quote || !body.teacherName) {
+    if (!body || !body.teacherId?.trim() || !body.quote?.trim() || !body.teacherName?.trim()) {
       return HttpResponse.json(
         { title: 'Chybí povinná pole (teacherId, teacherName, quote)', status: 400 },
         { status: 400 }
@@ -348,9 +388,9 @@ export const bingoHandlers = [
 
     const newQuote: TeacherQuote = {
       id: `q-${teacherQuotes.length + 1}`,
-      teacherId: body.teacherId,
-      teacherName: body.teacherName,
-      quote: body.quote,
+      teacherId: body.teacherId.trim(),
+      teacherName: body.teacherName.trim(),
+      quote: body.quote.trim(),
       createdAt: new Date().toISOString(),
     }
 

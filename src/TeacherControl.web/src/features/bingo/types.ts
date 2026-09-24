@@ -39,6 +39,10 @@ export interface CreateQuoteRequest {
   quote: string
 }
 
+export interface QuoteFilters {
+  teacherId?: string
+}
+
 export interface ToggleCellResponse {
   board: BingoBoard
   newBingoAchieved: boolean
