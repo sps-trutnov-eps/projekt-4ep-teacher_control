@@ -1,6 +1,28 @@
 @TeacherControl.Api_HostAddress = http://localhost:5229
 
-GET {{TeacherControl.Api_HostAddress}}/weatherforecast/
+### Login
+POST {{TeacherControl.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "TeacherControl123!"
+}
+
+### Ověření přihlášení
+GET {{TeacherControl.Api_HostAddress}}/api/auth/me
+
+### Získání recenzí pro učitele 1
+GET {{TeacherControl.Api_HostAddress}}/api/rating/teacher/1
 Accept: application/json
 
-###
+### Vytvoření recenze
+POST {{TeacherControl.Api_HostAddress}}/api/rating
+Content-Type: application/json
+
+{
+  "teacherId": 1,
+  "title": "Test recenze",
+  "content": "Testovaci obsah",
+  "rating": 5
+}
