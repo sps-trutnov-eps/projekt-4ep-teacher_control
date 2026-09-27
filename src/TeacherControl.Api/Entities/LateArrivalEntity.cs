@@ -6,7 +6,7 @@ public class LateArrivalEntity
 {
     [Key]
     public int Id { get; set; }
-    public required DateTime Date { get; set; }
+    public required DateOnly Date { get; set; }
     
     public required int TeacherId { get; set; }
     public required TeacherEntity Teacher { get; set; }

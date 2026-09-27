@@ -3,47 +3,10 @@
  * Do not make direct changes to the file.
  */
 
-export interface paths {
-    "/ratings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getRatings"];
-        put?: never;
-        post: operations["createRating"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-}
+export type paths = Record<string, never>;
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        Rating: {
-            id: string;
-            subject: string;
-            score: number;
-            comment?: string | null;
-            authorName: string;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        CreateRatingRequest: {
-            subject: string;
-            score: number;
-            comment?: string | null;
-        };
-        ProblemDetails: {
-            title?: string;
-            status?: number;
-            detail?: string;
-        };
-    };
+    schemas: never;
     responses: never;
     parameters: never;
     requestBodies: never;
@@ -51,60 +14,4 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export interface operations {
-    getRatings: {
-        parameters: {
-            query?: {
-                subject?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Seznam hodnocení */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Rating"][];
-                };
-            };
-        };
-    };
-    createRating: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateRatingRequest"];
-            };
-        };
-        responses: {
-            /** @description Vytvořené hodnocení */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Rating"];
-                };
-            };
-            /** @description Neplatný vstup */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetails"];
-                };
-            };
-        };
-    };
-}
+export type operations = Record<string, never>;

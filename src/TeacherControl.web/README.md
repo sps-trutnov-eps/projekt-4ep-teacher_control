@@ -20,14 +20,14 @@ Nic dalšího nastavovat nemusíš, mocky se ve vývoji zapnou samy. Běží to 
 Před každým PR musí projít:
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm build
+pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
 ## Pět pravidel
 
 1. **`AGENTS.md` si tvůj AI agent načte sám** — jsou tam všechna pravidla, nemusíš mu je opisovat.
 2. **Sahej jen do své featury** (`src/features/<tvoje>/`). Do `shared/` a do konfigurace ne.
-3. **Tvar kódu kopíruj z `src/features/rating`** — je to hotová referenční featura.
+3. **Tvar kódu kopíruj z `src/features/vzor`** — je to hotová referenční featura.
 4. **Typy pro API se nepíšou ručně**, generují se z OpenAPI přes `pnpm gen:api`.
 5. **Uživatele ber jen přes `useAuth()`**, vlastní přihlášení nikdo nepíše — dělá se to ve featuře F6.
 
