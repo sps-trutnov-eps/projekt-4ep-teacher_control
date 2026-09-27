@@ -205,7 +205,6 @@ function calculateBingoCount(cells: BingoCell[], size: number): number {
  */
 function createNewBoard(userId: string, requestedSize = DEFAULT_GRID_SIZE): BingoBoard {
   const size = Math.max(2, Math.min(requestedSize, 6))
-  const neededQuotes = size * size
 
   // Zamíchání hlášek
   const shuffled = [...teacherQuotes].sort(() => Math.random() - 0.5)
