@@ -1,6 +1,5 @@
 import { Route, Routes } from 'react-router'
 import { VzorPage } from '@/features/vzor'
-import { RatingPage } from '@/features/rating'
 import { AbstencePage } from '@/features/abstence'
 import { FeatureTodo } from './FeatureTodo'
 
