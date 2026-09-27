@@ -18,7 +18,7 @@ public class AbstenceService
 
     public async Task<List<TeacherAbstenceDto>> GetTeachersAsync()
     {
-        var today = DateTime.Now.Date;
+        var today = DateOnly.FromDateTime(DateTime.Now);
 
         var teachers = await _context.Teachers
             .Include(t => t.Reviews)
@@ -30,7 +30,7 @@ public class AbstenceService
 
     public async Task<TeacherAbstenceDto?> GetTeacherAsync(int teacherId)
     {
-        var today = DateTime.Now.Date;
+        var today = DateOnly.FromDateTime(DateTime.Now);
 
         var teacher = await _context.Teachers
             .Include(t => t.Reviews)
@@ -43,7 +43,7 @@ public class AbstenceService
     public async Task<AbstenceWriteResult> SubmitLateArrivalAsync(int teacherId, string studentId, int minutes)
     {
         var now = DateTime.Now;
-        var today = now.Date;
+        var today = DateOnly.FromDateTime(now);
 
         var teacher = await _context.Teachers
             .Include(t => t.Reviews)
@@ -59,28 +59,28 @@ public class AbstenceService
         if (student is null)
             return new AbstenceWriteResult(AbstenceWriteOutcome.TeacherNotFound);
 
-        var entry = new LateArrivalEntity
+        // Přidáním do trackované navigační kolekce si EF entitu sám označí jako Added,
+        // není potřeba volat i _context.LateArrivals.Add(...) zvlášť.
+        teacher.LateArrivals.Add(new LateArrivalEntity
         {
             Date = today,
             TeacherId = teacherId,
             Teacher = teacher,
             StudentId = studentId,
             Student = student,
-            TimeSpan = TimeSpan.FromMinutes(minutes),
-        };
-        _context.LateArrivals.Add(entry);
+            TimeSpan = TimeSpan.FromMinutes(minutes)
+        });
         teacher.LastSubmissionAt = now;
 
         await _context.SaveChangesAsync();
 
-        teacher.LateArrivals.Add(entry);
         return new AbstenceWriteResult(AbstenceWriteOutcome.Success, ToDto(teacher));
     }
 
     public async Task<AbstenceWriteResult> SubmitMoodAsync(int teacherId, string studentId, float value)
     {
         var now = DateTime.Now;
-        var today = now.Date;
+        var today = DateOnly.FromDateTime(now);
 
         var teacher = await _context.Teachers
             .Include(t => t.Reviews)
@@ -104,7 +104,8 @@ public class AbstenceService
         return new AbstenceWriteResult(AbstenceWriteOutcome.Success, ToDto(teacher));
     }
 
-    // Cooldown is shared between late-arrival and mood submissions — either one resets it for the teacher.
+    // Cooldown je sdílený mezi pozdním příchodem a náladou — odeslání jednoho z nich
+    // resetuje časovač pro oba typy u daného učitele.
     private static bool TryGetCooldownRemaining(TeacherEntity teacher, DateTime now, out TimeSpan remaining)
     {
         if (teacher.LastSubmissionAt is { } last && now - last < SubmissionCooldown)

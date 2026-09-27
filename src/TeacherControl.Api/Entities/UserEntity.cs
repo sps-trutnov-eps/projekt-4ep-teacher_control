@@ -11,5 +11,5 @@ public class UserEntity : IdentityUser
     public int? TeacherId { get; set; } = null;
     public TeacherEntity? Teacher { get; set; }
 
-    public required int FinishedBingoCount { get; set; } = 0;
+    public int FinishedBingoCount { get; set; } = 0;
 }
