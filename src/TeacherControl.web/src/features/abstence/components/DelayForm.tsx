@@ -1,42 +1,48 @@
-import { Alert, Button, Group, NumberInput, Stack, Textarea } from '@mantine/core'
+import { Alert, Button, Group, NumberInput, Stack } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
-import { notifications } from '@mantine/notifications'
-import { useCreateDelay } from '../api'
+import { ApiError, formatRetryAfter, useSubmitLateArrival } from '../api'
 import { DELAY_PRESETS, delayFormSchema, type DelayFormValues } from '../schema'
 
 interface DelayFormProps {
-  teacherId: string
+  teacherId: number
 }
 
 /**
  * Zadávání zpoždění podle designu: tlačítka +1 až +20 se uloží hned po kliknutí,
- * přes "Custom" lze zadat vlastní počet minut.
+ * přes "Custom" pole lze zadat vlastní počet minut. Poznámka už se neposílá — backend
+ * ji neumí. Per učitel platí 30minutový cooldown (429 + Retry-After).
  */
 export function DelayForm({ teacherId }: DelayFormProps) {
-  const createDelay = useCreateDelay(teacherId)
+  const submitLateArrival = useSubmitLateArrival(teacherId)
 
   const {
     control,
     handleSubmit,
-    register,
-    reset,
     setValue,
     formState: { errors },
   } = useForm<DelayFormValues>({
     resolver: zodResolver(delayFormSchema),
-    defaultValues: { minutes: 5, note: '' },
+    defaultValues: { minutes: 5 },
   })
-
-  const saveDelay = async (minutes: number, note?: string) => {
-    await createDelay.mutateAsync({ minutes, note })
-    notifications.show({ message: 'Zpoždění uloženo.' })
-    reset({ minutes: 5, note: '' })
-  }
 
   const onSubmit = handleSubmit(async (values) => {
-    await saveDelay(values.minutes, values.note)
+    await submitLateArrival.mutateAsync({ minutes: values.minutes })
+    notifications.show({ message: 'Zpoždění uloženo.' })
   })
+
+  const quickSave = (minutes: number) => {
+    setValue('minutes', minutes, { shouldValidate: true })
+    submitLateArrival.mutate({ minutes })
+  }
+
+  const cooldownError =
+    submitLateArrival.isError &&
+    submitLateArrival.error instanceof ApiError &&
+    submitLateArrival.error.status === 429
+      ? `Zpoždění pro tohohle učitele jsi nedávno nahlašoval, zkus to znovu ${formatRetryAfter(submitLateArrival.error.retryAfterSeconds)}.`
+      : null
 
   return (
     <Stack gap="sm">
@@ -45,11 +51,8 @@ export function DelayForm({ teacherId }: DelayFormProps) {
           <Button
             key={preset}
             variant="default"
-            disabled={createDelay.isPending}
-            onClick={() => {
-              setValue('minutes', preset, { shouldValidate: true })
-              void saveDelay(preset)
-            }}
+            disabled={submitLateArrival.isPending}
+            onClick={() => quickSave(preset)}
           >
             +{preset}
           </Button>
@@ -66,28 +69,26 @@ export function DelayForm({ teacherId }: DelayFormProps) {
                 label="Vlastní zpoždění (minuty)"
                 placeholder="Např. 7"
                 min={1}
-                max={240}
+                max={300}
                 value={field.value}
                 onChange={(value) => field.onChange(Number(value))}
                 onBlur={field.onBlur}
                 error={errors.minutes?.message}
               />
             )}
-          />          <Textarea
-          label="Poznámka"
-          placeholder="Nepovinné"
-          minRows={2}
-          error={errors.note?.message}
-          {...register('note')}
-        />
+          />
 
-          {createDelay.isError ? (
+          {cooldownError !== null ? (
+            <Alert color="yellow" title="Chvíli počkej">
+              {cooldownError}
+            </Alert>
+          ) : submitLateArrival.isError ? (
             <Alert color="red" title="Chyba">
               Zpoždění se nepodařilo uložit.
             </Alert>
           ) : null}
 
-          <Button type="submit" loading={createDelay.isPending}>
+          <Button type="submit" loading={submitLateArrival.isPending}>
             Uložit zpoždění
           </Button>
         </Stack>

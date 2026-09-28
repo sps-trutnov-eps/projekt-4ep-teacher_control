@@ -1,84 +1,139 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/shared/api'
-import type { DelayFormValues } from './schema'
-import type { DelayEntry, Teacher, TeacherFilters } from './types'
+import type { LateArrivalBody, MoodBody, Teacher } from './types'
 
 /**
- * Endpointy abstence zatím nejsou v OpenAPI schématu (to obsahuje jen `/ratings`, protože
- * `docs/api/TeacherControl.Api.json` je stále placeholder). Situace:
+ * Endpointy featury Abstence jsou ve vygenerovaném schématu (docs/api/TeacherControl.Api.json):
+ * - GET  /api/abstence                           → seznam učitelů
+ * - GET  /api/abstence/{teacherId}               → detail učitele
+ * - POST /api/abstence/{teacherId}/late-arrival  { minutes }
+ * - POST /api/abstence/{teacherId}/mood          { value: 1–5 }
  *
- * - vlastní fetch() je ve featuře zakázaný (eslint: no-restricted-globals)
- * - generovaný soubor editovat nesmíme (přepíše ho `pnpm gen:api`)
- *
- * Proto se volá generovaný klient s explicitním suppression. **Jakmile backend endpointy do
- * schématu přidá, tady se změní jen cesty a suppression se smaže.** Do té doby jedou odpovědi
- * přes MSW handlery v `mocks.ts`.
- *
- * Pozor: cesty jsou BEZ prefixu `/api` — ten přidává klient přes baseUrl (stejně jako `/ratings`).
+ * Schéma zatím dokumentuje jen 200, ale backend posílá i 400/401/404 a u zápisů 429
+ * (sdílený 30minutový cooldown per učitel, hlavička Retry-After). Proto se kontroluje
+ * `response.ok` místo `error` z klienta.
  */
-const request = async <T>(
-  path: string,
-  init?: { method?: 'GET' | 'POST'; body?: unknown },
-): Promise<T> => {
-  // @ts-expect-error endpoint ještě není ve vygenerovaném schématu, viz komentář výše
-  const { data, error } = await api.request(init?.method ?? 'GET', path, { body: init?.body })
-
-  if (error !== undefined) {
-    throw new Error(`Request na ${path} selhal.`)
-  }
-
-  return data as T
-}
 
 /** Query key konvence: [featura, typ, ...parametry]. */
 const abstenceKeys = {
   all: ['abstence'] as const,
-  teachers: (filters: TeacherFilters) => ['abstence', 'teachers', filters] as const,
-  teacher: (teacherId: string) => ['abstence', 'teacher', teacherId] as const,
-  delays: (teacherId: string) => ['abstence', 'delays', teacherId] as const,
+  list: () => [...abstenceKeys.all, 'teachers'] as const,
+  teacher: (teacherId: number) => ['abstence', 'teacher', teacherId] as const,
 }
 
-export function useTeachers(filters: TeacherFilters = {}) {
+export class ApiError extends Error {
+  readonly status: number
+  readonly retryAfterSeconds: number | null
+
+  constructor(status: number, retryAfterSeconds: number | null = null) {
+    super(`API volání skončilo ${status}.`)
+    this.name = 'ApiError'
+    this.status = status
+    this.retryAfterSeconds = retryAfterSeconds
+  }
+}
+
+/** Retry-After backend posílá ve vteřinách; chybí-li nebo je neplatný, vrátí null. */
+function getRetryAfterSeconds(response: Response): number | null {
+  const raw = response.headers.get('Retry-After')
+
+  if (raw === null) {
+    return null
+  }
+
+  const seconds = Number(raw)
+  return Number.isFinite(seconds) ? seconds : null
+}
+
+/** Text pro uživatele, za jak dlouho si může zápis zopakovat. */
+export function formatRetryAfter(retryAfterSeconds: number | null): string {
+  if (retryAfterSeconds === null) {
+    return 'za chvíli'
+  }
+
+  if (retryAfterSeconds < 60) {
+    return `za ${retryAfterSeconds} s`
+  }
+
+  return `za ${Math.ceil(retryAfterSeconds / 60)} min`
+}
+
+export function useTeachers() {
   return useQuery({
-    queryKey: abstenceKeys.teachers(filters),
-    queryFn: () => {
-      const searchParams = new URLSearchParams()
-      if (filters.name) {
-        searchParams.set('name', filters.name)
+    queryKey: abstenceKeys.list(),
+    queryFn: async ({ signal }) => {
+      const { data, response } = await api.GET('/api/abstence', { signal })
+
+      if (!response.ok || data === undefined) {
+        throw new ApiError(response.status)
       }
-      const query = searchParams.toString()
-      return request<Teacher[]>(`/abstence/teachers${query ? `?${query}` : ''}`)
+
+      return data as Teacher[]
     },
   })
 }
 
-export function useTeacher(teacherId: string) {
+export function useTeacher(teacherId: number | null) {
   return useQuery({
-    queryKey: abstenceKeys.teacher(teacherId),
-    queryFn: () => request<Teacher>(`/abstence/teachers/${teacherId}`),
-    enabled: teacherId.length > 0,
+    queryKey: abstenceKeys.teacher(teacherId ?? 0),
+    queryFn: async ({ signal }) => {
+      const { data, response } = await api.GET('/api/abstence/{teacherId}', {
+        params: { path: { teacherId: teacherId ?? 0 } },
+        signal,
+      })
+
+      if (!response.ok || data === undefined) {
+        throw new ApiError(response.status)
+      }
+
+      return data as Teacher
+    },
+    enabled: teacherId !== null,
   })
 }
 
-export function useTeacherDelays(teacherId: string) {
-  return useQuery({
-    queryKey: abstenceKeys.delays(teacherId),
-    queryFn: () => request<DelayEntry[]>(`/abstence/teachers/${teacherId}/delays`),
-    enabled: teacherId.length > 0,
-  })
-}
-
-export function useCreateDelay(teacherId: string) {
+export function useSubmitLateArrival(teacherId: number) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (values: DelayFormValues) =>
-      request<DelayEntry>(`/abstence/teachers/${teacherId}/delays`, {
-        method: 'POST',
+    mutationFn: async (values: LateArrivalBody) => {
+      const { response } = await api.POST('/api/abstence/{teacherId}/late-arrival', {
+        params: { path: { teacherId } },
         body: values,
-      }),
+      })
+
+      if (!response.ok) {
+        throw new ApiError(
+          response.status,
+          response.status === 429 ? getRetryAfterSeconds(response) : null,
+        )
+      }
+    },
     onSuccess: () => {
-      // Po mutaci se invaliduje celá featura: změna nálady ovlivní seznam i profil.
+      // Odpovědí je přepočítaný učitel; invalidace celé featury zvládne seznam i detail najednou.
+      queryClient.invalidateQueries({ queryKey: abstenceKeys.all })
+    },
+  })
+}
+
+export function useSubmitMood(teacherId: number) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (values: MoodBody) => {
+      const { response } = await api.POST('/api/abstence/{teacherId}/mood', {
+        params: { path: { teacherId } },
+        body: values,
+      })
+
+      if (!response.ok) {
+        throw new ApiError(
+          response.status,
+          response.status === 429 ? getRetryAfterSeconds(response) : null,
+        )
+      }
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: abstenceKeys.all })
     },
   })

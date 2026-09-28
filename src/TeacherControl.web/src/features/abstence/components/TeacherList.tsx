@@ -2,19 +2,19 @@ import { Alert, Loader, Stack, Text } from '@mantine/core'
 import { useState } from 'react'
 import { useMediaQuery } from '@mantine/hooks'
 import { useTeacher, useTeachers } from '../api'
-import type { Teacher, TeacherFilters } from '../types'
 import { TeacherDetail } from './TeacherDetail'
 import { TeacherListItem } from './TeacherListItem'
 
 interface TeacherListProps {
-  filters: TeacherFilters
-  onSelect: (teacherId: string) => void
+  /** Filtr jména — backend ho nepodporuje, filtruje se ze staženého seznamu. */
+  nameFilter: string
+  onSelect: (teacherId: number) => void
 }
 
 /** Seznam učitelů s vyhledáváním podle jména. Na mobilu se řádek rozklikne, na desktopu vybere detail. */
-export function TeacherList({ filters, onSelect }: TeacherListProps) {
-  const teachersQuery = useTeachers(filters)
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+export function TeacherList({ nameFilter, onSelect }: TeacherListProps) {
+  const teachersQuery = useTeachers()
+  const [expandedId, setExpandedId] = useState<number | null>(null)
   // Rozklik řádku je mobilní varianta z designu; na desktopu řádek jen vybere detail vedle.
   const isMobile = useMediaQuery('(max-width: 48em)')
 
@@ -30,51 +30,39 @@ export function TeacherList({ filters, onSelect }: TeacherListProps) {
     )
   }
 
-  if (teachersQuery.data.length === 0) {
+  const normalizedFilter = nameFilter.trim().toLowerCase()
+  const teachers = normalizedFilter
+    ? teachersQuery.data.filter((teacher) => teacher.name.toLowerCase().includes(normalizedFilter))
+    : teachersQuery.data
+
+  if (teachers.length === 0) {
     return <Text c="dimmed">Nikoho jsem nenašel.</Text>
   }
 
   return (
     <Stack gap="sm">
-      <TeacherListItems
-        teachers={teachersQuery.data}
-        expandedId={isMobile ? expandedId : null}
-        onToggle={(teacherId) => {
-          onSelect(teacherId)
-          if (isMobile) {
-            setExpandedId((current) => (current === teacherId ? null : teacherId))
-          }
-        }}
-      />
+      {teachers.map((teacher) => (
+        <TeacherListItem
+          key={teacher.teacherId}
+          teacher={teacher}
+          isExpanded={isMobile && expandedId === teacher.teacherId}
+          onToggle={() => {
+            onSelect(teacher.teacherId)
+            if (isMobile) {
+              setExpandedId((current) => (current === teacher.teacherId ? null : teacher.teacherId))
+            }
+          }}
+        >
+          {isMobile && expandedId === teacher.teacherId ? (
+            <ExpandedTeacherDetail teacherId={teacher.teacherId} />
+          ) : null}
+        </TeacherListItem>
+      ))}
     </Stack>
   )
 }
 
-interface TeacherListItemsProps {
-  teachers: Teacher[]
-  expandedId: string | null
-  onToggle: (teacherId: string) => void
-}
-
-/** Rozkliknutý řádek načítá detail přímo u sebe — tohle je mobilní varianta z designu. */
-function TeacherListItems({ teachers, expandedId, onToggle }: TeacherListItemsProps) {
-  return (
-    <>
-      {teachers.map((teacher) => (
-        <TeacherListItem
-          key={teacher.id}
-          teacher={teacher}
-          isExpanded={expandedId === teacher.id}
-          onToggle={() => onToggle(teacher.id)}
-        >
-          {expandedId === teacher.id ? <ExpandedTeacherDetail teacherId={teacher.id} /> : null}
-        </TeacherListItem>
-      ))}
-    </>
-  )
-}
-
-function ExpandedTeacherDetail({ teacherId }: { teacherId: string }) {
+function ExpandedTeacherDetail({ teacherId }: { teacherId: number }) {
   const { data: teacher, isPending, isError } = useTeacher(teacherId)
 
   if (isPending) {

@@ -1,13 +1,12 @@
 import { Avatar } from '@mantine/core'
-import { MOOD_LABELS } from '../mood'
+import { MOOD_COLORS, MOOD_LABELS } from '../mood'
 import type { MoodLevel } from '../types'
 
 interface TeacherAvatarProps {
-  firstName: string
-  lastName: string
+  /** Celé jméno učitele z backendu (fotky a fallback inicial si řeší Mantine). */
+  name: string
   photoUrl: string | null
-  moodColor: string
-  mood: MoodLevel
+  moodLevel: MoodLevel
   size?: number | 'sm' | 'md' | 'lg'
 }
 
@@ -15,24 +14,15 @@ interface TeacherAvatarProps {
  * Fotka učitele s inicialami, obarvená podle nálady (zelená = dobrá, červená = špatná) —
  * kolečko ze seznamu v designu. Pro čtečky hlásí, co barva znamená.
  */
-export function TeacherAvatar({
-  firstName,
-  lastName,
-  photoUrl,
-  moodColor,
-  mood,
-  size = 'md',
-}: TeacherAvatarProps) {
+export function TeacherAvatar({ name, photoUrl, moodLevel, size = 'md' }: TeacherAvatarProps) {
   return (
     <Avatar
       src={photoUrl}
       size={size}
-      color={moodColor}
+      color={MOOD_COLORS[moodLevel]}
       radius="xl"
-      name={`${firstName} ${lastName}`}
-      aria-label={`Nálada učitele: ${MOOD_LABELS[mood]}`}
-    >
-      {`${firstName[0] ?? ''}${lastName[0] ?? ''}`}
-    </Avatar>
+      name={name}
+      aria-label={`Nálada učitele: ${MOOD_LABELS[moodLevel]}`}
+    />
   )
 }

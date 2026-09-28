@@ -1,14 +1,11 @@
-import { Alert, Divider, Group, Loader, SegmentedControl, Stack, Text, Title } from '@mantine/core'
+import { Group, SegmentedControl, Stack, Text } from '@mantine/core'
 import { useState } from 'react'
 import { PageHeader } from '@/shared/ui'
 import { useAuth } from '@/shared/auth'
-import { useTeacherDelays } from '../api'
-import { MOOD_COLORS, getMoodLevel } from '../mood'
-import type { MoodLevel } from '../types'
-import { formatDateTime } from '@/shared/lib'
+import { getMoodLevel } from '../mood'
 import type { Teacher } from '../types'
 import { DelayForm } from './DelayForm'
-import { MoodThermometer } from './MoodThermometer'
+import { MoodMeter } from './MoodMeter'
 import { TeacherAvatar } from './TeacherAvatar'
 import { TeacherStars } from './TeacherStars'
 
@@ -17,35 +14,32 @@ interface TeacherDetailProps {
 }
 
 /**
- * Detail učitele: profil s náladovým teploměrem. Dvě záložky z designu —
- * "Zobrazit" (profil a historie) a "Hodnotit" (zadání zpoždění).
+ * Detail učitele podle designu. Záložka Zobrazit: profil, dnešní zpoždění a metr nálady
+ * jen pro čtení. Záložka Hodnotit: metr nálady editovatelný kliknutím + zadání zpoždění.
  */
 export function TeacherDetail({ teacher }: TeacherDetailProps) {
   const { isAuthenticated } = useAuth()
-  const [tab, setTab] = useState('view')
+  const [tab, setTab] = useState<'view' | 'rate'>('view')
 
-  const moodColor = MOOD_COLORS[getMoodLevel(teacher.averageDelayMinutes)]
-  const fullName = `${teacher.firstName} ${teacher.lastName}`
+  const moodLevel = getMoodLevel(teacher.mood)
 
   return (
     <Stack gap="md">
-      <PageHeader title={fullName} description="Profil učitele — zpoždění a nálada" />
+      <PageHeader title={teacher.name} description="Profil učitele — zpoždění a nálada" />
 
       <Group align="flex-start" gap="xl" wrap="nowrap">
         <Stack gap="sm" style={{ flex: 1 }}>
           <Group gap="md" wrap="nowrap">
             <TeacherAvatar
-              firstName={teacher.firstName}
-              lastName={teacher.lastName}
+              name={teacher.name}
               photoUrl={teacher.photoUrl}
-              moodColor={moodColor}
-              mood={getMoodLevel(teacher.averageDelayMinutes) as MoodLevel}
+              moodLevel={moodLevel}
               size={96}
             />
             <Stack gap={4}>
-              <TeacherStars rating={teacher.rating} />
+              {teacher.rating !== null ? <TeacherStars rating={teacher.rating} /> : null}
               <Text size="sm" c="dimmed">
-                Nálada podle průměrného zpoždění
+                Nálada podle zpětné vazby studentů
               </Text>
             </Stack>
           </Group>
@@ -64,47 +58,28 @@ export function TeacherDetail({ teacher }: TeacherDetailProps) {
           ) : null}
 
           {isAuthenticated && tab === 'rate' ? (
-            <DelayForm teacherId={teacher.id} />
+            <Stack gap="md">
+              <DelayForm teacherId={teacher.teacherId} />
+              <MoodMeter mood={teacher.mood} editable teacherId={teacher.teacherId} />
+            </Stack>
           ) : (
-            <TeacherProfile teacher={teacher} />
+            <Stack gap="xs">
+              <Text size="sm">
+                Dnes nahlášeno{' '}
+                <Text span fw={700}>
+                  {teacher.lateArrivalMinutesToday} min
+                </Text>{' '}
+                zpoždění.
+              </Text>
+              <Text size="sm" c="dimmed">
+                Zelené kolečko znamená dobrou náladu, červené špatnou.
+              </Text>
+            </Stack>
           )}
         </Stack>
 
-        <MoodThermometer averageDelayMinutes={teacher.averageDelayMinutes} />
+        <MoodMeter mood={teacher.mood} editable={false} />
       </Group>
-    </Stack>
-  )
-}
-
-function TeacherProfile({ teacher }: { teacher: Teacher }) {
-  const delaysQuery = useTeacherDelays(teacher.id)
-
-  return (
-    <Stack gap="xs">
-      <Title order={4}>Nahlášená zpoždění</Title>
-      {delaysQuery.isPending ? (
-        <Loader size="sm" />
-      ) : delaysQuery.isError ? (
-        <Alert color="red" title="Chyba">
-          Zpoždění se nepodařilo načíst.
-        </Alert>
-      ) : delaysQuery.data.length === 0 ? (
-        <Text c="dimmed">Zatím tu nejsou žádná nahlášená zpoždění.</Text>
-      ) : (
-        <Stack gap={4}>
-          {delaysQuery.data.map((delay) => (
-            <Text key={delay.id} size="sm">
-              +{delay.minutes} min — {delay.authorName} ({formatDateTime(delay.createdAt)})
-            </Text>
-          ))}
-        </Stack>
-      )}
-
-      <Divider my="xs" />
-      <Text size="sm" c="dimmed">
-        Zelené kolečko znamená dobrou náladu, červené špatnou. Barvu určuje průměrné zpoždění
-        učitele po zvonění.
-      </Text>
     </Stack>
   )
 }
