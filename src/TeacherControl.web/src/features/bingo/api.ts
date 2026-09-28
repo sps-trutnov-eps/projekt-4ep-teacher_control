@@ -60,10 +60,10 @@ export function useNewBingoBoard() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (size?: number): Promise<BingoBoard> => {
-      const targetSize = size ?? 3
+    mutationFn: async (options?: { size?: number; teacherIds?: string[] }): Promise<BingoBoard> => {
+      const targetSize = options?.size ?? 3
       const { data, error } = await bingoApi.POST<BingoBoard>('/bingo/board/new', {
-        params: { query: { size: targetSize } },
+        body: { size: targetSize, teacherIds: options?.teacherIds },
       })
 
       if (error || !data) {

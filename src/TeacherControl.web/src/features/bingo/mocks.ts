@@ -203,11 +203,18 @@ function calculateBingoCount(cells: BingoCell[], size: number): number {
 /**
  * Vygeneruje novou náhodnou desku pro zadaného uživatele.
  */
-function createNewBoard(userId: string, requestedSize = DEFAULT_GRID_SIZE): BingoBoard {
+function createNewBoard(
+  userId: string,
+  requestedSize = DEFAULT_GRID_SIZE,
+  selectedTeacherIds?: string[]
+): BingoBoard {
   const size = Math.max(2, Math.min(requestedSize, 6))
 
   // Zamíchání hlášek
-  const shuffled = [...teacherQuotes].sort(() => Math.random() - 0.5)
+  const eligibleQuotes = selectedTeacherIds
+    ? teacherQuotes.filter((quote) => selectedTeacherIds.includes(quote.teacherId))
+    : teacherQuotes
+  const shuffled = [...eligibleQuotes].sort(() => Math.random() - 0.5)
 
   const cells: BingoCell[] = []
   let quoteIndex = 0
@@ -272,11 +279,15 @@ export const bingoHandlers = [
   http.post('/api/bingo/board/new', async ({ request }: { request: Request }) => {
     const userId = getActiveUserId()
     let size = DEFAULT_GRID_SIZE
+    let teacherIds: string[] | undefined
 
     try {
-      const body = (await request.json()) as { size?: number }
+      const body = (await request.json()) as { size?: number; teacherIds?: string[] }
       if (body && typeof body.size === 'number') {
         size = body.size
+      }
+      if (Array.isArray(body.teacherIds)) {
+        teacherIds = body.teacherIds
       }
     } catch {
       const url = new URL(request.url)
@@ -289,7 +300,11 @@ export const bingoHandlers = [
       }
     }
 
-    const newBoard = createNewBoard(userId, size)
+    if (teacherIds && !teacherIds.some((teacherId) => teacherQuotes.some((quote) => quote.teacherId === teacherId))) {
+      return HttpResponse.json({ title: 'Vyberte alespoň jednoho učitele', status: 400 }, { status: 400 })
+    }
+
+    const newBoard = createNewBoard(userId, size, teacherIds)
     return HttpResponse.json(newBoard, { status: 201 })
   }),
 

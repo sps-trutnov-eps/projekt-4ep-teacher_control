@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router'
+import { BingoPage } from '@/features/bingo'
 import { RatingPage } from '@/features/rating'
 import { FeatureTodo } from './FeatureTodo'
 
@@ -8,7 +9,7 @@ import { FeatureTodo } from './FeatureTodo'
  */
 export const APP_ROUTES = [
   { path: '/rating', label: 'F2 Rating', element: <RatingPage /> },
-  { path: '/bingo', label: 'F1 Bingo', element: <FeatureTodo code="F1" name="Bingo" /> },
+  { path: '/bingo', label: 'F1 Bingo', element: <BingoPage /> },
   { path: '/recenze', label: 'F3 Recenze', element: <FeatureTodo code="F3" name="Recenze" /> },
   { path: '/abstence', label: 'F4 Abstence', element: <FeatureTodo code="F4" name="Abstence" /> },
   { path: '/pololeti', label: 'F5 Pololetí', element: <FeatureTodo code="F5" name="Pololetí" /> },
