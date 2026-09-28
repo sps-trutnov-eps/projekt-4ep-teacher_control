@@ -1,22 +1,20 @@
 import type { MoodLevel } from './types'
 
 /**
- * Nálada učitele se počítá z průměrného zpoždění:
- * - do 2 minut → good (zelená)
- * - do 10 minut → neutral (žlutá)
- * - nad 10 minut → bad (červená)
+ * Nálada je číslo 1–5 z backendu. Pro zobrazení se mapuje na tři úrovně:
+ * 1–2 → good (zelená), 3 → neutral (žlutá), 4–5 → bad (červená).
  */
 export const MOOD_THRESHOLDS = {
-  goodMaxMinutes: 2,
-  neutralMaxMinutes: 10,
+  goodMax: 2,
+  neutralMax: 3,
 } as const
 
-export function getMoodLevel(averageDelayMinutes: number): MoodLevel {
-  if (averageDelayMinutes <= MOOD_THRESHOLDS.goodMaxMinutes) {
+export function getMoodLevel(mood: number): MoodLevel {
+  if (mood <= MOOD_THRESHOLDS.goodMax) {
     return 'good'
   }
 
-  if (averageDelayMinutes <= MOOD_THRESHOLDS.neutralMaxMinutes) {
+  if (mood <= MOOD_THRESHOLDS.neutralMax) {
     return 'neutral'
   }
 

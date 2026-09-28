@@ -1,35 +1,29 @@
+import type { components } from '@/shared/api'
+
 /**
- * Lokální typy featury. Tvary z API se neopisují ručně — pokud backend dodá OpenAPI schéma,
- * přibudou v `src/shared/api/generated` a tady se jen namapují.
- *
- * Zatím běžíme na MSW mocku, takže si tvary držíme tady a při připojení backendu se jen
- * vymění za `components['schemas'][...]`.
+ * Tvary z API se neopisují ručně — mapují se ze schématu generovaného `pnpm gen:api`
+ * (zdroj: docs/api/TeacherControl.Api.json, featura Abstence).
  */
+
+type TeacherAbstenceDto = components['schemas']['TeacherAbstenceDto']
+
+/** Backend serializuje čísla jako JSON number; ve schématu mají kvůli strict OpenAPI i string tvar. */
+type AsNumber<T> = T extends string | number ? number : T
+
+/** Učitel v seznamu / profilu (z backend DTO TeacherAbstenceDto). */
+export interface Teacher {
+  teacherId: AsNumber<TeacherAbstenceDto['teacherId']>
+  name: TeacherAbstenceDto['name']
+  photoUrl: TeacherAbstenceDto['photoUrl']
+  rating: AsNumber<TeacherAbstenceDto['rating']>
+  mood: AsNumber<TeacherAbstenceDto['mood']>
+  lateArrivalMinutesToday: AsNumber<TeacherAbstenceDto['lateArrivalMinutesToday']>
+}
 
 export type MoodLevel = 'good' | 'neutral' | 'bad'
 
-/** Učitel v seznamu / profilu. */
-export interface Teacher {
-  id: string
-  firstName: string
-  lastName: string
-  /** Průměrné zpoždění v minutách, ze kterého se počítá nálada. */
-  averageDelayMinutes: number
-  /** Průměrné hodnocení 1–5, případná foto se zatím nenačítá. */
-  rating: number
-  photoUrl: string | null
-}
+/** Tělo POST /api/abstence/{teacherId}/late-arrival. */
+export type LateArrivalBody = components['schemas']['SubmitLateArrivalRequest']
 
-/** Záznam o zpoždění učitele (jak pozdě po zvonění přišel). */
-export interface DelayEntry {
-  id: string
-  teacherId: string
-  teacherName: string
-  minutes: number
-  authorName: string
-  createdAt: string
-}
-
-export interface TeacherFilters {
-  name?: string
-}
+/** Tělo POST /api/abstence/{teacherId}/mood — hodnota nálady 1–5. */
+export type MoodBody = components['schemas']['SubmitMoodRequest']

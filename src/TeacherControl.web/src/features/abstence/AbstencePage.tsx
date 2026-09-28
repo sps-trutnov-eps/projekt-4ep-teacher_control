@@ -11,7 +11,7 @@ import { TeacherList } from './components/TeacherList'
  */
 export function AbstencePage() {
   const [nameFilter, setNameFilter] = useState('')
-  const [selectedTeacherId, setSelectedTeacherId] = useState<string | null>(null)
+  const [selectedTeacherId, setSelectedTeacherId] = useState<number | null>(null)
 
   return (
     <Stack gap="md">
@@ -30,7 +30,7 @@ export function AbstencePage() {
 
       <Group align="flex-start" gap="xl">
         <Box maw={480} style={{ flex: 1 }}>
-          <TeacherList filters={{ name: nameFilter || undefined }} onSelect={setSelectedTeacherId} />
+          <TeacherList nameFilter={nameFilter} onSelect={setSelectedTeacherId} />
         </Box>
 
         <Box visibleFrom="md" maw={560} style={{ flex: 1 }}>
@@ -42,8 +42,8 @@ export function AbstencePage() {
 }
 
 /** Detail vedle seznamu se zobrazuje jen na desktopu — na mobilu jede rozklik v seznamu. */
-function SideDetail({ teacherId }: { teacherId: string | null }) {
-  const { data: teacher, isPending, isError } = useTeacher(teacherId ?? '')
+function SideDetail({ teacherId }: { teacherId: number | null }) {
+  const { data: teacher, isPending, isError } = useTeacher(teacherId ?? 0)
 
   if (teacherId === null) {
     return null
