@@ -14,7 +14,7 @@ public class TeacherBingoService(AppDbContext db)
 			.FirstOrDefaultAsync(cancellationToken);
 
 		if (board is not null)
-			return MapBoard(board);
+			return MapBoard(board, studentId);
 
 		return await CreateBoardAsync(studentId, DefaultBoardSize, null, cancellationToken);
 	}
@@ -50,8 +50,6 @@ public class TeacherBingoService(AppDbContext db)
 		var shuffledQuotes = quotes.OrderBy(_ => Random.Shared.Next()).ToArray();
 		var board = new BingoBoardEntity
 		{
-			StudentId = studentId,
-			Student = null!,
 			Quotes = Enumerable.Range(0, size * size)
 				.Select(position => new BingoBoardQuoteEntity
 				{
@@ -67,7 +65,7 @@ public class TeacherBingoService(AppDbContext db)
 		db.BingoBoards.Add(board);
 		await db.SaveChangesAsync(cancellationToken);
 
-		return await GetBoardByIdAsync(board.Id, cancellationToken);
+		return await GetBoardByIdAsync(board.Id, studentId, cancellationToken);
 	}
 
 	public async Task<ToggleBingoCellDto?> ToggleCellAsync(
@@ -81,21 +79,40 @@ public class TeacherBingoService(AppDbContext db)
 		var boardQuote = await db.BingoBoardQuotes
 			.Include(item => item.BingoBoard)
 				.ThenInclude(board => board.Quotes)
-			.Where(item => item.Id == boardQuoteId && item.BingoBoard.StudentId == studentId)
+					.ThenInclude(quote => quote.Marks.Where(mark => mark.StudentId == studentId))
+			.Where(item => item.Id == boardQuoteId)
 			.FirstOrDefaultAsync(cancellationToken);
 		if (boardQuote is null)
 			return null;
 
-		var previousBingoCount = CalculateBingoCount(boardQuote.BingoBoard.Quotes);
-		boardQuote.Marked = !boardQuote.Marked;
-		var currentBingoCount = CalculateBingoCount(boardQuote.BingoBoard.Quotes);
+		var previousBingoCount = CalculateBingoCount(boardQuote.BingoBoard.Quotes, studentId);
+		var userMark = boardQuote.Marks.FirstOrDefault(mark => mark.StudentId == studentId);
+		if (userMark is null)
+		{
+			userMark = new BingoBoardQuoteMarkEntity
+			{
+				StudentId = studentId,
+				Student = null!,
+				BingoBoardQuoteId = boardQuote.Id,
+				BingoBoardQuote = boardQuote
+			};
+			boardQuote.Marks.Add(userMark);
+			db.BingoBoardQuoteMarks.Add(userMark);
+		}
+		else
+		{
+			boardQuote.Marks.Remove(userMark);
+			db.BingoBoardQuoteMarks.Remove(userMark);
+		}
+
+		var currentBingoCount = CalculateBingoCount(boardQuote.BingoBoard.Quotes, studentId);
 		var bingoDifference = currentBingoCount - previousBingoCount;
 
 		var student = await db.Users.FirstAsync(user => user.Id == studentId, cancellationToken);
 		student.FinishedBingoCount = Math.Max(0, student.FinishedBingoCount + bingoDifference);
 		await db.SaveChangesAsync(cancellationToken);
 
-		var board = await GetBoardByIdAsync(boardQuote.BingoBoardId, cancellationToken);
+		var board = await GetBoardByIdAsync(boardQuote.BingoBoardId, studentId, cancellationToken);
 		return board is null
 			? null
 			: new ToggleBingoCellDto(board, bingoDifference > 0, student.FinishedBingoCount);
@@ -143,9 +160,9 @@ public class TeacherBingoService(AppDbContext db)
 		var boards = await db.BingoBoards
 			.AsNoTracking()
 			.Include(board => board.Quotes)
-			.Where(board => board.StudentId == studentId)
+				.ThenInclude(quote => quote.Marks.Where(mark => mark.StudentId == studentId))
 			.ToListAsync(cancellationToken);
-		var completedBoards = boards.Count(board => IsBoardCompleted(board.Quotes));
+		var completedBoards = boards.Count(board => IsBoardCompleted(board.Quotes, studentId));
 
 		return new UserBingoStatsDto(studentId, student.FinishedBingoCount, completedBoards);
 	}
@@ -166,22 +183,29 @@ public class TeacherBingoService(AppDbContext db)
 			.Include(board => board.Quotes)
 				.ThenInclude(item => item.Quote)
 					.ThenInclude(quote => quote.Teacher)
-			.Where(board => board.StudentId == studentId && board.Date == today)
+			.Include(board => board.Quotes)
+				.ThenInclude(item => item.Marks.Where(mark => mark.StudentId == studentId))
+			.Where(board => board.Date == today)
 			.OrderByDescending(board => board.Id);
 	}
 
-	private async Task<BingoBoardDto?> GetBoardByIdAsync(int boardId, CancellationToken cancellationToken)
+	private async Task<BingoBoardDto?> GetBoardByIdAsync(
+		int boardId,
+		string? studentId,
+		CancellationToken cancellationToken)
 	{
 		var board = await db.BingoBoards
 			.AsNoTracking()
 			.Include(item => item.Quotes)
 				.ThenInclude(item => item.Quote)
 					.ThenInclude(quote => quote.Teacher)
+			.Include(item => item.Quotes)
+				.ThenInclude(item => item.Marks.Where(mark => mark.StudentId == studentId))
 			.FirstOrDefaultAsync(item => item.Id == boardId, cancellationToken);
-		return board is null ? null : MapBoard(board);
+		return board is null ? null : MapBoard(board, studentId);
 	}
 
-	private static BingoBoardDto MapBoard(BingoBoardEntity board)
+	private static BingoBoardDto MapBoard(BingoBoardEntity board, string? studentId)
 	{
 		var orderedQuotes = board.Quotes.OrderBy(item => item.Position).ToArray();
 		var size = (int)Math.Sqrt(orderedQuotes.Length);
@@ -190,30 +214,32 @@ public class TeacherBingoService(AppDbContext db)
 			size == 0 ? 0 : item.Position / size,
 			size == 0 ? 0 : item.Position % size,
 			MapQuote(item.Quote),
-			item.Marked)).ToArray();
-		var bingoCount = CalculateBingoCount(orderedQuotes);
+			studentId is not null && item.Marks.Any(mark => mark.StudentId == studentId))).ToArray();
+		var bingoCount = studentId is null ? 0 : CalculateBingoCount(orderedQuotes, studentId);
 
 		return new BingoBoardDto(
 			board.Id.ToString(),
-			board.StudentId,
+			studentId ?? string.Empty,
 			size,
 			cells,
 			bingoCount,
-			IsBoardCompleted(orderedQuotes),
+			studentId is not null && IsBoardCompleted(orderedQuotes, studentId),
 			board.Date.ToDateTime(TimeOnly.MinValue).ToString("O"));
 	}
 
 	private static TeacherQuoteDto MapQuote(TeacherQuoteEntity quote) =>
 		new(quote.Id.ToString(), quote.TeacherId.ToString(), quote.Teacher.Name, quote.Quote);
 
-	private static int CalculateBingoCount(IEnumerable<BingoBoardQuoteEntity> boardQuotes)
+	private static int CalculateBingoCount(IEnumerable<BingoBoardQuoteEntity> boardQuotes, string studentId)
 	{
 		var orderedQuotes = boardQuotes.OrderBy(item => item.Position).ToArray();
 		var size = (int)Math.Sqrt(orderedQuotes.Length);
 		if (size < 2 || orderedQuotes.Length != size * size)
 			return 0;
 
-		var marked = orderedQuotes.ToDictionary(item => item.Position, item => item.Marked);
+		var marked = orderedQuotes.ToDictionary(
+			item => item.Position,
+			item => item.Marks.Any(mark => mark.StudentId == studentId));
 		var count = 0;
 		for (var index = 0; index < size; index++)
 		{
@@ -231,11 +257,12 @@ public class TeacherBingoService(AppDbContext db)
 		return count;
 	}
 
-	private static bool IsBoardCompleted(IEnumerable<BingoBoardQuoteEntity> boardQuotes)
+	private static bool IsBoardCompleted(IEnumerable<BingoBoardQuoteEntity> boardQuotes, string studentId)
 	{
 		var quotes = boardQuotes.ToArray();
 		var size = (int)Math.Sqrt(quotes.Length);
-		return size >= 2 && quotes.Length == size * size && quotes.All(item => item.Marked);
+		return size >= 2 && quotes.Length == size * size &&
+			quotes.All(item => item.Marks.Any(mark => mark.StudentId == studentId));
 	}
 
 	private static DateOnly GetPragueDate() => DateOnly.FromDateTime(
