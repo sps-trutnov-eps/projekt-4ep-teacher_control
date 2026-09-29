@@ -209,6 +209,7 @@ function createNewBoard(
   selectedTeacherIds?: string[]
 ): BingoBoard {
   const size = Math.max(2, Math.min(requestedSize, 6))
+  const neededQuotes = size * size
 
   // Zamíchání hlášek
   const eligibleQuotes = selectedTeacherIds
