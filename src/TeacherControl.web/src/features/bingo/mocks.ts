@@ -209,7 +209,6 @@ function createNewBoard(
   selectedTeacherIds?: string[]
 ): BingoBoard {
   const size = Math.max(2, Math.min(requestedSize, 6))
-  const neededQuotes = size * size
 
   // Zamíchání hlášek
   const eligibleQuotes = selectedTeacherIds
@@ -267,7 +266,7 @@ function createNewBoard(
  */
 export const bingoHandlers = [
   // 1. Získání aktuální aktivní desky přihlášeného uživatele (pokud nemá, vytvoří se nová)
-  http.get('/api/bingo/board', () => {
+  http.get('*/api/bingo/board', () => {
     const userId = getActiveUserId()
     let board = userBoards.get(userId)
     if (!board) {
@@ -277,7 +276,7 @@ export const bingoHandlers = [
   }),
 
   // 2. Vygenerování nové desky pro uživatele
-  http.post('/api/bingo/board/new', async ({ request }: { request: Request }) => {
+  http.post('*/api/bingo/board/new', async ({ request }: { request: Request }) => {
     const userId = getActiveUserId()
     let size = DEFAULT_GRID_SIZE
     let teacherIds: string[] | undefined
@@ -311,7 +310,7 @@ export const bingoHandlers = [
 
   // 3. Označení / odznačení políčka a přepočet Bingo counteru
   http.post(
-    '/api/bingo/cells/:cellId/toggle',
+    '*/api/bingo/cells/:cellId/toggle',
     ({ params }: { params: { cellId?: string } }) => {
       const rawCellId = params.cellId
       const cellId = Array.isArray(rawCellId) ? rawCellId[0] : rawCellId
@@ -374,7 +373,7 @@ export const bingoHandlers = [
   ),
 
   // 4. Seznam učitelských hlášek (s možností filtru podle teacherId)
-  http.get('/api/bingo/quotes', ({ request }: { request: Request }) => {
+  http.get('*/api/bingo/quotes', ({ request }: { request: Request }) => {
     const url = new URL(request.url)
     const teacherId = url.searchParams.get('teacherId')
 
@@ -386,7 +385,7 @@ export const bingoHandlers = [
   }),
 
   // 5. Přidání nové hlášky pro učitele (Teacher ID -> Quote)
-  http.post('/api/bingo/quotes', async ({ request }: { request: Request }) => {
+  http.post('*/api/bingo/quotes', async ({ request }: { request: Request }) => {
     let body: Partial<CreateQuoteRequest>
     try {
       body = (await request.json()) as Partial<CreateQuoteRequest>
@@ -414,14 +413,14 @@ export const bingoHandlers = [
   }),
 
   // 6. Získání bingo counteru a statistik uživatele
-  http.get('/api/bingo/stats', () => {
+  http.get('*/api/bingo/stats', () => {
     const userId = getActiveUserId()
     const stats = getOrCreateUserStats(userId)
     return HttpResponse.json(stats)
   }),
 
   // 7. Reset statistik / bingo counteru
-  http.post('/api/bingo/stats/reset', () => {
+  http.post('*/api/bingo/stats/reset', () => {
     const userId = getActiveUserId()
     const stats = getOrCreateUserStats(userId)
     stats.totalBingos = 0

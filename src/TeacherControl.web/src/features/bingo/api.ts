@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/shared/api'
+import { fetchJson } from '@/shared/api'
 import type {
   BingoBoard,
   CreateQuoteRequest,
@@ -8,23 +8,6 @@ import type {
   ToggleCellResponse,
   UserBingoStats,
 } from './types'
-
-/**
- * Typově bezpečný adaptér pro endpointy, které ještě nejsou vygenerované v OpenAPI schématu.
- * Zabraňuje vzniku typu `any` a splňuje pravidla v AGENTS.md bez nutnosti obcházení linteru.
- */
-interface TypedBingoApi {
-  GET: <T>(
-    url: string,
-    options?: { params?: { query?: Record<string, unknown> } }
-  ) => Promise<{ data?: T; error?: unknown }>
-  POST: <T>(
-    url: string,
-    options?: { body?: unknown; params?: { query?: Record<string, unknown> } }
-  ) => Promise<{ data?: T; error?: unknown }>
-}
-
-const bingoApi = api as unknown as TypedBingoApi
 
 /** Query key konvence: [featura, typ, ...parametry]. */
 export const bingoKeys = {
@@ -41,15 +24,7 @@ export const bingoKeys = {
 export function useBingoBoard() {
   return useQuery({
     queryKey: bingoKeys.board(),
-    queryFn: async (): Promise<BingoBoard> => {
-      const { data, error } = await bingoApi.GET<BingoBoard>('/bingo/board')
-
-      if (error || !data) {
-        throw new Error('Bingo desku se nepodařilo načíst.')
-      }
-
-      return data
-    },
+    queryFn: () => fetchJson<BingoBoard>('/bingo/board'),
   })
 }
 
@@ -60,17 +35,12 @@ export function useNewBingoBoard() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (options?: { size?: number; teacherIds?: string[] }): Promise<BingoBoard> => {
+    mutationFn: (options?: { size?: number; teacherIds?: string[] }) => {
       const targetSize = options?.size ?? 3
-      const { data, error } = await bingoApi.POST<BingoBoard>('/bingo/board/new', {
-        body: { size: targetSize, teacherIds: options?.teacherIds },
+      return fetchJson<BingoBoard>('/bingo/board/new', {
+        method: 'POST',
+        body: JSON.stringify({ size: targetSize, teacherIds: options?.teacherIds }),
       })
-
-      if (error || !data) {
-        throw new Error('Nepodařilo se vygenerovat novou bingo desku.')
-      }
-
-      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bingoKeys.board() })
@@ -85,15 +55,8 @@ export function useToggleBingoCell() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (cellId: string): Promise<ToggleCellResponse> => {
-      const { data, error } = await bingoApi.POST<ToggleCellResponse>(`/bingo/cells/${cellId}/toggle`)
-
-      if (error || !data) {
-        throw new Error('Nepodařilo se aktualizovat stav políčka.')
-      }
-
-      return data
-    },
+    mutationFn: (cellId: string) =>
+      fetchJson<ToggleCellResponse>(`/bingo/cells/${encodeURIComponent(cellId)}/toggle`, { method: 'POST' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bingoKeys.board() })
       queryClient.invalidateQueries({ queryKey: bingoKeys.stats() })
@@ -107,17 +70,10 @@ export function useToggleBingoCell() {
 export function useTeacherQuotes(filters: QuoteFilters = {}) {
   return useQuery({
     queryKey: bingoKeys.quotes(filters.teacherId),
-    queryFn: async (): Promise<TeacherQuote[]> => {
-      const { data, error } = await bingoApi.GET<TeacherQuote[]>('/bingo/quotes', {
-        params: { query: { teacherId: filters.teacherId } },
-      })
-
-      if (error || !data) {
-        throw new Error('Učitelské hlášky se nepodařilo načíst.')
-      }
-
-      return data
-    },
+    queryFn: () =>
+      fetchJson<TeacherQuote[]>(
+        filters.teacherId ? `/bingo/quotes?teacherId=${encodeURIComponent(filters.teacherId)}` : '/bingo/quotes'
+      ),
   })
 }
 
@@ -128,15 +84,8 @@ export function useCreateTeacherQuote() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (values: CreateQuoteRequest): Promise<TeacherQuote> => {
-      const { data, error } = await bingoApi.POST<TeacherQuote>('/bingo/quotes', { body: values })
-
-      if (error || !data) {
-        throw new Error('Učitelskou hlášku se nepodařilo uložit.')
-      }
-
-      return data
-    },
+    mutationFn: (values: CreateQuoteRequest) =>
+      fetchJson<TeacherQuote>('/bingo/quotes', { method: 'POST', body: JSON.stringify(values) }),
     onSuccess: () => {
       // Invaliduje všechny dotazy na hlášky (filtrované i celkové)
       queryClient.invalidateQueries({ queryKey: bingoKeys.quotes() })
@@ -150,14 +99,6 @@ export function useCreateTeacherQuote() {
 export function useBingoStats() {
   return useQuery({
     queryKey: bingoKeys.stats(),
-    queryFn: async (): Promise<UserBingoStats> => {
-      const { data, error } = await bingoApi.GET<UserBingoStats>('/bingo/stats')
-
-      if (error || !data) {
-        throw new Error('Bingo statistiky se nepodařilo načíst.')
-      }
-
-      return data
-    },
+    queryFn: () => fetchJson<UserBingoStats>('/bingo/stats'),
   })
 }
