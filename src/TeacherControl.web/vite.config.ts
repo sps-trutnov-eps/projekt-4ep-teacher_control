@@ -12,9 +12,9 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // Backend ASP.NET Core Web API běží lokálně na 5000.
+      // Backend ASP.NET Core Web API běží lokálně na 5229 (http profil v launchSettings.json).
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:5229',
         changeOrigin: true,
       },
     },
