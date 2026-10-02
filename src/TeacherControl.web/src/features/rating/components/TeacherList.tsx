@@ -1,28 +1,37 @@
 import { UnstyledButton, Text, Group, Avatar, Stack, Rating } from '@mantine/core'
+import type { Teacher } from '../types'
 
-export function TeacherList() {
+interface TeacherListProps {
+  teachers: Teacher[]
+  selectedTeacherId: string | null
+  onSelect: (teacherId: string) => void
+}
+
+export function TeacherList({ teachers, selectedTeacherId, onSelect }: TeacherListProps) {
   return (
     <Stack gap={0} bd="1px solid var(--mantine-color-gray-3)">
-      {Array.from({ length: 15 }).map((_, i) => (
+      {teachers.map((teacher) => (
         <UnstyledButton
-          key={i}
+          key={teacher.id}
+          onClick={() => onSelect(teacher.id)}
           p="md"
-          bg="white"
+          bg={selectedTeacherId === teacher.id ? 'var(--mantine-color-blue-0)' : 'white'}
           style={{
             borderBottom: '1px solid var(--mantine-color-gray-3)',
+            transition: 'background-color 150ms ease',
           }}
         >
           <Group gap="sm" wrap="nowrap" align="center">
-            <Avatar radius="xl" color="blue" />
+            <Avatar src={teacher.photoUrl} alt={`${teacher.firstName} ${teacher.lastName}`} radius="xl" color="blue" />
             <Stack gap={4}>
               <Text fw={500} size="md" lh={1}>
-                Jméno Příjmení
+                {teacher.firstName} {teacher.lastName}
               </Text>
               <Group gap="xs">
                 <Text size="xs" c="dimmed" lh={1}>
                   Rating:
                 </Text>
-                <Rating value={0} readOnly size="xs" color="yellow" />
+                <Rating value={teacher.ratings.overall} readOnly size="xs" color="yellow" />
               </Group>
             </Stack>
           </Group>
