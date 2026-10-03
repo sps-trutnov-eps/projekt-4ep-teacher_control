@@ -1,6 +1,10 @@
 @TeacherControl.Api_HostAddress = http://localhost:5229
 
-GET {{TeacherControl.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Login
+POST {{TeacherControl.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
 
-###
+{
+  "email": "test@example.com",
+  "password": "TeacherControl123!"
+}
