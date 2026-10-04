@@ -21,14 +21,6 @@ Object.defineProperty(window, 'matchMedia', {
   }),
 })
 
-// jsdom neumí ani ResizeObserver, potřebuje ho třeba ScrollArea. Nic neměří, jsdom stejně nemá layout.
-class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-window.ResizeObserver = ResizeObserver
-
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterEach(() => server.resetHandlers())
 afterAll(() => server.close())
