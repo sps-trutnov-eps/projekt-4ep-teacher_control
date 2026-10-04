@@ -1,6 +1,13 @@
 import { afterAll, afterEach, beforeAll, vi } from 'vitest'
 import { server } from './src/mocks/server'
 
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+window.ResizeObserver = ResizeObserver;
+
 // jsdom neumí matchMedia a Mantine ho potřebuje. Bez tohohle spadne každý test s UI.
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
