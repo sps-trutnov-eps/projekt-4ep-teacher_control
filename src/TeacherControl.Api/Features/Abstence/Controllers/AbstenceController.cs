@@ -9,7 +9,6 @@ namespace TeacherControl.Api.Features.Abstence.Controllers;
 
 [ApiController]
 [Route("api/abstence")]
-[Authorize]
 public class AbstenceController : ControllerBase
 {
     private readonly ILogger<AbstenceController> _logger;
@@ -40,6 +39,9 @@ public class AbstenceController : ControllerBase
         return Ok(teacher);
     }
 
+    // Zápis vyžaduje přihlášení — potřebujeme StudentId k uložení a k cooldownu;
+    // čtení (GetTeachers/GetTeacher výše) je úmyslně veřejné, přihlášení k tomu není potřeba.
+    [Authorize]
     [HttpPost("{teacherId:int}/late-arrival")]
     public async Task<ActionResult<TeacherAbstenceDto>> SubmitLateArrival(int teacherId, [FromBody] SubmitLateArrivalRequest request)
     {
@@ -60,6 +62,7 @@ public class AbstenceController : ControllerBase
         return MapResult(teacherId, userId, result);
     }
 
+    [Authorize]
     [HttpPost("{teacherId:int}/mood")]
     public async Task<ActionResult<TeacherAbstenceDto>> SubmitMood(int teacherId, [FromBody] SubmitMoodRequest request)
     {

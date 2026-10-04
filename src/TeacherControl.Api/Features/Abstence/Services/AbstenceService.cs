@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
@@ -20,24 +21,19 @@ public class AbstenceService
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
 
-        var teachers = await _context.Teachers
-            .Include(t => t.Reviews)
-            .Include(t => t.LateArrivals.Where(a => a.Date == today))
+        return await _context.Teachers
+            .Select(BuildDtoProjection(today))
             .ToListAsync();
-
-        return teachers.Select(ToDto).ToList();
     }
 
     public async Task<TeacherAbstenceDto?> GetTeacherAsync(int teacherId)
     {
         var today = DateOnly.FromDateTime(DateTime.Now);
 
-        var teacher = await _context.Teachers
-            .Include(t => t.Reviews)
-            .Include(t => t.LateArrivals.Where(a => a.Date == today))
-            .FirstOrDefaultAsync(t => t.Id == teacherId);
-
-        return teacher is null ? null : ToDto(teacher);
+        return await _context.Teachers
+            .Where(t => t.Id == teacherId)
+            .Select(BuildDtoProjection(today))
+            .FirstOrDefaultAsync();
     }
 
     public async Task<AbstenceWriteResult> SubmitLateArrivalAsync(int teacherId, string studentId, int minutes)
@@ -118,6 +114,8 @@ public class AbstenceService
         return false;
     }
 
+    // Pro zápis (SubmitLateArrivalAsync/SubmitMoodAsync) už máme trackovanou entitu po uložení
+    // v paměti, takže se mapuje přímo v C#, ne přes dotaz do DB.
     private static TeacherAbstenceDto ToDto(TeacherEntity teacher)
     {
         var rating = teacher.Reviews.Count > 0 ? teacher.Reviews.Average(r => r.Rating) : (float?)null;
@@ -131,4 +129,15 @@ public class AbstenceService
             teacher.Mood,
             (int)Math.Round(lateMinutesToday));
     }
+
+    // Pro čtení (GetTeachersAsync/GetTeacherAsync) se mapuje přímo v dotazu, aby EF Core poslal
+    // jen potřebná data (žádné Include + mapování v paměti).
+    private static Expression<Func<TeacherEntity, TeacherAbstenceDto>> BuildDtoProjection(DateOnly today) => teacher =>
+        new TeacherAbstenceDto(
+            teacher.Id,
+            teacher.Name,
+            teacher.PhotoUrl,
+            teacher.Reviews.Any() ? teacher.Reviews.Average(r => r.Rating) : (float?)null,
+            teacher.Mood,
+            (int)Math.Round(teacher.LateArrivals.Where(a => a.Date == today).Sum(a => a.TimeSpan.TotalMinutes)));
 }
