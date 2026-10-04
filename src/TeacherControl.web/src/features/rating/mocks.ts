@@ -61,7 +61,7 @@ export const ratingHandlers = [
   http.get('*/api/teachers', () => HttpResponse.json(teachers)),
 
   // Detail endpoint
-  http.get('*/api/Rating/teacher/:teacherId', ({ params }) => {
+  http.get('*/api/rating/teacher/:teacherId/profile', ({ params }) => {
     const teacher = teachers.find(
       (t) => t.id === params.teacherId || t.id === `t-${params.teacherId}`,
     )
