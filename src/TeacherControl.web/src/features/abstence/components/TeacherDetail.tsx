@@ -15,7 +15,7 @@ interface TeacherDetailProps {
 
 /**
  * Detail učitele podle designu. Záložka Zobrazit: profil, dnešní zpoždění a metr nálady
- * jen pro čtení. Záložka Hodnotit: metr nálady editovatelný kliknutím + zadání zpoždění.
+ * jen pro čtení. Záložka Hodnotit: zadání zpoždění a metr nálady editovatelný kliknutím.
  */
 export function TeacherDetail({ teacher }: TeacherDetailProps) {
   const { isAuthenticated } = useAuth()
@@ -64,6 +64,7 @@ export function TeacherDetail({ teacher }: TeacherDetailProps) {
             </Stack>
           ) : (
             <Stack gap="xs">
+              <MoodMeter mood={teacher.mood} editable={false} />
               <Text size="sm">
                 Dnes nahlášeno{' '}
                 <Text span fw={700}>
@@ -77,8 +78,6 @@ export function TeacherDetail({ teacher }: TeacherDetailProps) {
             </Stack>
           )}
         </Stack>
-
-        <MoodMeter mood={teacher.mood} editable={false} />
       </Group>
     </Stack>
   )
