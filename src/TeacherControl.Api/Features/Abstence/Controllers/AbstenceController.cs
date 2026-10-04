@@ -31,7 +31,13 @@ public class AbstenceController : ControllerBase
     public async Task<ActionResult<TeacherAbstenceDto>> GetTeacher(int teacherId)
     {
         var teacher = await _abstenceService.GetTeacherAsync(teacherId);
-        return teacher is null ? NotFound() : Ok(teacher);
+        if (teacher is null)
+        {
+            _logger.LogError("Učitel {TeacherId} nebyl nalezen", teacherId);
+            return NotFound();
+        }
+
+        return Ok(teacher);
     }
 
     [HttpPost("{teacherId:int}/late-arrival")]
@@ -45,7 +51,10 @@ public class AbstenceController : ControllerBase
 
         var userId = _userManager.GetUserId(User);
         if (userId is null)
+        {
+            _logger.LogError("Zápis pozdního příchodu pro učitele {TeacherId} odmítnut — chybí identita přihlášeného uživatele", teacherId);
             return Unauthorized();
+        }
 
         var result = await _abstenceService.SubmitLateArrivalAsync(teacherId, userId, request.Minutes);
         return MapResult(teacherId, userId, result);
@@ -62,7 +71,10 @@ public class AbstenceController : ControllerBase
 
         var userId = _userManager.GetUserId(User);
         if (userId is null)
+        {
+            _logger.LogError("Zápis nálady pro učitele {TeacherId} odmítnut — chybí identita přihlášeného uživatele", teacherId);
             return Unauthorized();
+        }
 
         var result = await _abstenceService.SubmitMoodAsync(teacherId, userId, request.Value);
         return MapResult(teacherId, userId, result);
@@ -85,6 +97,7 @@ public class AbstenceController : ControllerBase
                 _logger.LogError("Přihlášený uživatel {StudentId} nebyl v DB nalezen při zápisu pro učitele {TeacherId}", studentId, teacherId);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             default:
+                _logger.LogError("Neočekávaný výsledek zápisu {Outcome} pro učitele {TeacherId}", result.Outcome, teacherId);
                 return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
