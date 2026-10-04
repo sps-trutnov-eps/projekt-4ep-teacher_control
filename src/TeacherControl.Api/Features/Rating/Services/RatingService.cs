@@ -26,7 +26,7 @@ public class RatingService
             Content = request.Content,
             Rating = request.Rating,
             TeacherId = request.TeacherId,
-            Teacher = null!,
+            Teacher = null!, // EF si dotáhne přes FK, nastavovat navigation ručně není potřeba
             StudentId = studentId,
             Student = null!
         };
@@ -61,6 +61,54 @@ public class RatingService
             .ToListAsync();
 
         return ratings.Count == 0 ? 0f : ratings.Average();
+    }
+
+    public async Task<TeacherProfileResponse> GetTeacherProfileAsync(int teacherId)
+    {
+        var teacher = await _db.Teachers.FindAsync(teacherId);
+        if (teacher is null)
+            throw new KeyNotFoundException($"Teacher with id {teacherId} was not found.");
+
+        var ratings = await _db.Reviews
+            .Where(r => r.TeacherId == teacherId)
+            .Select(r => r.Rating)
+            .ToListAsync();
+
+        return new TeacherProfileResponse
+        {
+            Id = teacher.Id,
+            Name = teacher.Name,
+            PhotoUrl = teacher.PhotoUrl,
+            Description = teacher.Description,
+            Mood = teacher.Mood,
+            AverageRating = ratings.Count == 0 ? 0f : ratings.Average(),
+            ReviewCount = ratings.Count
+        };
+    }
+
+    public async Task<ReviewResponse> UpdateReviewAsync(int reviewId, UpdateReviewRequest request)
+    {
+        var review = await _db.Reviews.FindAsync(reviewId);
+        if (review is null)
+            throw new KeyNotFoundException($"Review with id {reviewId} was not found.");
+
+        review.Title = request.Title;
+        review.Content = request.Content;
+        review.Rating = request.Rating;
+
+        await _db.SaveChangesAsync();
+
+        return MapToResponse(review);
+    }
+
+    public async Task DeleteReviewAsync(int reviewId)
+    {
+        var review = await _db.Reviews.FindAsync(reviewId);
+        if (review is null)
+            throw new KeyNotFoundException($"Review with id {reviewId} was not found.");
+
+        _db.Reviews.Remove(review);
+        await _db.SaveChangesAsync();
     }
 
     private static ReviewResponse MapToResponse(ReviewEntity review) => new()
