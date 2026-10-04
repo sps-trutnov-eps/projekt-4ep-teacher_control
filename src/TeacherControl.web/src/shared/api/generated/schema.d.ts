@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/api/Rating": {
+    "/api/rating": {
         parameters: {
             query?: never;
             header?: never;
@@ -43,7 +43,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/Rating/teacher/{teacherId}": {
+    "/api/rating/teacher/{teacherId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -78,7 +78,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/Rating/teacher/{teacherId}/average": {
+    "/api/rating/teacher/{teacherId}/average": {
         parameters: {
             query?: never;
             header?: never;
@@ -108,6 +108,101 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rating/teacher/{teacherId}/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    teacherId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/rating/{reviewId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    reviewId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateReviewRequest"];
+                    "text/json": components["schemas"]["UpdateReviewRequest"];
+                    "application/*+json": components["schemas"]["UpdateReviewRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    reviewId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -120,6 +215,12 @@ export interface components {
         CreateReviewRequest: {
             /** Format: int32 */
             teacherId: number | string;
+            title: string;
+            content: string;
+            /** Format: float */
+            rating: number | string;
+        };
+        UpdateReviewRequest: {
             title: string;
             content: string;
             /** Format: float */

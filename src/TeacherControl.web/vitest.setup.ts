@@ -1,13 +1,6 @@
 import { afterAll, afterEach, beforeAll, vi } from 'vitest'
 import { server } from './src/mocks/server'
 
-class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-window.ResizeObserver = ResizeObserver;
-
 // jsdom neumí matchMedia a Mantine ho potřebuje. Bez tohohle spadne každý test s UI.
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
@@ -20,6 +13,14 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   }),
 })
+
+// jsdom neumí ani ResizeObserver, potřebuje ho třeba ScrollArea. Nic neměří, jsdom stejně nemá layout.
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+window.ResizeObserver = ResizeObserver
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterEach(() => server.resetHandlers())

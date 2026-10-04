@@ -21,7 +21,7 @@ export function useTeacher(id: string | null) {
     queryFn: async () => {
       // Použito openapi-fetch `api.GET` pro endpoint v OpenAPI
       // (typ vrací neznámé hodnoty (zatím), backend nedefinoval 200 response schéma)
-      const { data, error } = await api.GET('/api/Rating/teacher/{teacherId}', {
+      const { data, error } = await api.GET('/api/rating/teacher/{teacherId}/profile', {
         params: {
           path: { teacherId: Number(id?.replace('t-', '')) || 0 },
         },

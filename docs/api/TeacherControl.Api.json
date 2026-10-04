@@ -5,7 +5,7 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/api/Rating": {
+    "/api/rating": {
       "post": {
         "tags": [
           "Rating"
@@ -37,7 +37,7 @@
         }
       }
     },
-    "/api/Rating/teacher/{teacherId}": {
+    "/api/rating/teacher/{teacherId}": {
       "get": {
         "tags": [
           "Rating"
@@ -61,7 +61,7 @@
         }
       }
     },
-    "/api/Rating/teacher/{teacherId}/average": {
+    "/api/rating/teacher/{teacherId}/average": {
       "get": {
         "tags": [
           "Rating"
@@ -69,6 +69,96 @@
         "parameters": [
           {
             "name": "teacherId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/rating/teacher/{teacherId}/profile": {
+      "get": {
+        "tags": [
+          "Rating"
+        ],
+        "parameters": [
+          {
+            "name": "teacherId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/rating/{reviewId}": {
+      "put": {
+        "tags": [
+          "Rating"
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReviewRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReviewRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Rating"
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
             "in": "path",
             "required": true,
             "schema": {
@@ -105,6 +195,30 @@
             ],
             "format": "int32"
           },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "rating": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "float"
+          }
+        }
+      },
+      "UpdateReviewRequest": {
+        "required": [
+          "title",
+          "content",
+          "rating"
+        ],
+        "type": "object",
+        "properties": {
           "title": {
             "type": "string"
           },
