@@ -8,7 +8,6 @@ namespace TeacherControl.Api.Features.Rating.Controllers;
 
 [ApiController]
 [Route("api/rating")]
-[Authorize]
 public class RatingController : ControllerBase
 {
     private readonly ILogger<RatingController> _logger;
@@ -21,6 +20,7 @@ public class RatingController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> CreateReview([FromBody] CreateReviewRequest request)
     {
         var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -51,5 +51,52 @@ public class RatingController : ControllerBase
     {
         var average = await _ratingService.GetAverageRatingAsync(teacherId);
         return Ok(average);
+    }
+
+    [HttpGet("teacher/{teacherId:int}/profile")]
+    public async Task<IActionResult> GetTeacherProfile(int teacherId)
+    {
+        try
+        {
+            var profile = await _ratingService.GetTeacherProfileAsync(teacherId);
+            return Ok(profile);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Attempted to view profile of a non-existent teacher");
+            return NotFound(ex.Message);
+        }
+    }
+
+    [HttpPut("{reviewId:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateReview(int reviewId, [FromBody] UpdateReviewRequest request)
+    {
+        try
+        {
+            var result = await _ratingService.UpdateReviewAsync(reviewId, request);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Attempted to update a non-existent review");
+            return NotFound(ex.Message);
+        }
+    }
+
+    [HttpDelete("{reviewId:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteReview(int reviewId)
+    {
+        try
+        {
+            await _ratingService.DeleteReviewAsync(reviewId);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Attempted to delete a non-existent review");
+            return NotFound(ex.Message);
+        }
     }
 }
