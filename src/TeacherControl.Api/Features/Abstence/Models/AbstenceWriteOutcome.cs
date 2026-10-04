@@ -7,5 +7,9 @@ public enum AbstenceWriteOutcome
 {
     Success,
     TeacherNotFound,
-    TooSoon
+    TooSoon,
+
+    // Přihlášený uživatel, pod kterým se zapisuje, by v DB měl vždy existovat —
+    // pokud ne, jde o vnitřní nekonzistenci, ne o běžný "not found" stav.
+    InternalError
 }

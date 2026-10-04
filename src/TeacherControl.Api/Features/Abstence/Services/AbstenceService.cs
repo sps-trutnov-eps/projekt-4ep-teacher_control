@@ -57,7 +57,7 @@ public class AbstenceService
 
         var student = await _context.Users.FindAsync(studentId);
         if (student is null)
-            return new AbstenceWriteResult(AbstenceWriteOutcome.TeacherNotFound);
+            return new AbstenceWriteResult(AbstenceWriteOutcome.InternalError);
 
         // Přidáním do trackované navigační kolekce si EF entitu sám označí jako Added,
         // není potřeba volat i _context.LateArrivals.Add(...) zvlášť.
@@ -94,7 +94,7 @@ public class AbstenceService
 
         var student = await _context.Users.FindAsync(studentId);
         if (student is null)
-            return new AbstenceWriteResult(AbstenceWriteOutcome.TeacherNotFound);
+            return new AbstenceWriteResult(AbstenceWriteOutcome.InternalError);
 
         teacher.Mood = value;
         teacher.LastSubmissionAt = now;

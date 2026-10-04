@@ -48,7 +48,7 @@ public class AbstenceController : ControllerBase
             return Unauthorized();
 
         var result = await _abstenceService.SubmitLateArrivalAsync(teacherId, userId, request.Minutes);
-        return MapResult(teacherId, result);
+        return MapResult(teacherId, userId, result);
     }
 
     [HttpPost("{teacherId:int}/mood")]
@@ -65,10 +65,10 @@ public class AbstenceController : ControllerBase
             return Unauthorized();
 
         var result = await _abstenceService.SubmitMoodAsync(teacherId, userId, request.Value);
-        return MapResult(teacherId, result);
+        return MapResult(teacherId, userId, result);
     }
 
-    private ActionResult<TeacherAbstenceDto> MapResult(int teacherId, AbstenceWriteResult result)
+    private ActionResult<TeacherAbstenceDto> MapResult(int teacherId, string studentId, AbstenceWriteResult result)
     {
         switch (result.Outcome)
         {
@@ -80,6 +80,10 @@ public class AbstenceController : ControllerBase
             case AbstenceWriteOutcome.TooSoon:
                 _logger.LogError("Odeslání pro učitele {TeacherId} přišlo dřív, než uplynul cooldown (zbývá {RetryAfter})", teacherId, result.RetryAfter);
                 return TooSoon(result.RetryAfter);
+            case AbstenceWriteOutcome.InternalError:
+                // Přihlášený uživatel by v DB měl vždy existovat — pokud ne, je to chyba na naší straně, ne 404.
+                _logger.LogError("Přihlášený uživatel {StudentId} nebyl v DB nalezen při zápisu pro učitele {TeacherId}", studentId, teacherId);
+                return StatusCode(StatusCodes.Status500InternalServerError);
             default:
                 return StatusCode(StatusCodes.Status500InternalServerError);
         }
