@@ -1,15 +1,27 @@
-import { Box, Title, Text, Stack, Group, Rating, Center, Alert } from '@mantine/core'
+import { Box, Title, Text, Stack, Group, Rating, Center, Alert, Button } from '@mantine/core'
 import type { Teacher } from '../types'
 
 interface TeacherDetailProps {
   teacher: Teacher
+  onBack: () => void
 }
 
-export function TeacherDetail({ teacher }: TeacherDetailProps) {
+export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
   return (
     <Box bg="white" style={{ flex: 1, minHeight: '100%' }}>
       {/* Top photo placeholder */}
-      <Box h={200} bg="gray.3">
+      <Box h={{ base: 120, sm: 200 }} bg="gray.3" pos="relative">
+        <Button
+          variant="default"
+          size="xs"
+          pos="absolute"
+          top={10}
+          left={10}
+          onClick={onBack}
+          display={{ base: 'block', sm: 'none' }}
+        >
+          ← Zpět
+        </Button>
         <Center h="100%">
           <Text c="gray.6" fw={700} size="xl">
             FOTO
@@ -17,7 +29,7 @@ export function TeacherDetail({ teacher }: TeacherDetailProps) {
         </Center>
       </Box>
 
-      <Box p="xl">
+      <Box p={{ base: 'md', sm: 'xl' }}>
         <Stack gap="xl">
           <Title order={2} ta="center" fw={400}>
             {teacher.firstName} {teacher.lastName}
@@ -28,8 +40,8 @@ export function TeacherDetail({ teacher }: TeacherDetailProps) {
           </Text>
 
           <Stack gap="md">
-            <Group align="flex-start" wrap="nowrap">
-              <Box miw={250}>
+            <Group align="flex-start" wrap="wrap">
+              <Box w={{ base: '100%', sm: 250 }}>
                 <Title order={3} size="h4" fw={500} mb="sm">
                   Hodnocení:
                 </Title>
@@ -47,15 +59,19 @@ export function TeacherDetail({ teacher }: TeacherDetailProps) {
                 </Group>
               </Box>
 
-              <Alert color="blue" variant="filled" style={{ flex: 1, borderRadius: 0 }}>
+              <Alert
+                color="blue"
+                variant="filled"
+                style={{ flex: 1, borderRadius: 0, width: '100%' }}
+              >
                 Kliknutí na hodnocení Vás pošle na informace o učitely v dané funkci.
               </Alert>
             </Group>
           </Stack>
 
           <Stack gap="md">
-            <Group align="flex-start" wrap="nowrap">
-              <Box miw={250}>
+            <Group align="flex-start" wrap="wrap">
+              <Box w={{ base: '100%', sm: 250 }}>
                 <Title order={3} size="h4" fw={500} mb="sm">
                   Ocenění:
                 </Title>
@@ -66,11 +82,17 @@ export function TeacherDetail({ teacher }: TeacherDetailProps) {
                     </Text>
                   ))
                 ) : (
-                  <Text size="sm" c="dimmed">Žádná ocenění</Text>
+                  <Text size="sm" c="dimmed">
+                    Žádná ocenění
+                  </Text>
                 )}
               </Box>
 
-              <Alert color="blue" variant="filled" style={{ flex: 1, borderRadius: 0 }}>
+              <Alert
+                color="blue"
+                variant="filled"
+                style={{ flex: 1, borderRadius: 0, width: '100%' }}
+              >
                 Kliknutí na dané ocenění Vás pošle na informace o daném ocenění.
               </Alert>
             </Group>

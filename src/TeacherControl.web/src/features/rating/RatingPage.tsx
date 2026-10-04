@@ -14,12 +14,19 @@ export function RatingPage() {
   return (
     <Box h="calc(100vh - 100px)" display="flex" style={{ flexDirection: 'column' }}>
       <PageHeader title="Rating" description="Hodnocení učitelů" />
-      
+
       <Flex flex={1} style={{ overflow: 'hidden' }} mt="md">
-        <Box w={{ base: '100%', sm: 300 }} style={{ borderRight: '1px solid var(--mantine-color-gray-3)' }}>
+        {/* Levý panel - seznam učitelů. Na mobilu se schová, pokud je vybrán učitel */}
+        <Box
+          w={{ base: '100%', sm: 300 }}
+          display={{ base: selectedId ? 'none' : 'block', sm: 'block' }}
+          style={{ borderRight: '1px solid var(--mantine-color-gray-3)' }}
+        >
           <ScrollArea h="100%">
             {isLoadingTeachers ? (
-              <Center h="100%"><Loader /></Center>
+              <Center h="100%">
+                <Loader />
+              </Center>
             ) : isErrorTeachers || !teachers ? (
               <Alert color="red">Chyba při načítání učitelů.</Alert>
             ) : (
@@ -31,12 +38,20 @@ export function RatingPage() {
             )}
           </ScrollArea>
         </Box>
-        
-        <Box flex={1} style={{ overflowY: 'auto' }} bg="white">
+
+        {/* Pravý panel - detail učitele. Na mobilu je přes celou šířku a zobrazí se jen pokud je vybrán */}
+        <Box
+          flex={1}
+          style={{ overflowY: 'auto' }}
+          bg="white"
+          display={{ base: selectedId ? 'block' : 'none', sm: 'block' }}
+        >
           {isLoadingTeacher ? (
-             <Center h="100%"><Loader /></Center>
+            <Center h="100%">
+              <Loader />
+            </Center>
           ) : selectedTeacher ? (
-            <TeacherDetail teacher={selectedTeacher} />
+            <TeacherDetail teacher={selectedTeacher} onBack={() => setSelectedId(null)} />
           ) : (
             <Center h="100%" c="dimmed">
               Vyberte učitele ze seznamu pro zobrazení podrobností

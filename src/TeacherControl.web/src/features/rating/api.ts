@@ -23,8 +23,8 @@ export function useTeacher(id: string | null) {
       // (typ vrací neznámé hodnoty (zatím), backend nedefinoval 200 response schéma)
       const { data, error } = await api.GET('/api/Rating/teacher/{teacherId}', {
         params: {
-          path: { teacherId: Number(id?.replace('t-', '')) || 0 }
-        }
+          path: { teacherId: Number(id?.replace('t-', '')) || 0 },
+        },
       })
       if (error) {
         throw new Error('Nepodařilo se načíst detail učitele')
