@@ -7,7 +7,8 @@ using TeacherControl.Api.Features.Rating.Services;
 namespace TeacherControl.Api.Features.Rating.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/rating")]
+[Authorize]
 public class RatingController : ControllerBase
 {
     private readonly ILogger<RatingController> _logger;
@@ -20,7 +21,6 @@ public class RatingController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize]
     public async Task<IActionResult> CreateReview([FromBody] CreateReviewRequest request)
     {
         var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier);

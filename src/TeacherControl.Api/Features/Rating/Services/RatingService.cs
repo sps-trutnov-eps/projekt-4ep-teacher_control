@@ -26,12 +26,12 @@ public class RatingService
             Content = request.Content,
             Rating = request.Rating,
             TeacherId = request.TeacherId,
-            Teacher = null!, // EF si dotáhne přes FK, nastavovat navigation ručně není potřeba
+            Teacher = null!,
             StudentId = studentId,
             Student = null!
         };
 
-        _db.Reviews.Add(review); // TODO: over si skutecny nazev DbSetu v AppDbContext.cs
+        _db.Reviews.Add(review);
         await _db.SaveChangesAsync();
 
         return MapToResponse(review);
