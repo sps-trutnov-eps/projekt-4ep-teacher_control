@@ -23,7 +23,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
-    // fetch v Node chce absolutní URL, v prohlížeči stačí '/api' z .env.
-    env: { VITE_API_BASE_URL: 'http://localhost/api' },
+    // fetch v Node chce absolutní URL, v prohlížeči stačí relativní cesta.
+    env: { VITE_API_URL: 'http://localhost' },
   },
 })
