@@ -1,18 +1,23 @@
-import { Alert, Box, Paper, Stack, Tooltip } from '@mantine/core'
-import { ApiError, formatRetryAfter, useSubmitMood } from '../api'
+import { Box, Paper, Tooltip } from '@mantine/core'
 import { MOOD_COLORS, MOOD_LABELS, getMoodLevel } from '../mood'
 
 interface MoodMeterProps {
-  /** Hodnota nálady 1–5 z backendu. */
+  /** Hodnota nálady 1–5 — vybraná úroveň, nebo hodnota z backendu. */
   mood: number
-  /** V Hodnotit se dá hodnota změnit kliknutím na metr, v Zobrazit je jen pro čtení. */
+  /** V Hodnotit se dá hodnota vybrat kliknutím, v Zobrazit je jen pro čtení. */
   editable: boolean
-  /** Id učitele — povinné v editovatelné variantě. */
-  teacherId?: number
+  /** Klik na úroveň 1–5. Výběr se uloží až tlačítkem "Uložit" ve formuláři. */
+  onSelect?: (level: number) => void
 }
 
 const LEVELS = [1, 2, 3, 4, 5] as const
 const SEGMENTS_PER_LEVEL = 4
+
+// Segmenty jsou záměrně drobné — metr sedí vedle profilu, kde původní rozměr vypadal jako sloupek.
+const SEGMENT_HEIGHT = 7
+const SEGMENT_GAP = 1
+const LEVEL_GAP = 2
+const LEVEL_HEIGHT = SEGMENTS_PER_LEVEL * SEGMENT_HEIGHT + (SEGMENTS_PER_LEVEL - 1) * SEGMENT_GAP
 
 /** Barva segmentu podle úrovně 1–5 (dole zelená, nahoře červená). */
 function colorForLevel(level: number): string {
@@ -25,32 +30,30 @@ function colorForLevel(level: number): string {
 
 /**
  * Metr nálady (design: svislá stupnice 1–5). Ukazuje jen náladu — zpoždění se zobrazuje
- * zvlášť. V Zobrazit je jen ukazatel, v Hodnotit funguje jako ovládání: klikneš na úroveň
- * 1–5 a hodnota se uloží (backend hodnotu přepíše, per učitel platí 30minutový cooldown).
+ * zvlášť. V Zobrazit je jen ukazatel, v Hodnotit jde kliknutím na úroveň 1–5 vybrat hodnotu;
+ * na backend se ale nic neposílá, klik se uloží až tlačítkem "Uložit" ve formuláři na zpoždění.
  */
-export function MoodMeter({ mood, editable, teacherId }: MoodMeterProps) {
+export function MoodMeter({ mood, editable, onSelect }: MoodMeterProps) {
   if (!editable) {
     return <MeterBody mood={mood} editable={false} />
   }
 
-  if (teacherId === undefined) {
-    throw new Error('MoodMeter v editovatelné variantě potřebuje teacherId.')
+  if (onSelect === undefined) {
+    throw new Error('MoodMeter v editovatelné variantě potřebuje onSelect.')
   }
 
-  return <EditableMeter mood={mood} teacherId={teacherId} />
+  return <MeterBody mood={mood} editable onPick={onSelect} />
 }
 
-/** Statický vzhled metru pro zvolenou hodnotu — stejný pro čtení i editaci. */
+/** Statický vzhled metru pro zvolenou hodnotu — stejný pro čtení i výběr. */
 function MeterBody({
   mood,
   editable,
   onPick,
-  isPending,
 }: {
   mood: number
   editable: boolean
   onPick?: (level: number) => void
-  isPending?: boolean
 }) {
   const filledLevels = Math.round(mood)
 
@@ -62,16 +65,16 @@ function MeterBody({
       }
     >
       <Paper
-        p="xs"
+        p={6}
         radius="xl"
         withBorder
         aria-label={`Nálada učitele: ${MOOD_LABELS[getMoodLevel(mood)]}`}
         style={(theme) => ({
           borderColor: theme.colors[MOOD_COLORS[getMoodLevel(mood)]][6],
-          width: 56,
+          width: 44,
           display: 'flex',
           flexDirection: 'column',
-          gap: 2,
+          gap: LEVEL_GAP,
         })}
       >
         {[...LEVELS].reverse().map((level) => (
@@ -80,7 +83,6 @@ function MeterBody({
             level={level}
             filledLevels={filledLevels}
             editable={editable}
-            isPending={isPending ?? false}
             onPick={onPick}
           />
         ))}
@@ -94,13 +96,11 @@ function LevelGroup({
   level,
   filledLevels,
   editable,
-  isPending,
   onPick,
 }: {
   level: number
   filledLevels: number
   editable: boolean
-  isPending: boolean
   onPick?: (level: number) => void
 }) {
   const segments = Array.from({ length: SEGMENTS_PER_LEVEL }, (_, index) => {
@@ -123,7 +123,7 @@ function LevelGroup({
 
   if (!editable) {
     return (
-      <Box h={SEGMENTS_PER_LEVEL * 10} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Box h={LEVEL_HEIGHT} style={{ display: 'flex', flexDirection: 'column', gap: SEGMENT_GAP }}>
         {segments}
       </Box>
     )
@@ -134,45 +134,22 @@ function LevelGroup({
       <Box
         component="button"
         type="button"
-        disabled={isPending}
         onClick={() => onPick?.(level)}
         aria-label={`Nastavit náladu na ${level} z 5 (${MOOD_LABELS[getMoodLevel(level)]})`}
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 2,
+          gap: SEGMENT_GAP,
           width: '100%',
-          height: SEGMENTS_PER_LEVEL * 10,
+          height: LEVEL_HEIGHT,
           padding: 0,
           border: 'none',
           background: 'transparent',
-          cursor: isPending ? 'wait' : 'pointer',
+          cursor: 'pointer',
         }}
       >
         {segments}
       </Box>
     </Tooltip>
-  )
-}
-
-/** Metr v režimu Hodnotit: klik na úroveň 1–5 rovnou uloží, řeší pending i chyby. */
-function EditableMeter({ mood, teacherId }: { mood: number; teacherId: number }) {
-  const submitMood = useSubmitMood(teacherId)
-
-  const pick = (level: number) => {
-    submitMood.mutate({ value: level })
-  }
-
-  return (
-    <Stack gap="xs" align="flex-start">
-      {submitMood.isError ? (
-        <Alert color="red" title="Chyba">
-          {submitMood.error instanceof ApiError && submitMood.error.status === 429
-            ? `Náladu tohohle učitele jsi nedávno měnil, zkus to znovu ${formatRetryAfter(submitMood.error.retryAfterSeconds)}.`
-            : 'Náladu se nepodařilo uložit.'}
-        </Alert>
-      ) : null}
-      <MeterBody mood={mood} editable onPick={pick} isPending={submitMood.isPending} />
-    </Stack>
   )
 }
