@@ -12,9 +12,9 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // Backend ASP.NET Core Web API běží lokálně na 5000.
+      // Backend ASP.NET Core Web API běží lokálně na 5229 (http profil v launchSettings.json).
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://localhost:5229',
         changeOrigin: true,
       },
     },
@@ -23,7 +23,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
-    // fetch v Node chce absolutní URL, v prohlížeči stačí '/api' z .env.
-    env: { VITE_API_BASE_URL: 'http://localhost/api' },
+    // fetch v Node chce absolutní URL, v prohlížeči stačí relativní cesta.
+    env: { VITE_API_URL: 'http://localhost' },
   },
 })
