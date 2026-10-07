@@ -16,7 +16,7 @@ import {
 import { useState } from 'react'
 import { PageHeader } from '@/shared/ui'
 import { useBingoBoard, useNewBingoBoard, useTeacherQuotes, useToggleBingoCell } from './api'
-import coconutImage from './coconut.jpg'
+import coconutImage from './assets/coconut.jpg'
 
 const GRID_SIZES = [3, 4, 5, 6].map((size) => ({ value: String(size), label: `${size} × ${size}` }))
 
