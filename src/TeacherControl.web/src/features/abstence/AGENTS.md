@@ -14,7 +14,7 @@ Tohle je dané. Neměň to a nenavrhuj alternativy.
 | Jazyk | TypeScript, `strict: true` |
 | Framework | React 19 (function components + hooks) |
 | Build | Vite |
-| Routing | React Router v7 |
+| Routing | React Router v8 |
 | Server state | TanStack Query v5 |
 | Formuláře | React Hook Form + Zod |
 | UI komponenty | Mantine |
