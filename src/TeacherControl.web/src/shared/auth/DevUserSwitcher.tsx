@@ -22,7 +22,7 @@ export function DevUserSwitcher() {
   return (
     <Select
       size="xs"
-      w={260}
+      w={{ base: 140, sm: 260 }}
       aria-label="Dev přepínač uživatele"
       placeholder="Nepřihlášen"
       data={OPTIONS}
