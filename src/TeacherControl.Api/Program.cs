@@ -57,23 +57,28 @@ public class Program
             {
                 await db.Database.MigrateAsync();
             }
+
+            await DatabaseSeeder.SeedAsync(app.Services);
         }
 
         app.MapOpenApi();
         if (app.Environment.IsDevelopment())
         {
             if (!isOpenApiGeneration)
+            {
                 await DevelopmentAuthentication.SeedAsync(app.Services, app.Configuration);
+            }
             app.MapDevelopmentAuthentication();
         }
 
         app.UseHttpsRedirection();
+
+        app.UseRouting();
+        
         app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
-
-        app.UseRouting();
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
