@@ -47,8 +47,9 @@ Soubory v `src/shared/api/generated/` **needituj ručně**, přepíše je dalš�
 3. `pnpm gen:api` je proto potřeba spustit po každé změně schématu na backendu. Automaticky to nic
    nehlídá. Spouští ho frontendový tým featury, který nový endpoint potřebuje, a to ve svém PR.
 
-Když dva týmy přegenerují typy zároveň a vznikne konflikt v `schema.d.ts`, neřeš ho ručně. Vezmi
-aktuální `staging` a spusť `pnpm gen:api` znovu.
+Když dva týmy změní schéma zároveň, vzniknou konflikty v `docs/api/TeacherControl.Api.json`
+a v `schema.d.ts`. Mergni si aktuální `main`, konflikt v JSONu vyřeš normálně a `schema.d.ts` ručně
+neřeš: až je JSON vyřešený, spusť `pnpm gen:api` znovu.
 
 ### Jak volat routy
 
