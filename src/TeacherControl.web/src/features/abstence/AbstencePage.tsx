@@ -53,5 +53,6 @@ function SideDetail({ teacherId }: { teacherId: number | null }) {
     return null
   }
 
-  return <TeacherDetail teacher={teacher} />
+  // key přepne stav detailu (výběr nálady, rozepsané zpoždění) při změně učitele.
+  return <TeacherDetail key={teacher.teacherId} teacher={teacher} />
 }

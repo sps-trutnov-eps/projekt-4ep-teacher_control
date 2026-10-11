@@ -14,71 +14,75 @@ interface TeacherDetailProps {
 }
 
 /**
- * Detail učitele podle designu. Záložka Zobrazit: profil, dnešní zpoždění a metr nálady
- * jen pro čtení. Záložka Hodnotit: zadání zpoždění a metr nálady editovatelný kliknutím.
+ * Detail učitele podle designu. Metr nálady sedí podle návrhu vpravo nahoře profilu.
+ * Záložka Zobrazit: dnešní zpoždění a metr jen pro čtení. Záložka Hodnotit: metr jde vybrat
+ * kliknutím, ale na backend se hodnota odešle až tlačítkem "Uložit" ve formuláři.
  */
 export function TeacherDetail({ teacher }: TeacherDetailProps) {
   const { isAuthenticated } = useAuth()
   const [tab, setTab] = useState<'view' | 'rate'>('view')
+  // Klik na úroveň v metru je zatím jen lokální výběr, aby šlo chybu opravit před uložením.
+  const [selectedMood, setSelectedMood] = useState<number | null>(null)
 
-  const moodLevel = getMoodLevel(teacher.mood)
+  const canRate = isAuthenticated && tab === 'rate'
+  const shownMood = selectedMood ?? teacher.mood
+  const moodLevel = getMoodLevel(shownMood)
+  // Posílá se jen hodnota, která se proti backendu opravdu změnila (sdílený cooldown).
+  const moodToSave = selectedMood !== null && selectedMood !== teacher.mood ? selectedMood : null
 
   return (
     <Stack gap="md">
       <PageHeader title={teacher.name} description="Profil učitele — zpoždění a nálada" />
 
-      <Group align="flex-start" gap="xl" wrap="nowrap">
-        <Stack gap="sm" style={{ flex: 1 }}>
-          <Group gap="md" wrap="nowrap">
-            <TeacherAvatar
-              name={teacher.name}
-              photoUrl={teacher.photoUrl}
-              moodLevel={moodLevel}
-              size={96}
-            />
-            <Stack gap={4}>
-              {teacher.rating !== null ? <TeacherStars rating={teacher.rating} /> : null}
-              <Text size="sm" c="dimmed">
-                Nálada podle zpětné vazby studentů
-              </Text>
-            </Stack>
-          </Group>
+      {/* wrap="nowrap" drží metr vpravo i na mobilu — jinak by spadl na vlastní řádek vlevo. */}
+      <Group align="flex-start" justify="space-between" gap="md" wrap="nowrap">
+        <Group gap="md" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
+          <TeacherAvatar
+            name={teacher.name}
+            photoUrl={teacher.photoUrl}
+            moodLevel={moodLevel}
+            size={96}
+          />
+          <Stack gap={4} style={{ minWidth: 0 }}>
+            {teacher.rating !== null ? <TeacherStars rating={teacher.rating} /> : null}
+            <Text size="sm" c="dimmed">
+              Nálada podle zpětné vazby studentů
+            </Text>
+          </Stack>
+        </Group>
 
-          {isAuthenticated ? (
-            <SegmentedControl
-              fullWidth
-              value={tab}
-              onChange={setTab}
-              aria-label="Menu profilu učitele"
-              data={[
-                { value: 'view', label: 'Zobrazit' },
-                { value: 'rate', label: 'Hodnotit' },
-              ]}
-            />
-          ) : null}
-
-          {isAuthenticated && tab === 'rate' ? (
-            <Stack gap="md">
-              <DelayForm teacherId={teacher.teacherId} />
-              <MoodMeter mood={teacher.mood} editable teacherId={teacher.teacherId} />
-            </Stack>
-          ) : (
-            <Stack gap="xs">
-              <MoodMeter mood={teacher.mood} editable={false} />
-              <Text size="sm">
-                Dnes nahlášeno{' '}
-                <Text span fw={700}>
-                  {teacher.lateArrivalMinutesToday} min
-                </Text>{' '}
-                zpoždění.
-              </Text>
-              <Text size="sm" c="dimmed">
-                Zelené kolečko znamená dobrou náladu, červené špatnou.
-              </Text>
-            </Stack>
-          )}
-        </Stack>
+        <MoodMeter mood={shownMood} editable={canRate} onSelect={setSelectedMood} />
       </Group>
+
+      {isAuthenticated ? (
+        <SegmentedControl
+          fullWidth
+          value={tab}
+          onChange={setTab}
+          aria-label="Menu profilu učitele"
+          data={[
+            { value: 'view', label: 'Zobrazit' },
+            { value: 'rate', label: 'Hodnotit' },
+          ]}
+        />
+      ) : null}
+
+      {canRate ? (
+        <DelayForm teacherId={teacher.teacherId} mood={moodToSave} />
+      ) : (
+        <Stack gap="xs">
+          <Text size="sm">
+            Dnes nahlášeno{' '}
+            <Text span fw={700}>
+              {teacher.lateArrivalMinutesToday} min
+            </Text>{' '}
+            zpoždění.
+          </Text>
+          <Text size="sm" c="dimmed">
+            Zelené kolečko znamená dobrou náladu, červené špatnou.
+          </Text>
+        </Stack>
+      )}
     </Stack>
   )
 }

@@ -139,7 +139,7 @@ describe('AbstencePage oproti návrhu', () => {
     expect(screen.getAllByLabelText('Nálada učitele: Špatná nálada').length).toBeGreaterThan(0)
   })
 
-  it('Hodnotit: metr nálady je editovatelný, klik na úroveň uloží hodnotu', () => {
+  it('Hodnotit: klik na úroveň v metru jen vybere, uloží se až tlačítkem Uložit', async () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
@@ -147,10 +147,19 @@ describe('AbstencePage oproti návrhu', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Nastavit náladu na 2 z 5/ }))
 
-    expect(submitMoodMock).toHaveBeenCalledWith({ value: 2 })
+    // Výběr nálady se zatím nikam neposílá — uživatel může chybu ještě opravit.
+    expect(submitMoodMock).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Uložit' }))
+
+    await waitFor(() => {
+      expect(submitMoodMock).toHaveBeenCalledWith({ value: 2 })
+    })
+    // Zpoždění se neměnilo, tak se neposílá (sdílený cooldown by druhé volání odmítlo).
+    expect(submitLateArrivalMock).not.toHaveBeenCalled()
   })
 
-  it('Hodnotit: rychlé tlačítko +5 uloží zpoždění jedním klikem', () => {
+  it('Hodnotit: rychlé tlačítko +5 jen vyplní pole, odešle se až Uložit', async () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
@@ -158,7 +167,46 @@ describe('AbstencePage oproti návrhu', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '+5' }))
 
-    expect(submitLateArrivalMock).toHaveBeenCalledWith({ minutes: 5 })
+    expect(submitLateArrivalMock).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Uložit' }))
+
+    await waitFor(() => {
+      expect(submitLateArrivalMock).toHaveBeenCalledWith({ minutes: 5 })
+    })
+    // Nálada se nevybrala, tak se neposílá.
+    expect(submitMoodMock).not.toHaveBeenCalled()
+  })
+
+  it('Hodnotit: Uložit odešle zpoždění i náladu jedním klikem', async () => {
+    renderPage()
+
+    fireEvent.click(screen.getByText('Petr Svoboda'))
+    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+
+    fireEvent.click(screen.getByRole('button', { name: '+15' }))
+    fireEvent.click(screen.getByRole('button', { name: /Nastavit náladu na 3 z 5/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Uložit' }))
+
+    await waitFor(() => {
+      expect(submitLateArrivalMock).toHaveBeenCalledWith({ minutes: 15 })
+      expect(submitMoodMock).toHaveBeenCalledWith({ value: 3 })
+    })
+  })
+
+  it('Hodnotit: bez jakékoli změny se Uložit nic neodešle', async () => {
+    renderPage()
+
+    fireEvent.click(screen.getByText('Petr Svoboda'))
+    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Uložit' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Nic se nezměnilo — uprav zpoždění nebo náladu.')).toBeTruthy()
+    })
+    expect(submitLateArrivalMock).not.toHaveBeenCalled()
+    expect(submitMoodMock).not.toHaveBeenCalled()
   })
 
   it('Hodnotit: custom 0 minut projde validací Zod a neodešle se', async () => {
@@ -170,12 +218,13 @@ describe('AbstencePage oproti návrhu', () => {
     fireEvent.change(screen.getByLabelText('Vlastní zpoždění (minuty)'), {
       target: { value: '0' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Uložit zpoždění' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Uložit' }))
 
     await waitFor(() => {
       expect(screen.getByText('Zpoždění musí být alespoň 1 minuta.')).toBeTruthy()
     })
     expect(submitLateArrivalMock).not.toHaveBeenCalled()
+    expect(submitMoodMock).not.toHaveBeenCalled()
   })
 
   it('mobil: řádek se rozklikne s detailem (varianta z mobilního návrhu)', async () => {

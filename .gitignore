@@ -209,7 +209,9 @@ nunit-*.xml
 **/.vscode/*
 !**/.vscode/extensions.json
 .idea/
-.vs/
 *.suo
 *.sw?
+
+
+src/.idea/
 

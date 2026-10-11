@@ -77,5 +77,5 @@ function ExpandedTeacherDetail({ teacherId }: { teacherId: number }) {
     )
   }
 
-  return <TeacherDetail teacher={teacher} />
+  return <TeacherDetail key={teacher.teacherId} teacher={teacher} />
 }
