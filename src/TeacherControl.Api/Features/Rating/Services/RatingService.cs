@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using TeacherControl.Api.Features.Rating.DTOs;
