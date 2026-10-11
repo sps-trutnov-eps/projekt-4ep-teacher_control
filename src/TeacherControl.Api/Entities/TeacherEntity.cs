@@ -26,7 +26,8 @@ public class TeacherEntity
     /// </summary>
     public required float Mood { get; set; } = 3;
 
-    // Čas posledního odeslání (pozdní příchod nebo nálada) pro tohoto učitele — Abstence tím
-    // vynucuje 30minutovou prodlevu mezi odesláními, sdílenou pro oba typy.
-    public DateTime? LastSubmissionAt { get; set; }
+    // Čas posledního odeslání pozdního příchodu / nálady pro tohoto učitele — zvlášť pro
+    // každý typ, Abstence tím vynucuje 30minutovou prodlevu mezi odesláními téhož typu.
+    public DateTime? LastLateArrivalSubmissionAt { get; set; }
+    public DateTime? LastMoodSubmissionAt { get; set; }
 }
