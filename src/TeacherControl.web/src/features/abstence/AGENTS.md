@@ -9,17 +9,17 @@ Pokud si nejsi jistý, kopíruj tvar existujícího kódu ve `src/features/ratin
 
 Tohle je dané. Neměň to a nenavrhuj alternativy.
 
-| Oblast | Co používáme |
-|---|---|
-| Jazyk | TypeScript, `strict: true` |
-| Framework | React 19 (function components + hooks) |
-| Build | Vite |
-| Routing | React Router v8 |
-| Server state | TanStack Query v5 |
-| Formuláře | React Hook Form + Zod |
-| UI komponenty | Mantine |
-| HTTP | generovaný klient v `src/shared/api` |
-| Package manager | pnpm |
+| Oblast          | Co používáme                           |
+| --------------- | -------------------------------------- |
+| Jazyk           | TypeScript, `strict: true`             |
+| Framework       | React 19 (function components + hooks) |
+| Build           | Vite                                   |
+| Routing         | React Router v8                        |
+| Server state    | TanStack Query v5                      |
+| Formuláře       | React Hook Form + Zod                  |
+| UI komponenty   | Mantine                                |
+| HTTP            | generovaný klient v `src/shared/api`   |
+| Package manager | pnpm                                   |
 
 Verze Node je v `.nvmrc`.
 
@@ -103,7 +103,7 @@ F6 Login se napojuje na školní systém a bude hotový až později. **Do té d
 Používej výhradně:
 
 ```ts
-const { user, roles, isAuthenticated } = useAuth()  // z src/shared/auth
+const { user, roles, isAuthenticated } = useAuth() // z src/shared/auth
 ```
 
 Zatím to obsluhuje `MockAuthProvider`, který bere uživatele z dev přepínače. Až bude F6 hotová, vymění se implementace pod `useAuth()` a nic dalšího se měnit nebude. Proto:
