@@ -1,0 +1,282 @@
+<!doctype html>
+<!--
+  Dočasné demo backendu featury Pololetí (seznam učitelů, karta učitele, hlasování o titul).
+  Není součástí React aplikace – po předvedení smazat.
+
+  Spuštění: backend (http profil, port 5229) + `pnpm dev`, pak otevřít
+  http://localhost:5173/src/features/pololeti/index.html – /api jde přes Vite proxy.
+-->
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pololetí – demo backendu</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0 auto;
+        max-width: 960px;
+        padding: 16px;
+        color: #222;
+      }
+      h1 {
+        font-size: 1.4rem;
+      }
+      h2 {
+        font-size: 1.1rem;
+        margin: 0 0 8px;
+      }
+      section {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+      .columns {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 640px) {
+        .columns {
+          grid-template-columns: 1fr;
+        }
+      }
+      #teachers button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        margin-bottom: 4px;
+        padding: 6px 8px;
+      }
+      #teachers button.selected {
+        font-weight: bold;
+        background: #dbeafe;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border-bottom: 1px solid #ddd;
+        padding: 6px 8px;
+        text-align: left;
+      }
+      td.votes {
+        font-variant-numeric: tabular-nums;
+        font-weight: bold;
+      }
+      .muted {
+        color: #666;
+      }
+      .error {
+        color: #b91c1c;
+      }
+      .ok {
+        color: #15803d;
+      }
+      input {
+        padding: 4px 6px;
+      }
+      pre {
+        background: #f4f4f5;
+        padding: 8px;
+        overflow: auto;
+        max-height: 240px;
+        font-size: 0.8rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Pololetí – demo backendu</h1>
+
+    <section>
+      <h2>Přihlášení</h2>
+      <p id="me" class="muted">Zjišťuji stav přihlášení…</p>
+      <form id="login">
+        <input name="email" type="email" value="test@example.com" required />
+        <input name="password" type="password" value="TeacherControl123!" required />
+        <button type="submit">Přihlásit</button>
+        <button type="button" id="logout">Odhlásit</button>
+      </form>
+    </section>
+
+    <div class="columns">
+      <section>
+        <h2>Učitelé</h2>
+        <div id="teachers" class="muted">Načítám…</div>
+      </section>
+
+      <section>
+        <h2>Karta učitele</h2>
+        <div id="card" class="muted">Vyber učitele ze seznamu.</div>
+      </section>
+    </div>
+
+    <section>
+      <h2>Poslední odpověď API</h2>
+      <p id="status" class="muted">—</p>
+      <pre id="response"></pre>
+    </section>
+
+    <script>
+      const meEl = document.getElementById('me')
+      const teachersEl = document.getElementById('teachers')
+      const cardEl = document.getElementById('card')
+      const statusEl = document.getElementById('status')
+      const responseEl = document.getElementById('response')
+
+      let selectedTeacherId = null
+
+      function el(tag, text, className) {
+        const node = document.createElement(tag)
+        if (text !== undefined) node.textContent = text
+        if (className) node.className = className
+        return node
+      }
+
+      // Každé volání se vypíše dole, ať je vidět, co backend skutečně vrátil.
+      async function call(method, path, body) {
+        const response = await fetch(path, {
+          method,
+          headers: body ? { 'Content-Type': 'application/json' } : undefined,
+          body: body ? JSON.stringify(body) : undefined,
+        })
+        const text = await response.text()
+        let data = null
+        try {
+          data = text ? JSON.parse(text) : null
+        } catch {
+          data = text
+        }
+
+        statusEl.textContent = `${method} ${path} → ${response.status} ${response.statusText}`
+        statusEl.className = response.ok ? 'ok' : 'error'
+        responseEl.textContent = data === null ? '' : JSON.stringify(data, null, 2)
+
+        return { ok: response.ok, status: response.status, data }
+      }
+
+      async function refreshMe() {
+        const { ok, data } = await call('GET', '/api/auth/me')
+        meEl.textContent = ok
+          ? `Přihlášen: ${data.email} (${data.id})`
+          : 'Nepřihlášen – seznam i kartu vidíš, hlasování vrátí 401.'
+        meEl.className = ok ? 'ok' : 'muted'
+      }
+
+      async function loadTeachers() {
+        const { ok, data } = await call('GET', '/api/pololeti/teachers')
+        teachersEl.replaceChildren()
+        if (!ok) {
+          teachersEl.append(el('p', 'Seznam učitelů se nepodařilo načíst.', 'error'))
+          return
+        }
+
+        teachersEl.className = ''
+        for (const teacher of data) {
+          const button = el('button', teacher.name)
+          button.dataset.teacherId = teacher.teacherId
+          button.addEventListener('click', () => selectTeacher(teacher.teacherId))
+          teachersEl.append(button)
+        }
+      }
+
+      async function selectTeacher(teacherId) {
+        selectedTeacherId = teacherId
+        for (const button of teachersEl.querySelectorAll('button')) {
+          button.classList.toggle('selected', Number(button.dataset.teacherId) === teacherId)
+        }
+
+        const { ok, data } = await call('GET', `/api/pololeti/teachers/${teacherId}`)
+        if (ok) renderCard(data)
+        else cardEl.replaceChildren(el('p', 'Kartu učitele se nepodařilo načíst.', 'error'))
+      }
+
+      function renderCard(card) {
+        cardEl.className = ''
+        cardEl.replaceChildren(
+          el('h3', card.name),
+          el('p', card.description || 'Bez popisu.', 'muted'),
+          el('p', `Hlasování: ${card.pololetiText}`),
+        )
+
+        const table = el('table')
+        const head = el('tr')
+        head.append(el('th', 'Titul'), el('th', 'Hlasů'), el('th', 'Můj hlas'), el('th'))
+        table.append(head)
+
+        for (const title of card.titles) {
+          const row = el('tr')
+          const mine =
+            title.myVoteTeacherId === null
+              ? '—'
+              : title.myVoteTeacherId === card.teacherId
+                ? 'tento učitel'
+                : `jiný učitel (#${title.myVoteTeacherId})`
+
+          const voteButton = el(
+            'button',
+            title.myVoteTeacherId === null ? 'Hlasovat' : 'Přesunout hlas sem',
+          )
+          voteButton.disabled = title.myVoteTeacherId === card.teacherId
+          voteButton.addEventListener('click', () => vote(card.teacherId, title.teacherTitleId))
+
+          const action = el('td')
+          action.append(voteButton)
+          row.append(
+            el('td', title.title),
+            el('td', String(title.votes), 'votes'),
+            el('td', mine),
+            action,
+          )
+          table.append(row)
+        }
+
+        cardEl.append(table)
+      }
+
+      async function vote(teacherId, teacherTitleId) {
+        const { ok, status, data } = await call(
+          'POST',
+          `/api/pololeti/teachers/${teacherId}/votes`,
+          { teacherTitleId },
+        )
+        if (ok) {
+          renderCard(data)
+          return
+        }
+
+        cardEl.append(
+          el(
+            'p',
+            status === 401
+              ? 'Hlasovat může jen přihlášený uživatel (401).'
+              : `Hlas se nepodařilo uložit (${status}).`,
+            'error',
+          ),
+        )
+      }
+
+      document.getElementById('login').addEventListener('submit', async (event) => {
+        event.preventDefault()
+        const form = new FormData(event.target)
+        await call('POST', '/api/auth/login', {
+          email: form.get('email'),
+          password: form.get('password'),
+        })
+        await refreshMe()
+        if (selectedTeacherId !== null) await selectTeacher(selectedTeacherId)
+      })
+
+      document.getElementById('logout').addEventListener('click', async () => {
+        await call('POST', '/api/auth/logout')
+        await refreshMe()
+        if (selectedTeacherId !== null) await selectTeacher(selectedTeacherId)
+      })
+
+      refreshMe().then(loadTeachers)
+    </script>
+  </body>
+</html>

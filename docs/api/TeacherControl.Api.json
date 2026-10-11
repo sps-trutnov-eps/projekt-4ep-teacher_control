@@ -5,6 +5,316 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/rating": {
+      "post": {
+        "tags": [
+          "Rating"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReviewRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReviewRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/rating/teacher/{teacherId}": {
+      "get": {
+        "tags": [
+          "Rating"
+        ],
+        "parameters": [
+          {
+            "name": "teacherId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/rating/teacher/{teacherId}/average": {
+      "get": {
+        "tags": [
+          "Rating"
+        ],
+        "parameters": [
+          {
+            "name": "teacherId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/rating/teacher/{teacherId}/profile": {
+      "get": {
+        "tags": [
+          "Rating"
+        ],
+        "parameters": [
+          {
+            "name": "teacherId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/rating/{reviewId}": {
+      "put": {
+        "tags": [
+          "Rating"
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReviewRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReviewRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Rating"
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/pololeti/teachers": {
+      "get": {
+        "tags": [
+          "Pololeti"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PololetiTeacherDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PololetiTeacherDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PololetiTeacherDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pololeti/teachers/{teacherId}": {
+      "get": {
+        "tags": [
+          "Pololeti"
+        ],
+        "parameters": [
+          {
+            "name": "teacherId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherCardDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherCardDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherCardDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pololeti/teachers/{teacherId}/votes": {
+      "post": {
+        "tags": [
+          "Pololeti"
+        ],
+        "parameters": [
+          {
+            "name": "teacherId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CastVoteRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CastVoteRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CastVoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherCardDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherCardDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherCardDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/abstence": {
       "get": {
         "tags": [
@@ -205,180 +515,86 @@
           }
         }
       }
-    },
-    "/api/rating": {
-      "post": {
-        "tags": [
-          "Rating"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateReviewRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateReviewRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateReviewRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/rating/teacher/{teacherId}": {
-      "get": {
-        "tags": [
-          "Rating"
-        ],
-        "parameters": [
-          {
-            "name": "teacherId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/rating/teacher/{teacherId}/average": {
-      "get": {
-        "tags": [
-          "Rating"
-        ],
-        "parameters": [
-          {
-            "name": "teacherId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/rating/teacher/{teacherId}/profile": {
-      "get": {
-        "tags": [
-          "Rating"
-        ],
-        "parameters": [
-          {
-            "name": "teacherId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/rating/{reviewId}": {
-      "put": {
-        "tags": [
-          "Rating"
-        ],
-        "parameters": [
-          {
-            "name": "reviewId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateReviewRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateReviewRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateReviewRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Rating"
-        ],
-        "parameters": [
-          {
-            "name": "reviewId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
     }
   },
   "components": {
     "schemas": {
+      "CastVoteRequest": {
+        "required": [
+          "teacherTitleId"
+        ],
+        "type": "object",
+        "properties": {
+          "teacherTitleId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "CreateReviewRequest": {
+        "required": [
+          "teacherId",
+          "title",
+          "content",
+          "rating"
+        ],
+        "type": "object",
+        "properties": {
+          "teacherId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "rating": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "float"
+          }
+        }
+      },
+      "PololetiTeacherDto": {
+        "required": [
+          "teacherId",
+          "name",
+          "photoUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "teacherId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "SubmitLateArrivalRequest": {
         "required": [
           "minutes"
@@ -466,12 +682,15 @@
           }
         }
       },
-      "CreateReviewRequest": {
+      "TeacherCardDto": {
         "required": [
           "teacherId",
-          "title",
-          "content",
-          "rating"
+          "name",
+          "photoUrl",
+          "description",
+          "pololeti",
+          "pololetiText",
+          "titles"
         ],
         "type": "object",
         "properties": {
@@ -483,19 +702,73 @@
             ],
             "format": "int32"
           },
+          "name": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "pololeti": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pololetiText": {
+            "type": "string"
+          },
+          "titles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TitleVotesDto"
+            }
+          }
+        }
+      },
+      "TitleVotesDto": {
+        "required": [
+          "teacherTitleId",
+          "title",
+          "votes",
+          "myVoteTeacherId"
+        ],
+        "type": "object",
+        "properties": {
+          "teacherTitleId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
           "title": {
             "type": "string"
           },
-          "content": {
-            "type": "string"
-          },
-          "rating": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+          "votes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
-              "number",
+              "integer",
               "string"
             ],
-            "format": "float"
+            "format": "int32"
+          },
+          "myVoteTeacherId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -527,10 +800,13 @@
   },
   "tags": [
     {
-      "name": "Abstence"
+      "name": "Rating"
     },
     {
-      "name": "Rating"
+      "name": "Pololeti"
+    },
+    {
+      "name": "Abstence"
     }
   ]
 }
