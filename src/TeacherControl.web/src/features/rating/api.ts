@@ -1,36 +1,35 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchJson, api } from '@/shared/api'
-import type { Teacher } from './types'
+import type { TeacherProfile } from './types'
 
 const ratingKeys = {
   all: ['rating'] as const,
   teachers: () => [...ratingKeys.all, 'teachers'] as const,
-  teacher: (id: string) => [...ratingKeys.all, 'teacher', id] as const,
+  teacher: (id: string | number) => [...ratingKeys.all, 'teacher', String(id)] as const,
 }
 
 export function useTeachers() {
   return useQuery({
     queryKey: ratingKeys.teachers(),
-    queryFn: () => fetchJson<Teacher[]>('/teachers'),
+    queryFn: () => fetchJson<TeacherProfile[]>('/teachers'),
   })
 }
 
-export function useTeacher(id: string | null) {
+export function useTeacher(id: string | number | null) {
   return useQuery({
     queryKey: ratingKeys.teacher(id!),
     queryFn: async () => {
-      // Použito openapi-fetch `api.GET` pro endpoint v OpenAPI
-      // (typ vrací neznámé hodnoty (zatím), backend nedefinoval 200 response schéma)
+      const numericId = Number(String(id).replace('t-', '')) || 0
       const { data, error } = await api.GET('/api/rating/teacher/{teacherId}/profile', {
         params: {
-          path: { teacherId: Number(id?.replace('t-', '')) || 0 },
+          path: { teacherId: numericId },
         },
       })
       if (error) {
-        throw new Error('Nepodařilo se načíst detail učitele')
+        throw new Error('Nepodařilo se načíst profil učitele')
       }
-      return data as unknown as Teacher
+      return data as unknown as TeacherProfile
     },
-    enabled: !!id,
+    enabled: Boolean(id),
   })
 }
