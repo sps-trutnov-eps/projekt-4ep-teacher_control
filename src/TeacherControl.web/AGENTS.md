@@ -123,7 +123,7 @@ Aspoň jeden test na featuru. Nehoň se za pokrytím.
 ## Před PR
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm test && pnpm build
+pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
 Musí projít všechno. Jeden PR = jedna featura. Neupravuj při tom konfiguraci ani cizí featury.
