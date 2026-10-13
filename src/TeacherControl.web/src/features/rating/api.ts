@@ -4,8 +4,8 @@ import type { TeacherListItem, TeacherProfile } from './types'
 
 /**
  * API klient pro rating:
- * - useTeachers(): volá /rating/teachers (dokud backend nedodá endpoint do OpenAPI, jede přes fetchJson + MSW)
- * - useTeacher(id): volá přímo vygenerovaný endpoint /api/rating/teacher/{teacherId}/profile z OpenAPI přes api.GET()
+ * - useTeachers(): volá /rating/teachers (dokud backend nedodá endpoint do OpenAPI)
+ * - useTeacher(id): volá /api/rating/teacher/{teacherId}/profile přes openapi-fetch
  */
 
 const ratingKeys = {

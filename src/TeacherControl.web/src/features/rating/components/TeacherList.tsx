@@ -47,22 +47,22 @@ export function TeacherList({ teachers, selectedTeacherId, onSelect }: TeacherLi
         >
           <Group gap="sm" wrap="nowrap" align="center">
             <Avatar
-              src={teacher.photoUrl}
-              name={teacher.name}
-              alt={teacher.name}
+              src={teacher.image_url}
+              name={teacher.full_name}
+              alt={teacher.full_name}
               radius="xl"
               color="blue"
             />
             <Stack gap={4}>
               <Text fw={500} size="md" lh={1}>
-                {teacher.name}
+                {teacher.full_name}
               </Text>
               <Group gap={6}>
                 <Text size="xs" c="dimmed" lh={1}>
                   Rating:
                 </Text>
-                {teacher.rating !== null ? (
-                  <SimpleRating value={teacher.rating} />
+                {teacher.review !== null ? (
+                  <SimpleRating value={teacher.review} />
                 ) : (
                   <Text size="xs" c="dimmed" lh={1}>
                     Bez hodnocení

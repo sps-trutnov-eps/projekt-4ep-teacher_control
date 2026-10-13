@@ -7,22 +7,6 @@ interface TeacherDetailProps {
 }
 
 export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
-  const fullName = teacher.fullName || teacher.name || 'Jméno Příjmení'
-  const photo = teacher.imageUrl || teacher.photoUrl || null
-  const bio = teacher.bio || teacher.description || 'Bez popisu.'
-  const reviewScore = teacher.review ?? teacher.averageRating ?? 0
-  const abstentionScore = teacher.abstention ?? 0
-  const binginessScore = teacher.binginess ?? 0
-
-  const awardsList: string[] = []
-  if (teacher.award) {
-    awardsList.push(`${teacher.award}${teacher.year ? ` (${teacher.year})` : ''}`)
-  } else if (teacher.awards && teacher.awards.length > 0) {
-    teacher.awards.forEach((a) => {
-      awardsList.push(`${a.name}${a.year ? ` (${a.year})` : ''}`)
-    })
-  }
-
   return (
     <Box bg="white" style={{ flex: 1, minHeight: '100%' }}>
       {/* Fotografie učitele nebo placeholder */}
@@ -39,8 +23,8 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
         >
           ← Zpět
         </Button>
-        {photo ? (
-          <Image src={photo} alt={fullName} h="100%" w="100%" fit="cover" />
+        {teacher.image_url ? (
+          <Image src={teacher.image_url} alt={teacher.full_name} h="100%" w="100%" fit="cover" />
         ) : (
           <Center h="100%">
             <Text c="gray.6" fw={700} size="xl">
@@ -53,11 +37,11 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
       <Box p={{ base: 'md', sm: 'xl' }}>
         <Stack gap="xl">
           <Title order={2} ta="center" fw={400}>
-            {fullName}
+            {teacher.full_name}
           </Title>
 
           <Text c="dimmed" size="sm" ta="justify">
-            {bio}
+            {teacher.bio}
           </Text>
 
           <Box maw={300}>
@@ -66,15 +50,15 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
             </Title>
             <Group justify="space-between" mb="xs">
               <Text size="sm">Recenze:</Text>
-              <Rating value={reviewScore} readOnly fractions={2} color="yellow" />
+              <Rating value={teacher.review} readOnly fractions={2} color="yellow" />
             </Group>
             <Group justify="space-between" mb="xs">
               <Text size="sm">Abstence:</Text>
-              <Rating value={abstentionScore} readOnly fractions={2} color="yellow" />
+              <Rating value={teacher.abstention} readOnly fractions={2} color="yellow" />
             </Group>
             <Group justify="space-between">
               <Text size="sm">Bingovost:</Text>
-              <Rating value={binginessScore} readOnly fractions={2} color="yellow" />
+              <Rating value={teacher.binginess} readOnly fractions={2} color="yellow" />
             </Group>
           </Box>
 
@@ -82,10 +66,11 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
             <Title order={3} size="h4" fw={500} mb="sm">
               Ocenění:
             </Title>
-            {awardsList.length > 0 ? (
-              awardsList.map((item, idx) => (
+            {teacher.awards.length > 0 ? (
+              teacher.awards.map((item, idx) => (
                 <Text key={idx} size="sm" mb="xs">
-                  {item}
+                  {item.award}
+                  {item.year ? ` (${item.year})` : ''}
                 </Text>
               ))
             ) : (
