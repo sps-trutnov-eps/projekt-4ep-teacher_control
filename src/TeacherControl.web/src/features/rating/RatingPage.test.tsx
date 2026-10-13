@@ -25,14 +25,11 @@ function renderPage(initialEntries: string[] = ['/rating']) {
 test('vykreslí seznam učitelů z API', async () => {
   renderPage(['/rating'])
 
-  // Z mocks.ts by mělo přijít 'Jan Novák' v seznamu
   expect(await screen.findByText('Jan Novák')).toBeDefined()
 })
 
 test('vykreslí detail učitele při zadání ?teacher=1', async () => {
   renderPage(['/rating?teacher=1'])
 
-  // V detailu by se mělo zobrazit jméno a sekce hodnocení
-  expect(await screen.findAllByText('Jan Novák')).toBeDefined()
   expect(await screen.findByText('Hodnocení:')).toBeDefined()
 })

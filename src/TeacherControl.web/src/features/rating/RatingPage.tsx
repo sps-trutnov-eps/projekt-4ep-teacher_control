@@ -8,11 +8,12 @@ import { TeacherDetail } from './components/TeacherDetail'
 export function RatingPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const teacherIdParam = searchParams.get('teacher')
+  const selectedTeacherId = teacherIdParam ? Number(teacherIdParam) : null
 
   const { data: teachers, isLoading: isLoadingTeachers, isError: isErrorTeachers } = useTeachers()
-  const { data: selectedTeacher, isLoading: isLoadingTeacher } = useTeacher(teacherIdParam)
+  const { data: selectedTeacher, isLoading: isLoadingTeacher } = useTeacher(selectedTeacherId)
 
-  const handleSelectTeacher = (id: string | number) => {
+  const handleSelectTeacher = (id: number) => {
     setSearchParams({ teacher: String(id) })
   }
 
@@ -25,10 +26,10 @@ export function RatingPage() {
       <PageHeader title="Rating" description="Hodnocení učitelů" />
 
       <Flex flex={1} style={{ overflow: 'hidden' }} mt="md">
-        {/* Levý panel - výběr učitelů. Na mobilu se schová, pokud je vybrán učitel (?teacher=id) */}
+        {/* Levý panel – výběr učitelů (na mobilu se schová, když je vybrán učitel) */}
         <Box
           w={{ base: '100%', sm: 300 }}
-          display={{ base: teacherIdParam ? 'none' : 'block', sm: 'block' }}
+          display={{ base: selectedTeacherId ? 'none' : 'block', sm: 'block' }}
           style={{ borderRight: '1px solid var(--mantine-color-gray-3)' }}
         >
           <ScrollArea h="100%">
@@ -41,19 +42,19 @@ export function RatingPage() {
             ) : (
               <TeacherList
                 teachers={teachers}
-                selectedTeacherId={teacherIdParam}
+                selectedTeacherId={selectedTeacherId}
                 onSelect={handleSelectTeacher}
               />
             )}
           </ScrollArea>
         </Box>
 
-        {/* Pravý panel - detail učitele (/rating?teacher=id). Na mobilu se zobrazí jen pokud je vybrán */}
+        {/* Pravý panel – detail učitele (/rating?teacher=id) */}
         <Box
           flex={1}
           style={{ overflowY: 'auto' }}
           bg="white"
-          display={{ base: teacherIdParam ? 'block' : 'none', sm: 'block' }}
+          display={{ base: selectedTeacherId ? 'block' : 'none', sm: 'block' }}
         >
           {isLoadingTeacher ? (
             <Center h="100%">

@@ -1,15 +1,15 @@
 import { UnstyledButton, Text, Group, Avatar, Stack } from '@mantine/core'
-import type { TeacherProfile, TeacherListItem } from '../types'
-
-type DisplayTeacher = TeacherProfile | TeacherListItem
+import type { TeacherListItem } from '../types'
 
 interface TeacherListProps {
-  teachers: DisplayTeacher[]
-  selectedTeacherId: string | number | null
-  onSelect: (teacherId: string | number) => void
+  teachers: TeacherListItem[]
+  selectedTeacherId: number | null
+  onSelect: (teacherId: number) => void
 }
 
-function SimpleRating({ value }: { value: number }) {
+function SimpleRating({ value }: { value: number | null }) {
+  const rounded = Math.round(value ?? 0)
+
   return (
     <Group gap={2}>
       {[1, 2, 3, 4, 5].map((i) => (
@@ -18,10 +18,8 @@ function SimpleRating({ value }: { value: number }) {
           width={12}
           height={12}
           viewBox="0 0 24 24"
-          fill={i <= Math.round(value) ? 'var(--mantine-color-yellow-5)' : 'none'}
-          stroke={
-            i <= Math.round(value) ? 'var(--mantine-color-yellow-5)' : 'var(--mantine-color-gray-4)'
-          }
+          fill={i <= rounded ? 'var(--mantine-color-yellow-5)' : 'none'}
+          stroke={i <= rounded ? 'var(--mantine-color-yellow-5)' : 'var(--mantine-color-gray-4)'}
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -36,56 +34,45 @@ function SimpleRating({ value }: { value: number }) {
 export function TeacherList({ teachers, selectedTeacherId, onSelect }: TeacherListProps) {
   return (
     <Stack gap={0} bd="1px solid var(--mantine-color-gray-3)">
-      {teachers.map((teacher) => {
-        const anyTeacher = teacher as unknown as Record<string, unknown>
-        const id = teacher.id
-        const isSelected = String(selectedTeacherId) === String(id)
-        const name =
-          (anyTeacher.full_name as string) ||
-          (anyTeacher.fullName as string) ||
-          (anyTeacher.name as string) ||
-          'Jméno Příjmení'
-        const photo =
-          (anyTeacher.image_url as string) ||
-          (anyTeacher.imageUrl as string) ||
-          (anyTeacher.photoUrl as string) ||
-          null
-        const rating = Number(
-          anyTeacher.rating ??
-            anyTeacher.review ??
-            anyTeacher.averageRating ??
-            (anyTeacher.ratings as Record<string, unknown> | undefined)?.overall ??
-            0,
-        )
-
-        return (
-          <UnstyledButton
-            key={String(id)}
-            onClick={() => onSelect(id)}
-            p="md"
-            bg={isSelected ? 'var(--mantine-color-blue-0)' : 'white'}
-            style={{
-              borderBottom: '1px solid var(--mantine-color-gray-3)',
-              transition: 'background-color 150ms ease',
-            }}
-          >
-            <Group gap="sm" wrap="nowrap" align="center">
-              <Avatar src={photo} alt={name} radius="xl" color="blue" />
-              <Stack gap={4}>
-                <Text fw={500} size="md" lh={1}>
-                  {name}
+      {teachers.map((teacher) => (
+        <UnstyledButton
+          key={teacher.id}
+          onClick={() => onSelect(teacher.id)}
+          p="md"
+          bg={selectedTeacherId === teacher.id ? 'var(--mantine-color-blue-0)' : 'white'}
+          style={{
+            borderBottom: '1px solid var(--mantine-color-gray-3)',
+            transition: 'background-color 150ms ease',
+          }}
+        >
+          <Group gap="sm" wrap="nowrap" align="center">
+            <Avatar
+              src={teacher.photoUrl}
+              name={teacher.name}
+              alt={teacher.name}
+              radius="xl"
+              color="blue"
+            />
+            <Stack gap={4}>
+              <Text fw={500} size="md" lh={1}>
+                {teacher.name}
+              </Text>
+              <Group gap={6}>
+                <Text size="xs" c="dimmed" lh={1}>
+                  Rating:
                 </Text>
-                <Group gap={6}>
+                {teacher.rating !== null ? (
+                  <SimpleRating value={teacher.rating} />
+                ) : (
                   <Text size="xs" c="dimmed" lh={1}>
-                    Rating:
+                    Bez hodnocení
                   </Text>
-                  <SimpleRating value={rating} />
-                </Group>
-              </Stack>
-            </Group>
-          </UnstyledButton>
-        )
-      })}
+                )}
+              </Group>
+            </Stack>
+          </Group>
+        </UnstyledButton>
+      ))}
     </Stack>
   )
 }

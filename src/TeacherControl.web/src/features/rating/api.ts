@@ -1,35 +1,43 @@
 import { useQuery } from '@tanstack/react-query'
-import { fetchJson, api } from '@/shared/api'
-import type { TeacherProfile } from './types'
+import { api, fetchJson } from '@/shared/api'
+import type { TeacherListItem, TeacherProfile } from './types'
+
+/**
+ * API klient pro rating:
+ * - useTeachers(): volá /rating/teachers (dokud backend nedodá endpoint do OpenAPI, jede přes fetchJson + MSW)
+ * - useTeacher(id): volá přímo vygenerovaný endpoint /api/rating/teacher/{teacherId}/profile z OpenAPI přes api.GET()
+ */
 
 const ratingKeys = {
   all: ['rating'] as const,
   teachers: () => [...ratingKeys.all, 'teachers'] as const,
-  teacher: (id: string | number) => [...ratingKeys.all, 'teacher', String(id)] as const,
+  teacher: (id: number) => [...ratingKeys.all, 'teacher', id] as const,
 }
 
 export function useTeachers() {
   return useQuery({
     queryKey: ratingKeys.teachers(),
-    queryFn: () => fetchJson<TeacherProfile[]>('/teachers'),
+    queryFn: () => fetchJson<TeacherListItem[]>('/rating/teachers'),
   })
 }
 
-export function useTeacher(id: string | number | null) {
+export function useTeacher(id: number | null) {
   return useQuery({
-    queryKey: ratingKeys.teacher(id!),
-    queryFn: async () => {
-      const numericId = Number(String(id).replace('t-', '')) || 0
-      const { data, error } = await api.GET('/api/rating/teacher/{teacherId}/profile', {
+    queryKey: ratingKeys.teacher(id ?? 0),
+    queryFn: async ({ signal }) => {
+      const { data, response } = await api.GET('/api/rating/teacher/{teacherId}/profile', {
         params: {
-          path: { teacherId: numericId },
+          path: { teacherId: id! },
         },
+        signal,
       })
-      if (error) {
-        throw new Error('Nepodařilo se načíst profil učitele')
+
+      if (!response.ok || !data) {
+        throw new Error(`Nepodařilo se načíst profil učitele (${response.status})`)
       }
+
       return data as unknown as TeacherProfile
     },
-    enabled: Boolean(id),
+    enabled: Boolean(id) && (id ?? 0) > 0,
   })
 }

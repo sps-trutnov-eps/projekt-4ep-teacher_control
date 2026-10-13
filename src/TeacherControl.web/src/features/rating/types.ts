@@ -5,49 +5,36 @@ export interface TeacherAward {
   description?: string
 }
 
-export interface TeacherRating {
-  overall: number
-  absence: number
-  bingo: number
+/** Učitel v seznamu výběru pro hodnocení (/rating) */
+export interface TeacherListItem {
+  id: number
+  name: string
+  photoUrl?: string | null
+  rating: number | null
 }
 
 /**
- * Profil učitele podle specifikace v zadání a Davidových dodatcích:
- * Backend dodá:
- * - full_name (TeacherEntity.Name -> full_name)
- * - image_url (TeacherEntity.PhotoUrl -> image_url)
- * - bio (TeacherEntity.Description -> bio)
- * - review (TeacherEntity.Reviews.Rating.Average -> review)
- * - abstention (vypočtená hodnota -> abstention)
- * - binginess (vypočtená hodnota -> binginess)
- * - award & year (TitleVoteEntity -> award, Teacher.Pololeti -> year)
+ * Detail/profil učitele pro hodnocení (/rating?teacher=id)
+ *
+ * Podporuje jak pole z aktuálního backendu (TeacherProfileResponse: Id, Name, PhotoUrl, Description, AverageRating),
+ * tak specifikaci od Davida (full_name, image_url, bio, review, abstention, binginess, award, year).
  */
 export interface TeacherProfile {
-  id: number | string
-  fullName: string
+  id: number
+  name: string
+  fullName?: string
   full_name?: string
+  photoUrl?: string | null
   imageUrl?: string | null
   image_url?: string | null
-  photoUrl?: string | null
-  bio: string
   description?: string
-  review: number
-  averageRating?: number
-  abstention: number
-  absence?: number
-  binginess: number
-  bingo?: number
+  bio?: string
+  averageRating: number
+  review?: number
+  reviewCount?: number
+  abstention?: number
+  binginess?: number
   award?: string | null
   year?: string | null
   awards?: TeacherAward[]
-  ratings?: TeacherRating
-}
-
-export type Teacher = TeacherProfile
-
-export interface TeacherListItem {
-  id: number | string
-  fullName: string
-  photoUrl?: string | null
-  rating: number
 }

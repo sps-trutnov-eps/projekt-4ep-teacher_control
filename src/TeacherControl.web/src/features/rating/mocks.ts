@@ -1,94 +1,79 @@
 import { HttpResponse, http } from 'msw'
-import type { TeacherProfile } from './types'
+import type { TeacherListItem, TeacherProfile } from './types'
 
-const teachers: TeacherProfile[] = [
+const teachers: TeacherListItem[] = [
   {
     id: 1,
-    fullName: 'Jan Novák',
-    full_name: 'Jan Novák',
-    imageUrl: null,
-    image_url: null,
+    name: 'Jan Novák',
     photoUrl: null,
-    bio: 'Informace o učitelovi Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
-    description:
-      'Informace o učitelovi Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
-    review: 4.5,
-    averageRating: 4.5,
-    abstention: 5,
-    absence: 5,
-    binginess: 3,
-    bingo: 3,
-    award: 'Pololetí jenž učitel vyhrál.',
-    year: '2026',
-    awards: [
-      {
-        id: 'a-1',
-        name: 'Pololetí jenž učitel vyhrál.',
-        year: '2026',
-        description: 'Nejlepší učitel prvního pololetí.',
-      },
-    ],
+    rating: 4.5,
   },
   {
     id: 2,
-    fullName: 'Petr Svoboda',
-    full_name: 'Petr Svoboda',
-    imageUrl: null,
-    image_url: null,
+    name: 'Petr Svoboda',
     photoUrl: null,
-    bio: 'Informace o dalším učiteli...',
-    description: 'Informace o dalším učiteli...',
-    review: 5,
-    averageRating: 5,
-    abstention: 4,
-    absence: 4,
-    binginess: 5,
-    bingo: 5,
-    award: null,
-    year: null,
-    awards: [],
+    rating: 5,
   },
   {
     id: 3,
-    fullName: 'Marie Dvořáková',
-    full_name: 'Marie Dvořáková',
-    imageUrl: null,
-    image_url: null,
+    name: 'Marie Dvořáková',
     photoUrl: null,
-    bio: 'Další popis učitelky...',
-    description: 'Další popis učitelky...',
-    review: 3.5,
-    averageRating: 3.5,
-    abstention: 3,
-    absence: 3,
-    binginess: 2,
-    bingo: 2,
-    award: 'Nejlepší učitel druhého pololetí.',
-    year: '2024',
-    awards: [
-      {
-        id: 'a-2',
-        name: 'Nejlepší učitel druhého pololetí.',
-        year: '2024',
-        description: 'Ocenění z roku 2024.',
-      },
-    ],
+    rating: null,
   },
 ]
 
-export const ratingHandlers = [
-  // List endpoint
-  http.get('*/api/teachers', () => HttpResponse.json(teachers)),
-  http.get('*/api/rating/teachers', () => HttpResponse.json(teachers)),
+const profiles: Record<number, TeacherProfile> = {
+  1: {
+    id: 1,
+    name: 'Jan Novák',
+    photoUrl: null,
+    description:
+      'Informace o učitelovi. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    averageRating: 4.5,
+    review: 4.5,
+    reviewCount: 12,
+    abstention: 5,
+    binginess: 3,
+    award: 'Pololetí jenž učitel vyhrál.',
+    year: '2026',
+  },
+  2: {
+    id: 2,
+    name: 'Petr Svoboda',
+    photoUrl: null,
+    description: 'Informace o dalším učiteli...',
+    averageRating: 5,
+    review: 5,
+    reviewCount: 8,
+    abstention: 4,
+    binginess: 5,
+  },
+  3: {
+    id: 3,
+    name: 'Marie Dvořáková',
+    photoUrl: null,
+    description: 'Další popis učitelky...',
+    averageRating: 0,
+    review: 0,
+    reviewCount: 0,
+    abstention: 3,
+    binginess: 2,
+    award: 'Nejlepší učitel druhého pololetí.',
+    year: '2024',
+  },
+}
 
-  // Detail endpoint podle RatingController.cs a specifikace
+export const ratingHandlers = [
+  // Seznam učitelů pro rating (dokud backend nedodá endpoint v OpenAPI)
+  http.get('*/api/rating/teachers', () => HttpResponse.json(teachers)),
+  http.get('*/api/teachers', () => HttpResponse.json(teachers)),
+
+  // Profil učitele – odpovídá backendovému GET /api/rating/teacher/{teacherId}/profile
   http.get('*/api/rating/teacher/:teacherId/profile', ({ params }) => {
-    const rawId = String(params.teacherId).replace('t-', '')
-    const teacher = teachers.find(
-      (t) => String(t.id) === rawId || String(t.id) === String(params.teacherId),
-    )
-    if (teacher) {
-      return HttpResponse.json(teacher)
+    const id = Number(params.teacherId)
+    const profile = profiles[id]
+    if (profile) {
+      return HttpResponse.json(profile)
     }
     return new HttpResponse(null, { status: 404 })
   }),

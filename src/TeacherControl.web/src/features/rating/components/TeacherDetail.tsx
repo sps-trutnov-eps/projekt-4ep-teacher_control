@@ -7,12 +7,12 @@ interface TeacherDetailProps {
 }
 
 export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
-  const fullName = teacher.full_name || teacher.fullName || 'Jméno Příjmení'
-  const photo = teacher.image_url || teacher.imageUrl || teacher.photoUrl || null
+  const fullName = teacher.fullName || teacher.name || 'Jméno Příjmení'
+  const photo = teacher.imageUrl || teacher.photoUrl || null
   const bio = teacher.bio || teacher.description || 'Bez popisu.'
-  const reviewScore = teacher.review ?? teacher.averageRating ?? teacher.ratings?.overall ?? 0
-  const abstentionScore = teacher.abstention ?? teacher.absence ?? teacher.ratings?.absence ?? 0
-  const binginessScore = teacher.binginess ?? teacher.bingo ?? teacher.ratings?.bingo ?? 0
+  const reviewScore = teacher.review ?? teacher.averageRating ?? 0
+  const abstentionScore = teacher.abstention ?? 0
+  const binginessScore = teacher.binginess ?? 0
 
   const awardsList: string[] = []
   if (teacher.award) {
@@ -25,7 +25,7 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
 
   return (
     <Box bg="white" style={{ flex: 1, minHeight: '100%' }}>
-      {/* Horní část - fotografie učitele nebo placeholder FOTO */}
+      {/* Fotografie učitele nebo placeholder */}
       <Box h={{ base: 140, sm: 200 }} bg="gray.3" pos="relative" style={{ overflow: 'hidden' }}>
         <Button
           variant="default"
