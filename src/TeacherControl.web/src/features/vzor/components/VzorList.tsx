@@ -22,25 +22,27 @@ export function VzorList() {
   }
 
   return (
-    <Table striped>
-      <Table.Thead>
-        <Table.Tr>
-          <Table.Th>Název</Table.Th>
-          <Table.Th>Poznámka</Table.Th>
-          <Table.Th>Autor</Table.Th>
-          <Table.Th>Vytvořeno</Table.Th>
-        </Table.Tr>
-      </Table.Thead>
-      <Table.Tbody>
-        {data.map((item) => (
-          <Table.Tr key={item.id}>
-            <Table.Td>{item.title}</Table.Td>
-            <Table.Td>{item.note ?? '—'}</Table.Td>
-            <Table.Td>{item.authorName}</Table.Td>
-            <Table.Td>{formatDateTime(item.createdAt)}</Table.Td>
+    <Table.ScrollContainer minWidth={560}>
+      <Table striped>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Název</Table.Th>
+            <Table.Th>Poznámka</Table.Th>
+            <Table.Th>Autor</Table.Th>
+            <Table.Th>Vytvořeno</Table.Th>
           </Table.Tr>
-        ))}
-      </Table.Tbody>
-    </Table>
+        </Table.Thead>
+        <Table.Tbody>
+          {data.map((item) => (
+            <Table.Tr key={item.id}>
+              <Table.Td>{item.title}</Table.Td>
+              <Table.Td>{item.note ?? '—'}</Table.Td>
+              <Table.Td>{item.authorName}</Table.Td>
+              <Table.Td>{formatDateTime(item.createdAt)}</Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
   )
 }
