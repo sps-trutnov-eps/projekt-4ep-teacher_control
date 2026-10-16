@@ -27,7 +27,7 @@ if (rootElement === null) {
   throw new Error('V index.html chybí <div id="root">.')
 }
 
-startMocks().then(() => {
+const render = () => {
   createRoot(rootElement).render(
     <StrictMode>
       <MantineProvider>
@@ -42,4 +42,11 @@ startMocks().then(() => {
       </MantineProvider>
     </StrictMode>,
   )
-})
+}
+
+// Když se worker nerozjede, appka se stejně vykreslí. Bílá stránka je horší než chybějící mocky.
+startMocks()
+  .catch((error: unknown) => {
+    console.error('MSW se nepodařilo nastartovat, jedeš proti reálnému API.', error)
+  })
+  .finally(render)

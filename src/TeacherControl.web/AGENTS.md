@@ -16,7 +16,7 @@ svoji stránku zapojíš do routingu.
 Povinné soubory ve featuře: `api.ts`, `mocks.ts`, `index.ts`, `<Něco>Page.tsx`.
 Volitelné, až budou potřeba: `components/`, `hooks/`, `types.ts`, `schema.ts`.
 
-**Tvar kódu kopíruj z `src/features/rating`.** Je to referenční featura, která ukazuje všechny
+**Tvar kódu kopíruj z `src/features/vzor`.** Je to referenční featura, která ukazuje všechny
 konvence najednou. Kopíruj tvar, ne obsah.
 
 ## Zakázané (většinu z toho shodí `pnpm lint`)
@@ -39,12 +39,21 @@ Když ve `shared/` něco chybí, nepřidávej to sám, napiš frontend masterovi
 Klient se generuje z OpenAPI přes `pnpm gen:api`. Soubory v `src/shared/api/generated/` **needituj
 ručně**, přepíše je další generování.
 
+Backend zatím většinu endpointů nedodal, takže je ve schématu nenajdeš. Dokud tam ten tvůj není,
+volej `fetchJson()` ze `src/shared/api` a tvar odpovědi si popiš ve svém `types.ts`. Je to jediná
+výjimka z „typy se nepíšou ručně" a platí jen do chvíle, než endpoint v OpenAPI přibude — pak
+`pnpm gen:api`, přepiš volání na `api.GET()` a ruční typ zahoď.
+
 Volání vždy přes TanStack Query v `api.ts` své featury, nikdy přímo v komponentě.
-Query key konvence: `[featura, typ, ...parametry]`, třeba `['rating', 'list', filtry]`.
+Query key konvence: `[featura, typ, ...parametry]`, třeba `['vzor', 'list']`.
 Po mutaci invaliduj query key featury.
 
 Když endpoint na backendu ještě není, přidej MSW handler do `mocks.ts` své featury a zapoj ho
-v `src/mocks/handlers/index.ts`. Ve vývoji jedou mocky defaultně.
+v `src/mocks/handlers/index.ts` importem `@/features/<featura>/mocks`. Ve vývoji jedou mocky
+defaultně.
+
+`mocks.ts` **nikdy nereexportuj z `index.ts` své featury.** Barrel se táhne do produkčního bundlu
+a přitáhl by si s sebou celé `msw`. Hlídá to `pnpm lint`.
 
 ## Auth
 
@@ -52,7 +61,14 @@ Featura F6 Login bude hotová později. Do té doby **nikdo nepíše vlastní p�
 
 Používej výhradně `useAuth()` ze `src/shared/auth`. Žádné čtení tokenu ve featurách, žádný vlastní
 AuthContext. Oprávnění řeš přes `hasRole('student' | 'teacher' | 'admin')`, nikdy přes jméno
-uživatele. Na route guardy jsou `RequireAuth` a `RequireRole`.
+uživatele.
+
+Co na co:
+
+- `RequireAuth` — celá appka, je už v `App.tsx`, znovu ji nebalíš.
+- `RequireRole` — celá stránka jen pro jednu roli, obal jí obsah své `<Něco>Page.tsx`.
+- `hasRole()` — jen část stránky (tlačítko, formulář). Když něco schováš, napiš uživateli proč,
+  viz `VzorPage.tsx`.
 
 ## Formuláře
 
@@ -64,10 +80,18 @@ ne do komponenty.
 Kód a názvy anglicky, texty pro uživatele česky. Komponenty `PascalCase.tsx`, ostatní `camelCase.ts`.
 Žádné default exporty, všechno pojmenovaně. Nepiš komentáře k samozřejmostem.
 
+## Testy
+
+Vitest + Testing Library, data z tvých MSW handlerů (`src/mocks/server.ts` je pouští v Node).
+Vzor je `features/vzor/VzorPage.test.tsx` — zkopíruj z něj `renderPage()` s providery a piš
+testy proti tomu, co uživatel vidí (`findByText`, `findByRole`), ne proti vnitřnostem komponent.
+
+Aspoň jeden test na featuru. Nehoň se za pokrytím.
+
 ## Před PR
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm build
+pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
 Musí projít všechno. Jeden PR = jedna featura. Neupravuj při tom konfiguraci ani cizí featury.

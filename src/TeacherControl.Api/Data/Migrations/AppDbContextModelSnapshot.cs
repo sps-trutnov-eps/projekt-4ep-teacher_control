@@ -17,7 +17,7 @@ namespace TeacherControl.Api.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.11")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -154,6 +154,272 @@ namespace TeacherControl.Api.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("TeacherControl.Api.Entities.BingoBoardEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("BingoBoards");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.BingoBoardQuoteEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BingoBoardId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Marked")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuoteId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuoteId");
+
+                    b.HasIndex("BingoBoardId", "Position")
+                        .IsUnique();
+
+                    b.ToTable("BingoBoardQuotes", t =>
+                        {
+                            t.HasCheckConstraint("CK_BingoBoardQuotes_Position", "\"Position\" >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.HistoricTitleEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Pololeti")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TeacherTitleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WinningTeacherId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeacherTitleId");
+
+                    b.HasIndex("WinningTeacherId");
+
+                    b.ToTable("HistoricTitles", t =>
+                        {
+                            t.HasCheckConstraint("CK_HistoricTitles_Pololeti", "\"Pololeti\" >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.LateArrivalEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeSpan>("TimeSpan")
+                        .HasColumnType("interval");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("LateArrivals", t =>
+                        {
+                            t.HasCheckConstraint("CK_LateArrivals_Duration", "\"TimeSpan\" >= INTERVAL '0 seconds'");
+                        });
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.ReviewEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<float>("Rating")
+                        .HasColumnType("real");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("Reviews", t =>
+                        {
+                            t.HasCheckConstraint("CK_Reviews_Rating", "\"Rating\" BETWEEN 1 AND 5");
+                        });
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.TeacherEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("LastSubmissionAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LoginName")
+                        .HasMaxLength(25)
+                        .HasColumnType("character varying(25)");
+
+                    b.Property<float>("Mood")
+                        .HasColumnType("real");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Teachers", t =>
+                        {
+                            t.HasCheckConstraint("CK_Teachers_Mood", "\"Mood\" BETWEEN 1 AND 5");
+                        });
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.TeacherQuoteEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Quote")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("TeacherQuotes");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.TeacherTitleEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TeacherTitles");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.TitleVoteEntity", b =>
+                {
+                    b.Property<string>("StudentId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("TeacherTitleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Pololeti")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("VotedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("StudentId", "TeacherTitleId", "Pololeti");
+
+                    b.HasIndex("TeacherId");
+
+                    b.HasIndex("TeacherTitleId");
+
+                    b.ToTable("TitleVotes", t =>
+                        {
+                            t.HasCheckConstraint("CK_TitleVotes_Pololeti", "\"Pololeti\" >= 0");
+                        });
+                });
+
             modelBuilder.Entity("TeacherControl.Api.Entities.UserEntity", b =>
                 {
                     b.Property<string>("Id")
@@ -172,6 +438,13 @@ namespace TeacherControl.Api.Data.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<int>("FinishedBingoCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FullName")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -199,6 +472,9 @@ namespace TeacherControl.Api.Data.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
+                    b.Property<int?>("TeacherId")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
 
@@ -214,6 +490,9 @@ namespace TeacherControl.Api.Data.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("TeacherId")
+                        .IsUnique();
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -267,6 +546,153 @@ namespace TeacherControl.Api.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.BingoBoardEntity", b =>
+                {
+                    b.HasOne("TeacherControl.Api.Entities.UserEntity", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.BingoBoardQuoteEntity", b =>
+                {
+                    b.HasOne("TeacherControl.Api.Entities.BingoBoardEntity", "BingoBoard")
+                        .WithMany("Quotes")
+                        .HasForeignKey("BingoBoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TeacherControl.Api.Entities.TeacherQuoteEntity", "Quote")
+                        .WithMany()
+                        .HasForeignKey("QuoteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BingoBoard");
+
+                    b.Navigation("Quote");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.HistoricTitleEntity", b =>
+                {
+                    b.HasOne("TeacherControl.Api.Entities.TeacherTitleEntity", "TeacherTitle")
+                        .WithMany()
+                        .HasForeignKey("TeacherTitleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TeacherControl.Api.Entities.TeacherEntity", "WinningTeacher")
+                        .WithMany()
+                        .HasForeignKey("WinningTeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("TeacherTitle");
+
+                    b.Navigation("WinningTeacher");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.LateArrivalEntity", b =>
+                {
+                    b.HasOne("TeacherControl.Api.Entities.UserEntity", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TeacherControl.Api.Entities.TeacherEntity", "Teacher")
+                        .WithMany("LateArrivals")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.ReviewEntity", b =>
+                {
+                    b.HasOne("TeacherControl.Api.Entities.UserEntity", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TeacherControl.Api.Entities.TeacherEntity", "Teacher")
+                        .WithMany("Reviews")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.TeacherQuoteEntity", b =>
+                {
+                    b.HasOne("TeacherControl.Api.Entities.TeacherEntity", "Teacher")
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.TitleVoteEntity", b =>
+                {
+                    b.HasOne("TeacherControl.Api.Entities.UserEntity", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TeacherControl.Api.Entities.TeacherEntity", "Teacher")
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TeacherControl.Api.Entities.TeacherTitleEntity", "TeacherTitle")
+                        .WithMany()
+                        .HasForeignKey("TeacherTitleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Teacher");
+
+                    b.Navigation("TeacherTitle");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.UserEntity", b =>
+                {
+                    b.HasOne("TeacherControl.Api.Entities.TeacherEntity", "Teacher")
+                        .WithOne()
+                        .HasForeignKey("TeacherControl.Api.Entities.UserEntity", "TeacherId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.BingoBoardEntity", b =>
+                {
+                    b.Navigation("Quotes");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.TeacherEntity", b =>
+                {
+                    b.Navigation("LateArrivals");
+
+                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }

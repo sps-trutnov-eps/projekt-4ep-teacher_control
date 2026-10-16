@@ -71,9 +71,13 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
-
         app.MapControllers();
 
+        app.UseRouting();
+        app.MapControllerRoute(
+            name: "default",
+            pattern: "{controller=Home}/{action=Index}/{id?}");
+        
         await app.RunAsync();
     }
 }

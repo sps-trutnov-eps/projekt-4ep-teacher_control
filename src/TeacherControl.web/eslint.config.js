@@ -69,4 +69,23 @@ export default tseslint.config(
       'no-restricted-imports': 'off',
     },
   },
+  {
+    // Barrel featury vede do produkčního bundlu. Kdyby z něj šly ven i MSW handlery,
+    // přitáhne si produkce celé msw. Handlery se berou přímo z `mocks.ts`.
+    files: ['src/features/*/index.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['./mocks', './mocks.ts'],
+              message:
+                'MSW handlery nepatří do index.ts featury, protahují msw do produkce. Importuj je v src/mocks/handlers/index.ts přímo z @/features/<featura>/mocks.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 )

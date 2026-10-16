@@ -1,0 +1,1 @@
+export { AbstencePage } from './AbstencePage'
