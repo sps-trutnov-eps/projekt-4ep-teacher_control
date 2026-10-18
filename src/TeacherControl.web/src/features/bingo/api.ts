@@ -97,7 +97,17 @@ export function useCreateTeacherQuote() {
 }
 
 /**
- * Načte dnešního vítěze učitelského binga.
+ * Načte statistiky a bingo counter uživatele.
+ */
+export function useBingoStats() {
+  return useQuery({
+    queryKey: bingoKeys.stats(),
+    queryFn: () => fetchJson<UserBingoStats>('/bingo/stats'),
+  })
+}
+
+/**
+ * Načte vítěze dne. O tom, kdo byl první, rozhoduje server.
  */
 export function useDailyBingoWinner() {
   return useQuery({
@@ -107,29 +117,19 @@ export function useDailyBingoWinner() {
 }
 
 /**
- * Nárokuje dnešní vítězství po dokončení binga.
+ * Pošle serveru žádost o zapsání prvního dnešního binga.
  */
 export function useClaimDailyBingoWinner() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (request: ClaimDailyBingoWinnerRequest) =>
-      fetchJson<DailyBingoWinner>('/bingo/daily-winner/claim', {
+      fetchJson<DailyBingoWinner>('/bingo/daily-winner', {
         method: 'POST',
         body: JSON.stringify(request),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bingoKeys.dailyWinner() })
     },
-  })
-}
-
-/**
- * Načte statistiky a bingo counter uživatele.
- */
-export function useBingoStats() {
-  return useQuery({
-    queryKey: bingoKeys.stats(),
-    queryFn: () => fetchJson<UserBingoStats>('/bingo/stats'),
   })
 }

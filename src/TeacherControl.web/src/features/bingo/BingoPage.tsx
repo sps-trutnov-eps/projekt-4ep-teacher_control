@@ -25,6 +25,7 @@ import {
   useToggleBingoCell,
 } from './api'
 import coconutImage from './assets/coconut.jpg'
+import { TeacherQuoteForm } from './TeacherQuoteForm'
 
 const GRID_SIZES = [3, 4, 5, 6].map((size) => ({ value: String(size), label: `${size} × ${size}` }))
 const MUTED_TEXT_COLOR = '#64748B'
@@ -61,6 +62,15 @@ export function BingoPage() {
     createBoard.mutate({ size: Number(gridSize), teacherIds: activeTeacherIds })
   }
 
+  function toggleTeacher(teacherId: string) {
+    const currentSelection = selectedTeacherIds ?? teachers.map((teacher) => teacher.id)
+    setSelectedTeacherIds(
+      currentSelection.includes(teacherId)
+        ? currentSelection.filter((id) => id !== teacherId)
+        : [...currentSelection, teacherId],
+    )
+  }
+
   function markCell(cellId: string) {
     toggleCell.mutate(cellId, {
       onSuccess: (response) => {
@@ -72,15 +82,6 @@ export function BingoPage() {
         }
       },
     })
-  }
-
-  function toggleTeacher(teacherId: string) {
-    const currentSelection = selectedTeacherIds ?? teachers.map((teacher) => teacher.id)
-    setSelectedTeacherIds(
-      currentSelection.includes(teacherId)
-        ? currentSelection.filter((id) => id !== teacherId)
-        : [...currentSelection, teacherId],
-    )
   }
 
   return (
@@ -215,38 +216,16 @@ export function BingoPage() {
                   Zkuste na políčko kliknout znovu.
                 </Alert>
               ) : null}
+              {claimDailyWinner.isError ? (
+                <Alert color="red" title="Denní vítěz se nepodařil uložit" w="100%" maw={760}>
+                  Bingo je označené, ale vítěze dne se nepodařilo ověřit. Zkuste políčko označit znovu.
+                </Alert>
+              ) : null}
             </>
           ) : boardQuery.isLoading ? (
             <Text ta="center" c={MUTED_TEXT_COLOR}>
               Načítám bingo desku…
             </Text>
-          ) : null}
-          {claimDailyWinner.isError ? (
-            <Alert
-              color={ERROR_COLOR}
-              radius={12}
-              title="Denní vítěz se nepodařilo uložit"
-              w="100%"
-              maw={760}
-            >
-              <Stack gap="xs">
-                <Text size="sm">Bingo je označené, ale vítěze dne se nepodařilo ověřit.</Text>
-                <Button
-                  variant="light"
-                  size="xs"
-                  loading={claimDailyWinner.isPending}
-                  color={PRIMARY_BUTTON_COLOR}
-                  radius={12}
-                  onClick={() => {
-                    if (claimDailyWinner.variables) {
-                      claimDailyWinner.mutate(claimDailyWinner.variables)
-                    }
-                  }}
-                >
-                  Zkusit znovu
-                </Button>
-              </Stack>
-            </Alert>
           ) : null}
           <Paper withBorder p="md" radius={12} style={{ width: 'fit-content', maxWidth: '100%' }}>
             <Stack gap="xs">
@@ -279,9 +258,21 @@ export function BingoPage() {
                 <Title order={2} c={HEADING_COLOR}>
                   Učitelé
                 </Title>
-                <Text size="sm" c={MUTED_TEXT_COLOR}>
-                  {activeTeacherIds.length} z {teachers.length} vybráno
-                </Text>
+                <Group gap="xs">
+                  <Text size="sm" c={MUTED_TEXT_COLOR}>
+                    {activeTeacherIds.length} z {teachers.length} vybráno
+                  </Text>
+                  <Button
+                    variant="subtle"
+                    size="xs"
+                    onClick={() => setSelectedTeacherIds([])}
+                    disabled={activeTeacherIds.length === 0}
+                    color={PRIMARY_BUTTON_COLOR}
+                    radius={12}
+                  >
+                    Zrušit výběr
+                  </Button>
+                </Group>
               </Group>
               <TextInput
                 label="Vyhledat učitele"
@@ -325,6 +316,7 @@ export function BingoPage() {
                   {teachers.length === 0 ? 'Seznam učitelů je prázdný.' : 'Žádný učitel nenalezen.'}
                 </Text>
               )}
+              <TeacherQuoteForm teachers={teachers} />
             </Stack>
           </Paper>
           <Paper withBorder p="md" radius={12}>
