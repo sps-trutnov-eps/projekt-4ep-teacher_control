@@ -1,0 +1,245 @@
+<!doctype html>
+<!--
+  TEACHERCONTROL | VÝSLEDKY | ČISTÝ FRONTEND
+  Tato stránka obsahuje POUZE HTML + samostatné CSS.
+  Žádný JavaScript, žádné API požadavky a žádné napojení na databázi.
+
+  ========== DATA, KTERÁ ZDE POZDĚJI DODÁ BACKEND ==========
+  1. selectedCategory: { id, name, description }
+  2. categories[]:      { id, name, isMain } (menu kategorií)
+  3. totalVotes:        počet hlasů v právě vybrané kategorii
+  4. ranking[]:         { id, position, fullName, initials, votes }
+     Seřadit podle počtu hlasů sestupně; první tři jsou i na stupních vítězů.
+  5. percentOfWinner:   pro každý řádek (votes / firstPlaceVotes) * 100,
+     vložit jako procentuální šířku .rank-meter > span.
+  6. activeCategoryId:  určuje, který odkaz v .category-switcher dostane
+     aria-current="page". Staticky je nastavené hlavní hlasování.
+
+  Odkazy ?kategorie=ID jsou připravené pro budoucí serverové zpracování.
+  V samotném statickém HTML se podle parametru NEMĚNÍ data – jde o vzor
+  pro napojení backendem, nikoliv o funkční dynamickou výsledkovou aplikaci.
+
+  INTEGRACE: nahraďte texty v sekcích BACKEND, opakujte .ranking-row podle
+  počtu osob, zobrazte první tři v .podium-person a nenechte uživatelský
+  obsah vkládat jako neescapované HTML.
+============================================================
+-->
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#cbd4dd" />
+    <meta name="description" content="Ukázková výsledková listina soutěže Učitelé pololetí." />
+    <title>Žebříček výsledků | TeacherControl</title>
+    <link rel="stylesheet" href="vysledky.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- BACKEND / SHARED LAYOUT: hlavičku a navigaci lze převzít ze společného frontendu třídy. -->
+      <header class="site-header">
+        <a
+          class="brand"
+          href="kategorie.html"
+          aria-label="TeacherControl – přejít na výběr kategorií"
+        >
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>TeacherControl</span>
+        </a>
+        <span class="login-label" title="Přihlášení se napojí později">Login</span>
+      </header>
+
+      <aside class="sidebar" aria-label="Postranní navigace">
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="kategorie.html" title="Výběr kategorií">F1</a>
+          <a class="sidebar-link active" href="vysledky.html" aria-current="page" title="Žebříček"
+            >F2</a
+          >
+          <span class="sidebar-link disabled" title="Připravuje se">F3</span>
+          <span class="sidebar-link disabled" title="Připravuje se">F4</span>
+          <span class="sidebar-link disabled" title="Připravuje se">F5</span>
+        </nav>
+      </aside>
+
+      <main class="results-main">
+        <div class="results-container">
+          <a href="kategorie.html" class="back-link"
+            ><span aria-hidden="true">←</span> Zpět na kategorie</a
+          >
+          <section class="results-hero" aria-labelledby="results-heading">
+            <div>
+              <p class="eyebrow"><span class="eyebrow-line"></span> UČITELÉ POLOLETÍ · FINÁLE</p>
+              <h1 id="results-heading">Výsledková listina<span class="heading-period">.</span></h1>
+              <p class="hero-description">
+                Podívej se, kdo získal nejvíc hlasů. Zatím jde o statický návrh s ukázkovými jmény a
+                hlasy.
+              </p>
+            </div>
+            <div class="winner-seal" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none">
+                <path
+                  d="M15 9h18v11c0 8-4 13-9 13s-9-5-9-13V9Z"
+                  stroke="currentColor"
+                  stroke-width="2.8"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M15 13H9v5c0 5 3 8 9 8m15-13h6v5c0 5-3 8-9 8M24 33v6m-9 1h18"
+                  stroke="currentColor"
+                  stroke-width="2.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+          </section>
+
+          <!-- BACKEND / categories[] + activeCategoryId: opakovat odkazy a určit aria-current -->
+          <nav class="category-switcher" aria-label="Přepnout kategorii">
+            <a
+              href="vysledky.html?kategorie=hlavni"
+              data-category="hlavni"
+              data-category-id="hlavni"
+              aria-current="page"
+              >Hlavní hlasování</a
+            >
+            <a
+              href="vysledky.html?kategorie=kategorie1"
+              data-category="kategorie1"
+              data-category-id="kategorie1"
+              >Podkategorie 1</a
+            >
+            <a
+              href="vysledky.html?kategorie=kategorie2"
+              data-category="kategorie2"
+              data-category-id="kategorie2"
+              >Podkategorie 2</a
+            >
+            <a
+              href="vysledky.html?kategorie=kategorie3"
+              data-category="kategorie3"
+              data-category-id="kategorie3"
+              >Podkategorie 3</a
+            >
+            <a
+              href="vysledky.html?kategorie=kategorie4"
+              data-category="kategorie4"
+              data-category-id="kategorie4"
+              >Podkategorie 4</a
+            >
+          </nav>
+
+          <!-- BACKEND / selectedCategory.name, selectedCategory.description, totalVotes -->
+          <div class="selection-summary">
+            <div>
+              <p class="section-eyebrow">VYBRANÁ KATEGORIE</p>
+              <h2 id="category-title">Hlavní hlasování</h2>
+              <p id="category-description">Celkové pořadí hlasování o učitele pololetí.</p>
+            </div>
+            <div class="vote-summary">
+              <span id="total-votes">755</span><small>hlasů (ukázka)</small>
+            </div>
+          </div>
+
+          <div class="results-columns">
+            <section class="podium-panel" aria-labelledby="podium-heading">
+              <div class="panel-heading">
+                <div>
+                  <span class="panel-kicker">NEJLEPŠÍ Z NEJLEPŠÍCH</span>
+                  <h3 id="podium-heading">Stupně vítězů</h3>
+                </div>
+                <span class="stars" aria-hidden="true">✦ ✧</span>
+              </div>
+              <!-- BACKEND / ranking[0..2]: tři nejlepší osoby, jméno, iniciály, hlasy.
+                 Pořadí prvků v HTML je záměrně 2. / 1. / 3. pro vizuální stupně vítězů. -->
+              <div class="podium" aria-label="První tři místa">
+                <div class="podium-person second">
+                  <span class="medal silver" aria-label="Stříbrná medaile">2</span>
+                  <span class="avatar" id="avatar-2">PS</span>
+                  <strong class="person-name" id="name-2">Petra Svobodová</strong>
+                  <small id="votes-2">204 hlasů</small>
+                  <div class="podium-block podium-silver"><span>2</span></div>
+                </div>
+                <div class="podium-person first">
+                  <span class="medal gold" aria-label="Zlatá medaile">★</span>
+                  <span class="avatar" id="avatar-1">JN</span>
+                  <strong class="person-name" id="name-1">Jan Novák</strong>
+                  <small id="votes-1">236 hlasů</small>
+                  <div class="podium-block podium-gold"><span>1</span></div>
+                </div>
+                <div class="podium-person third">
+                  <span class="medal bronze" aria-label="Bronzová medaile">3</span>
+                  <span class="avatar" id="avatar-3">MD</span>
+                  <strong class="person-name" id="name-3">Martin Dvořák</strong>
+                  <small id="votes-3">156 hlasů</small>
+                  <div class="podium-block podium-bronze"><span>3</span></div>
+                </div>
+              </div>
+              <p class="podium-footnote">Pořadí je sestavené podle počtu získaných hlasů.</p>
+            </section>
+
+            <section class="ranking-panel" aria-labelledby="ranking-heading">
+              <div class="panel-heading ranking-title">
+                <div>
+                  <span class="panel-kicker">KOMPLETNÍ POŘADÍ</span>
+                  <h3 id="ranking-heading">Žebříček</h3>
+                </div>
+                <span class="ranking-icon" aria-hidden="true">≡</span>
+              </div>
+              <!-- BACKEND / ranking[]: pro každého člověka vygenerovat <li class="ranking-row">.
+                 Barvy a rozložení jsou v CSS; procenta šířky pruhů připraví backend. -->
+              <ol class="ranking-list" id="ranking-list">
+                <li class="ranking-row">
+                  <span class="rank-number top-rank">01</span>
+                  <div class="rank-detail">
+                    <strong>Jan Novák</strong>
+                    <div class="rank-meter"><span style="width: 100%"></span></div>
+                  </div>
+                  <span class="rank-votes">236 <small>hlasů</small></span>
+                </li>
+                <li class="ranking-row">
+                  <span class="rank-number top-rank">02</span>
+                  <div class="rank-detail">
+                    <strong>Petra Svobodová</strong>
+                    <div class="rank-meter"><span style="width: 86.4%"></span></div>
+                  </div>
+                  <span class="rank-votes">204 <small>hlasů</small></span>
+                </li>
+                <li class="ranking-row">
+                  <span class="rank-number top-rank">03</span>
+                  <div class="rank-detail">
+                    <strong>Martin Dvořák</strong>
+                    <div class="rank-meter"><span style="width: 66.1%"></span></div>
+                  </div>
+                  <span class="rank-votes">156 <small>hlasů</small></span>
+                </li>
+                <li class="ranking-row">
+                  <span class="rank-number">04</span>
+                  <div class="rank-detail">
+                    <strong>Eva Černá</strong>
+                    <div class="rank-meter"><span style="width: 42.4%"></span></div>
+                  </div>
+                  <span class="rank-votes">100 <small>hlasů</small></span>
+                </li>
+                <li class="ranking-row">
+                  <span class="rank-number">05</span>
+                  <div class="rank-detail">
+                    <strong>Tomáš Král</strong>
+                    <div class="rank-meter"><span style="width: 25%"></span></div>
+                  </div>
+                  <span class="rank-votes">59 <small>hlasů</small></span>
+                </li>
+              </ol>
+              <p class="data-notice">
+                <span aria-hidden="true">ⓘ</span> Ukázková data pro návrh stránky. Skutečná jména,
+                pořadí a počty hlasů doplní backend.
+              </p>
+            </section>
+          </div>
+          <footer class="results-footer">
+            TeacherControl <span>•</span> Výsledky pololetní soutěže
+          </footer>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

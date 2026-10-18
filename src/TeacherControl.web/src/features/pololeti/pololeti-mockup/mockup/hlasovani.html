@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pololetní hlasování – hlasování</title>
+    <link rel="stylesheet" href="hlasovani.css" />
+  </head>
+  <body>
+    <header class="shell-header">
+      <span class="shell-title">Teacher Control</span>
+      <span class="shell-user">Nepřihlášen</span>
+    </header>
+
+    <nav class="shell-nav" aria-label="Hlavní navigace">
+      <a href="#">F1 Bingo</a>
+      <a href="#">F2 Rating</a>
+      <a href="#">F3 Recenze</a>
+      <a href="#">F4 Abstence</a>
+      <a href="vyber-kategorii.html" class="active">F5 Pololetí</a>
+      <a href="#">F6 Login</a>
+    </nav>
+
+    <main class="page">
+      <a class="back-link" href="vyber-kategorii.html">← Zpět na výběr kategorie</a>
+
+      <h1 class="page-title">Hlavní hlasování</h1>
+      <p class="page-info">Vyber učitele, kterému dáš svůj hlas. Hlasovat můžeš jen jednou.</p>
+
+      <p class="notice" role="status">
+        Hlasování zatím není napojené na server. Hlas se neuloží a výsledky se zobrazí, až bude
+        hotový backend.
+      </p>
+
+      <form class="vote-form" onsubmit="return false">
+        <ul class="teachers">
+          <li>
+            <input class="vote-input" type="radio" name="teacher" id="teacher-1" />
+            <label class="teacher-card" for="teacher-1">
+              <span class="avatar" aria-hidden="true">JN</span>
+              <span class="teacher-name">Jana Nováková</span>
+              <span class="teacher-subject">Matematika</span>
+              <span class="teacher-votes">Hlasů: –</span>
+              <span class="vote-button">Hlasovat</span>
+            </label>
+          </li>
+          <li>
+            <input class="vote-input" type="radio" name="teacher" id="teacher-2" />
+            <label class="teacher-card" for="teacher-2">
+              <span class="avatar" aria-hidden="true">PS</span>
+              <span class="teacher-name">Petr Svoboda</span>
+              <span class="teacher-subject">Informatika</span>
+              <span class="teacher-votes">Hlasů: –</span>
+              <span class="vote-button">Hlasovat</span>
+            </label>
+          </li>
+          <li>
+            <input class="vote-input" type="radio" name="teacher" id="teacher-3" />
+            <label class="teacher-card" for="teacher-3">
+              <span class="avatar" aria-hidden="true">MD</span>
+              <span class="teacher-name">Marie Dvořáková</span>
+              <span class="teacher-subject">Český jazyk</span>
+              <span class="teacher-votes">Hlasů: –</span>
+              <span class="vote-button">Hlasovat</span>
+            </label>
+          </li>
+          <li>
+            <input class="vote-input" type="radio" name="teacher" id="teacher-4" />
+            <label class="teacher-card" for="teacher-4">
+              <span class="avatar" aria-hidden="true">TK</span>
+              <span class="teacher-name">Tomáš Král</span>
+              <span class="teacher-subject">Fyzika</span>
+              <span class="teacher-votes">Hlasů: –</span>
+              <span class="vote-button">Hlasovat</span>
+            </label>
+          </li>
+          <li>
+            <input class="vote-input" type="radio" name="teacher" id="teacher-5" />
+            <label class="teacher-card" for="teacher-5">
+              <span class="avatar" aria-hidden="true">EP</span>
+              <span class="teacher-name">Eva Procházková</span>
+              <span class="teacher-subject">Angličtina</span>
+              <span class="teacher-votes">Hlasů: –</span>
+              <span class="vote-button">Hlasovat</span>
+            </label>
+          </li>
+          <li>
+            <input class="vote-input" type="radio" name="teacher" id="teacher-6" />
+            <label class="teacher-card" for="teacher-6">
+              <span class="avatar" aria-hidden="true">JH</span>
+              <span class="teacher-name">Jiří Horák</span>
+              <span class="teacher-subject">Dějepis</span>
+              <span class="teacher-votes">Hlasů: –</span>
+              <span class="vote-button">Hlasovat</span>
+            </label>
+          </li>
+        </ul>
+      </form>
+    </main>
+  </body>
+</html>

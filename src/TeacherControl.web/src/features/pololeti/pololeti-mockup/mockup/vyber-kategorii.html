@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pololetní hlasování – výběr kategorie</title>
+    <link rel="stylesheet" href="vyber-kategorii.css" />
+  </head>
+  <body>
+    <header class="shell-header">
+      <span class="shell-title">Teacher Control</span>
+      <span class="shell-user">Nepřihlášen</span>
+    </header>
+
+    <nav class="shell-nav" aria-label="Hlavní navigace">
+      <a href="#">F1 Bingo</a>
+      <a href="#">F2 Rating</a>
+      <a href="#">F3 Recenze</a>
+      <a href="#">F4 Abstence</a>
+      <a href="vyber-kategorii.html" class="active">F5 Pololetí</a>
+      <a href="#">F6 Login</a>
+    </nav>
+
+    <main class="page">
+      <h1 class="page-title">Pololetní hlasování</h1>
+      <p class="page-info">
+        Vyber kategorii, ve které chceš hlasovat. Hlasovat můžeš v hlavní kategorii i v jednotlivých
+        podkategoriích.
+      </p>
+
+      <section class="categories" aria-label="Kategorie hlasování">
+        <a class="category category--main" href="hlasovani.html">
+          <span class="category-label">Hlavní hlasování</span>
+        </a>
+
+        <a class="category category--sub" href="hlasovani.html">
+          <span class="category-label">Podkategorie 1</span>
+        </a>
+        <a class="category category--sub" href="hlasovani.html">
+          <span class="category-label">Podkategorie 2</span>
+        </a>
+        <a class="category category--sub" href="hlasovani.html">
+          <span class="category-label">Podkategorie 3</span>
+        </a>
+        <a class="category category--sub" href="hlasovani.html">
+          <span class="category-label">Podkategorie 4</span>
+        </a>
+      </section>
+    </main>
+  </body>
+</html>
