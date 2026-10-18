@@ -1,4 +1,6 @@
 import {
+  Alert,
+  Anchor,
   Button,
   Card,
   Center,
@@ -8,33 +10,25 @@ import {
   TextInput,
   Title,
 } from '@mantine/core'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod/v4'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { notifications } from '@mantine/notifications'
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { Link, useNavigate } from 'react-router'
 import { useAuth } from '@/shared/auth'
-import { useNavigate } from 'react-router'
-
-const loginSchema = z.object({
-  username: z.string().min(1, 'Uživatelské jméno je povinné'),
-  password: z.string().min(1, 'Heslo je povinné'),
-})
-
-type LoginFormValues = z.infer<typeof loginSchema>
+import { useLoginMutation } from './api'
+import { loginSchema, type LoginFormValues } from './schema'
 
 /**
  * F6 Login – přihlašovací stránka.
  *
- * Aktuálně volá `login()` z auth kontextu (mock).
- * Až bude napojení na Windows Active Directory, formulář odešle
- * credentials na API a provider se vymění – tato komponenta
- * zůstane stejná, změní se jen implementace `login()`.
+ * Podporuje přihlášení přes školní e-mail (@spstrutnov.cz) a heslo.
  */
 export function LoginPage() {
   const { login, isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const loginMutation = useLoginMutation()
 
   const {
     register,
@@ -43,24 +37,32 @@ export function LoginPage() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
     },
   })
 
-  const onSubmit = async (_data: LoginFormValues) => {
+  const onSubmit = async (data: LoginFormValues) => {
     setError(null)
-    setLoading(true)
 
     try {
-      // TODO: Až bude AD napojení, předat _data.username a _data.password
-      // do login() nebo na API endpoint.
+      await loginMutation.mutateAsync({
+        email: data.email,
+        password: data.password,
+      })
       await login()
+      notifications.show({
+        title: 'Přihlášeno',
+        message: 'Byl jsi úspěšně přihlášen do systému.',
+        color: 'green',
+      })
       navigate('/')
-    } catch {
-      setError('Přihlášení se nezdařilo. Zkontroluj uživatelské jméno a heslo.')
-    } finally {
-      setLoading(false)
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Přihlášení se nezdařilo. Zkontroluj e-mail a heslo.'
+      setError(message)
     }
   }
 
@@ -70,7 +72,7 @@ export function LoginPage() {
         <Card shadow="sm" padding="xl" radius="md" withBorder maw={400} w="100%">
           <Stack align="center" gap="md">
             <Title order={3}>Už jsi přihlášen</Title>
-            <Text size="sm" c="dimmed">
+            <Text size="sm" c="dimmed" ta="center">
               Jsi již přihlášen do systému.
             </Text>
             <Button variant="light" onClick={() => navigate('/')}>
@@ -87,19 +89,21 @@ export function LoginPage() {
       <Card shadow="sm" padding="xl" radius="md" withBorder maw={400} w="100%">
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stack gap="md">
-            <Title order={2} ta="center">
-              Přihlášení
-            </Title>
-            <Text size="sm" c="dimmed" ta="center">
-              Přihlaš se pomocí školního účtu
-            </Text>
+            <Stack gap={4} align="center">
+              <Title order={2} ta="center">
+                Přihlášení
+              </Title>
+              <Text size="sm" c="dimmed" ta="center">
+                Přihlaš se pomocí školního e-mailu
+              </Text>
+            </Stack>
 
             <TextInput
-              label="Uživatelské jméno"
-              placeholder="jmeno.prijmeni"
-              autoComplete="username"
-              error={errors.username?.message}
-              {...register('username')}
+              label="Školní e-mail"
+              placeholder="jmeno.prijmeni@spstrutnov.cz"
+              autoComplete="email"
+              error={errors.email?.message}
+              {...register('email')}
             />
 
             <PasswordInput
@@ -111,14 +115,21 @@ export function LoginPage() {
             />
 
             {error ? (
-              <Text size="sm" c="red">
+              <Alert color="red" title="Chyba přihlášení">
                 {error}
-              </Text>
+              </Alert>
             ) : null}
 
-            <Button type="submit" fullWidth loading={loading}>
+            <Button type="submit" fullWidth loading={loginMutation.isPending}>
               Přihlásit se
             </Button>
+
+            <Text size="sm" ta="center">
+              Nemáš účet?{' '}
+              <Anchor component={Link} to="/register" fw={500}>
+                Zaregistruj se
+              </Anchor>
+            </Text>
           </Stack>
         </form>
       </Card>

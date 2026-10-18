@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router'
 import { RatingPage } from '@/features/rating'
-import { LoginPage } from '@/features/auth'
+import { LoginPage, RegisterPage } from '@/features/auth'
 import { FeatureTodo } from './FeatureTodo'
 
 /**
@@ -14,6 +14,7 @@ export const APP_ROUTES = [
   { path: '/abstence', label: 'F4 Abstence', element: <FeatureTodo code="F4" name="Abstence" /> },
   { path: '/pololeti', label: 'F5 Pololetí', element: <FeatureTodo code="F5" name="Pololetí" /> },
   { path: '/login', label: 'F6 Login', element: <LoginPage /> },
+  { path: '/register', label: 'F6 Registrace', element: <RegisterPage /> },
 ]
 
 export function AppRoutes() {
