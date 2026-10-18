@@ -47,7 +47,7 @@ public class Program
         builder.Services.AddScoped<AbstenceService>();
         builder.Services.AddScoped<TeacherBingoService>();
         builder.Services.AddScoped<RatingService>();
-        builder.Services.AddScoped<Reviews>();
+        builder.Services.AddScoped<ReviewsService>();
 
         var app = builder.Build();
         var isOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";

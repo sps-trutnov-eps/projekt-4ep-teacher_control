@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 using TeacherControl.Api.Features.Reviews.Models;
 using TeacherControl.Api.Features.Reviews.Services;
 
@@ -11,27 +10,27 @@ namespace TeacherControl.Api.Features.Reviews.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/reviews")]
-public class ReviewsController(Reviews reviews) : ControllerBase
+public class ReviewsController : ControllerBase
 {
-    private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+    private readonly ReviewsService _reviewsService;
 
-    public override void OnActionExecuting(ActionExecutingContext context)
+    public ReviewsController(ReviewsService reviewsService)
     {
-        if (string.IsNullOrWhiteSpace(User.FindFirstValue(ClaimTypes.NameIdentifier)))
-            context.Result = Unauthorized();
-        base.OnActionExecuting(context);
+        _reviewsService = reviewsService;
     }
+
+    private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
     [HttpGet("teachers")]
     public async Task<ActionResult<List<TeacherResponse>>> GetTeachers(
         [FromQuery, StringLength(100)] string? search, CancellationToken cancellationToken) =>
-        Ok(await reviews.GetTeachersAsync(UserId, search, cancellationToken));
+        Ok(await _reviewsService.GetTeachersAsync(UserId, search, cancellationToken));
 
     [HttpGet("teachers/{teacherId:int}")]
     public async Task<ActionResult<TeacherProfileResponse>> GetTeacher(
         int teacherId, CancellationToken cancellationToken)
     {
-        var teacher = await reviews.GetTeacherAsync(teacherId, UserId, cancellationToken);
+        var teacher = await _reviewsService.GetTeacherAsync(teacherId, UserId, cancellationToken);
         return teacher is null ? NotFound() : Ok(teacher);
     }
 
@@ -39,7 +38,7 @@ public class ReviewsController(Reviews reviews) : ControllerBase
     public async Task<ActionResult<List<ReviewResponse>>> GetReviews(
         int teacherId, CancellationToken cancellationToken)
     {
-        var result = await reviews.GetReviewsAsync(teacherId, UserId, cancellationToken);
+        var result = await _reviewsService.GetReviewsAsync(teacherId, UserId, cancellationToken);
         return result is null ? NotFound() : Ok(result);
     }
 
@@ -49,7 +48,7 @@ public class ReviewsController(Reviews reviews) : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(request.Content)) return BadRequest("Recenze nesmí být prázdná.");
 
-        var result = await reviews.CreateReviewAsync(teacherId, UserId, request.Content, cancellationToken);
+        var result = await _reviewsService.CreateReviewAsync(teacherId, UserId, request.Content, cancellationToken);
         return result.Outcome switch
         {
             ReviewWriteOutcome.TeacherNotFound => NotFound(),
@@ -64,7 +63,7 @@ public class ReviewsController(Reviews reviews) : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(request.Content)) return BadRequest("Recenze nesmí být prázdná.");
 
-        var result = await reviews.UpdateReviewAsync(reviewId, UserId, request.Content, cancellationToken);
+        var result = await _reviewsService.UpdateReviewAsync(reviewId, UserId, request.Content, cancellationToken);
         return result.Outcome switch
         {
             ReviewWriteOutcome.ReviewNotFound => NotFound(),
@@ -76,7 +75,7 @@ public class ReviewsController(Reviews reviews) : ControllerBase
     [HttpDelete("{reviewId:int}")]
     public async Task<IActionResult> DeleteReview(int reviewId, CancellationToken cancellationToken)
     {
-        var outcome = await reviews.DeleteReviewAsync(reviewId, UserId, cancellationToken);
+        var outcome = await _reviewsService.DeleteReviewAsync(reviewId, UserId, cancellationToken);
         return outcome switch
         {
             ReviewWriteOutcome.ReviewNotFound => NotFound(),
@@ -89,7 +88,7 @@ public class ReviewsController(Reviews reviews) : ControllerBase
     public async Task<ActionResult<ReactionResponse>> SetReaction(
         int teacherId, ReactionRequest request, CancellationToken cancellationToken)
     {
-        var reaction = await reviews.SetReactionAsync(teacherId, UserId, request.Value, cancellationToken);
+        var reaction = await _reviewsService.SetReactionAsync(teacherId, UserId, request.Value, cancellationToken);
         return reaction is null ? NotFound() : Ok(reaction);
     }
 }
