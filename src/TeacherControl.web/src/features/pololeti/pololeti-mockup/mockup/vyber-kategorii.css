@@ -1,0 +1,219 @@
+/* Mockup: výběr kategorií. Barvy a rozměry odpovídají výchozímu tématu Mantine. */
+
+:root {
+  --blue-6: #228be6;
+  --blue-7: #1c7ed6;
+  --blue-0: #e7f5ff;
+  --gray-0: #f8f9fa;
+  --gray-1: #f1f3f5;
+  --gray-3: #dee2e6;
+  --gray-6: #868e96;
+  --text: #212529;
+  --radius: 8px;
+  --header-h: 56px;
+  --nav-w: 220px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: #fff;
+  line-height: 1.55;
+}
+
+/* Rámeček aplikace (v appce ho dělá Mantine AppShell, tady jen pro náhled) */
+.shell-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--header-h);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-bottom: 1px solid var(--gray-3);
+  z-index: 10;
+}
+
+.shell-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.shell-user {
+  font-size: 14px;
+}
+
+.shell-nav {
+  position: fixed;
+  top: var(--header-h);
+  bottom: 0;
+  left: 0;
+  width: var(--nav-w);
+  padding: 8px;
+  background: #fff;
+  border-right: 1px solid var(--gray-3);
+}
+
+.shell-nav a {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 4px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.shell-nav a:hover {
+  background: var(--gray-0);
+}
+
+.shell-nav a.active {
+  background: var(--blue-0);
+  color: var(--blue-7);
+  font-weight: 500;
+}
+
+/* Obsah stránky */
+.page {
+  margin-top: var(--header-h);
+  margin-left: var(--nav-w);
+  padding: 16px;
+}
+
+.page-title {
+  margin: 16px 0 4px;
+  text-align: center;
+  font-size: 40px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.page-info {
+  max-width: 560px;
+  margin: 0 auto 32px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--gray-6);
+}
+
+.categories {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 120px;
+  gap: 24px 32px;
+}
+
+.category {
+  display: flex;
+  padding: 14px 16px;
+  border: 1px solid var(--gray-3);
+  border-radius: var(--radius);
+  background: var(--gray-1);
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.category:hover {
+  background: var(--blue-0);
+  border-color: var(--blue-6);
+}
+
+.category:focus-visible {
+  outline: 2px solid var(--blue-6);
+  outline-offset: 2px;
+}
+
+.category-label {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Podkategorie: popisek v rohu u okraje, ať ho nepřekryje hlavní karta */
+.category--sub:nth-of-type(even) {
+  justify-content: flex-start;
+}
+
+.category--sub:nth-of-type(odd) {
+  justify-content: flex-end;
+}
+
+/* Hlavní hlasování: uprostřed, přes rohy podkategorií, s bílým rámečkem jako v prototypu */
+.category--main {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  width: 46%;
+  height: 150px;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: var(--blue-6);
+  border: 0;
+  border-radius: var(--radius);
+  color: #fff;
+  box-shadow: 0 0 0 10px #fff;
+}
+
+.category--main:hover {
+  background: var(--blue-7);
+}
+
+.category--main .category-label {
+  font-size: 18px;
+}
+
+/* Tablet a mobil: bez překryvu, hlavní kategorie nahoře, pod ní podkategorie */
+@media (max-width: 767px) {
+  .shell-nav {
+    display: none;
+  }
+
+  .page {
+    margin-left: 0;
+  }
+
+  .page-title {
+    font-size: 28px;
+  }
+
+  .categories {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+    gap: 12px;
+  }
+
+  .category {
+    min-height: 80px;
+  }
+
+  .category--sub:nth-of-type(odd),
+  .category--sub:nth-of-type(even) {
+    justify-content: flex-start;
+  }
+
+  .category--main {
+    position: static;
+    order: -1;
+    width: 100%;
+    height: auto;
+    min-height: 110px;
+    transform: none;
+    box-shadow: none;
+  }
+}
