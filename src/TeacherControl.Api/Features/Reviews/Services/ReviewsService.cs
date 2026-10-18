@@ -6,17 +6,6 @@ using TeacherControl.Api.Features.Reviews.Models;
 
 namespace TeacherControl.Api.Features.Reviews.Services;
 
-public enum ReviewWriteOutcome
-{
-    Success,
-    TeacherNotFound,
-    ReviewNotFound,
-    AlreadyExists,
-    Forbidden
-}
-
-public sealed record ReviewWriteResult(ReviewWriteOutcome Outcome, ReviewResponse? Review = null);
-
 public sealed class ReviewsService
 {
     private readonly AppDbContext _db;
