@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<!--
+  TEACHERCONTROL | KATEGORIE | ČISTÝ FRONTEND
+  Tato stránka obsahuje POUZE HTML + samostatné CSS.
+  Žádný JavaScript, žádné API požadavky a žádné napojení na databázi.
+
+  ========== DATA, KTERÁ ZDE POZDĚJI DODÁ BACKEND ==========
+  1. competition.title                → nadpis „Pololetní hlasování“
+  2. competition.resultsPublished     → informace o ukončení soutěže
+  3. categories[]                      → pole právě pěti kategorií:
+     { id, name, isMain }
+     - 1 hlavní kategorie: isMain = true
+     - 4 podkategorie: isMain = false
+  4. URL na výsledky                   → parametr ?kategorie=ID,
+     který teď slouží pouze jako identifikátor pro budoucí backend.
+
+  INTEGRACE: při generování stránky nahraďte viditelné texty, atributy href,
+  data-category-id a případně počet kategorií hodnotami ze serveru.
+  Při lokálním otevření se ukážou jen ukázkové názvy kategorií.
+============================================================
+-->
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#cbd4dd">
+  <meta name="description" content="Výsledky soutěže Učitelé pololetí – výběr kategorií.">
+  <title>Výběr kategorií | TeacherControl</title>
+  <link rel="stylesheet" href="kategorie.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- BACKEND / SHARED LAYOUT: hlavičku a postranní panel lze převzít ze společného frontendu třídy. -->
+    <header class="site-header">
+      <a class="brand" href="kategorie.html" aria-label="TeacherControl – hlavní stránka výsledků">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>TeacherControl</span>
+      </a>
+      <span class="login-label" title="Přihlášení se napojí později">Login</span>
+    </header>
+
+    <aside class="sidebar" aria-label="Postranní navigace">
+      <nav class="sidebar-links">
+        <a class="sidebar-link active" href="kategorie.html" aria-current="page" title="Výběr kategorií">F1</a>
+        <a class="sidebar-link" href="vysledky.html" title="Žebříček">F2</a>
+        <span class="sidebar-link disabled" title="Připravuje se">F3</span>
+        <span class="sidebar-link disabled" title="Připravuje se">F4</span>
+        <span class="sidebar-link disabled" title="Připravuje se">F5</span>
+      </nav>
+    </aside>
+
+    <main class="page-content">
+      <!-- BACKEND / competition.title + competition.resultsPublished -->
+      <div class="page-heading">
+        <div class="heading-kicker"><span class="kicker-line"></span> FINÁLE SOUTĚŽE <span class="kicker-line"></span></div>
+        <h1 class="desktop-heading">Pololetní hlasování</h1>
+        <h1 class="mobile-heading">Učitelé<br>pololetí</h1>
+        <p>Hlasování skončilo. Vyber kategorii a podívej se na výsledky.</p>
+      </div>
+
+      <!--
+        BACKEND / categories[]:
+        Čtyři běžné položky se vykreslí jako .category-card.
+        Jedna hlavní položka se vykreslí jako .main-category.
+        data-category-id a href musí obsahovat ID stejné kategorie.
+        POZOR: ve statickém náhledu všech pět odkazů zobrazí stejnou
+        vzorovou výsledkovou stránku; skutečný výběr obstará až backend.
+      -->
+      <section class="voting-stage" aria-label="Výběr kategorie výsledků">
+        <span class="confetti confetti-a" aria-hidden="true"></span>
+        <span class="confetti confetti-b" aria-hidden="true"></span>
+        <span class="confetti confetti-c" aria-hidden="true"></span>
+        <span class="confetti confetti-d" aria-hidden="true"></span>
+
+        <a class="category-card card-one" href="vysledky.html?kategorie=kategorie1" data-category-id="kategorie1">
+          <span class="category-number">01 / 04</span>
+          <span class="category-title">Kategorie 1</span>
+          <span class="category-bottom">Zobrazit pořadí <span aria-hidden="true">↗</span></span>
+        </a>
+        <a class="category-card card-two" href="vysledky.html?kategorie=kategorie2" data-category-id="kategorie2">
+          <span class="category-number">02 / 04</span>
+          <span class="category-title">Kategorie 2</span>
+          <span class="category-bottom">Zobrazit pořadí <span aria-hidden="true">↗</span></span>
+        </a>
+
+        <!-- Na desktopu doplňují prostřední řadu prototypu; na mobilu jsou skryté. -->
+        <div class="stage-backplate backplate-left" aria-hidden="true"></div>
+        <div class="stage-backplate backplate-right" aria-hidden="true"></div>
+
+        <a class="category-card card-three" href="vysledky.html?kategorie=kategorie3" data-category-id="kategorie3">
+          <span class="category-number">03 / 04</span>
+          <span class="category-title">Kategorie 3</span>
+          <span class="category-bottom">Zobrazit pořadí <span aria-hidden="true">↗</span></span>
+        </a>
+        <a class="category-card card-four" href="vysledky.html?kategorie=kategorie4" data-category-id="kategorie4">
+          <span class="category-number">04 / 04</span>
+          <span class="category-title">Kategorie 4</span>
+          <span class="category-bottom">Zobrazit pořadí <span aria-hidden="true">↗</span></span>
+        </a>
+
+        <a class="main-category" href="vysledky.html?kategorie=hlavni" data-category-id="hlavni" aria-label="Hlavní hlasování – zobrazit výsledky">
+          <span class="trophy-emblem" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15 9h18v11c0 8-4 13-9 13s-9-5-9-13V9Z" stroke="currentColor" stroke-width="2.8" stroke-linejoin="round"/>
+              <path d="M15 13H9v5c0 5 3 8 9 8m15-13h6v5c0 5-3 8-9 8M24 33v6m-9 1h18" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="m24 13 1.6 3.2 3.5.5-2.55 2.5.6 3.5L24 21.05l-3.15 1.65.6-3.5-2.55-2.5 3.5-.5L24 13Z" fill="currentColor"/>
+            </svg>
+          </span>
+          <span class="main-category-overline">NEJDŮLEŽITĚJŠÍ OCENĚNÍ</span>
+          <strong>HLAVNÍ<br>HLASOVÁNÍ</strong>
+          <span class="main-category-cta">Zobrazit vítěze <span aria-hidden="true">↗</span></span>
+          <span class="medal-corner" aria-hidden="true">★</span>
+        </a>
+      </section>
+
+      <div class="page-footnote"><span class="footnote-dot" aria-hidden="true"></span> Statický návrh · Názvy kategorií jsou ukázkové</div>
+    </main>
+  </div>
+</body>
+</html>
