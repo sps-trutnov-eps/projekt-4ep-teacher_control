@@ -16,16 +16,24 @@ public sealed class ReviewRequest
     public string Content { get; set; } = "";
 }
 
-public sealed class ReactionRequest
+public sealed class ReactionRequest : IValidatableObject
 {
-    [Range(-1, 1)]
     public int Value { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (Value is not (-1 or 1))
+            yield return new ValidationResult("Hodnota musí být 1 (Like) nebo -1 (Dislike).", [nameof(Value)]);
+    }
 }
 
 public sealed record ReviewResponse(int Id, int TeacherId, string Content,
     DateTime CreatedAt, DateTime? UpdatedAt, bool IsMine);
 public sealed record TeacherResponse(int Id, string Name, string? PhotoUrl, string Description,
     double? AverageRating, int ReviewCount, int Likes, int Dislikes, int? MyReaction);
+public sealed record TeacherProfileResponse(int Id, string Name, string? Nickname, string? PhotoUrl,
+    string Description, float Mood, double? AverageRating, int ReviewCount, int Likes, int Dislikes,
+    int? MyReaction, List<ReviewResponse> Reviews);
 public sealed record ReactionResponse(int Likes, int Dislikes, int? MyReaction);
 
 [ApiController]
@@ -50,17 +58,36 @@ public class ReviewsController(AppDbContext db) : ControllerBase
         if (!string.IsNullOrWhiteSpace(search))
         {
             var term = search.Trim().ToLower();
-            query = query.Where(t => t.Name.ToLower().Contains(term));
+            query = query.Where(t => t.Name.ToLower().Contains(term)
+                || (t.LoginName != null && t.LoginName.ToLower().Contains(term)));
         }
         return Ok(await ProjectTeachers(query).OrderBy(t => t.Name).ToListAsync(cancellationToken));
     }
 
     [HttpGet("teachers/{teacherId:int}")]
-    public async Task<ActionResult<TeacherResponse>> GetTeacher(int teacherId, CancellationToken cancellationToken)
+    public async Task<ActionResult<TeacherProfileResponse>> GetTeacher(int teacherId, CancellationToken cancellationToken)
     {
-        var teacher = await ProjectTeachers(db.Teachers.AsNoTracking().Where(t => t.Id == teacherId))
-            .SingleOrDefaultAsync(cancellationToken);
-        return teacher is null ? NotFound() : Ok(teacher);
+        var teacher = await db.Teachers.AsNoTracking().Where(t => t.Id == teacherId)
+            .Select(t => new
+            {
+                t.Id, t.Name, t.LoginName, t.PhotoUrl, t.Description, t.Mood,
+                AverageRating = db.Reviews.Where(r => r.TeacherId == t.Id)
+                    .Select(r => (double?)r.Rating).Average(),
+                ReviewCount = db.TextReviews.Count(r => r.TeacherId == t.Id),
+                Likes = db.TeacherReactions.Count(r => r.TeacherId == t.Id && r.Value == 1),
+                Dislikes = db.TeacherReactions.Count(r => r.TeacherId == t.Id && r.Value == -1),
+                MyReaction = db.TeacherReactions.Where(r => r.TeacherId == t.Id && r.UserId == UserId)
+                    .Select(r => (int?)r.Value).SingleOrDefault()
+            }).SingleOrDefaultAsync(cancellationToken);
+        if (teacher is null) return NotFound();
+
+        var reviews = await db.TextReviews.AsNoTracking().Where(r => r.TeacherId == teacherId)
+            .OrderByDescending(r => r.CreatedAt).ThenByDescending(r => r.Id)
+            .Select(r => new ReviewResponse(r.Id, r.TeacherId, r.Content, r.CreatedAt, r.UpdatedAt, r.AuthorId == UserId))
+            .ToListAsync(cancellationToken);
+        return Ok(new TeacherProfileResponse(teacher.Id, teacher.Name, teacher.LoginName, teacher.PhotoUrl,
+            teacher.Description, teacher.Mood, teacher.AverageRating, teacher.ReviewCount, teacher.Likes,
+            teacher.Dislikes, teacher.MyReaction, reviews));
     }
 
     private IQueryable<TeacherResponse> ProjectTeachers(IQueryable<TeacherEntity> query)
