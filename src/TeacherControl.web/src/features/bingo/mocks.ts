@@ -15,7 +15,7 @@ const DEFAULT_GRID_SIZE = 3
 /**
  * Databáze hlášek učitelů s jejich ID a jmény.
  */
-let teacherQuotes: TeacherQuote[] = [
+const defaultTeacherQuotes: TeacherQuote[] = [
   {
     id: 'q-1',
     teacherId: 't-novak',
@@ -130,11 +130,55 @@ let teacherQuotes: TeacherQuote[] = [
   },
 ]
 
+interface PersistedBingoState {
+  teacherQuotes: TeacherQuote[]
+  userBoards: [string, BingoBoard][]
+  dailyWinner: DailyBingoWinner | null
+}
+
+const MOCK_STORAGE_KEY = 'teacher-control.bingo-state'
+
+function readPersistedState(): Partial<PersistedBingoState> {
+  const value = localStorage.getItem(MOCK_STORAGE_KEY)
+  if (value === null) {
+    return {}
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(value)
+    if (typeof parsed !== 'object' || parsed === null) {
+      throw new Error('Uložená bingo data nemají platný formát.')
+    }
+
+    return parsed as Partial<PersistedBingoState>
+  } catch (error) {
+    throw new Error('Uložená bingo data se nepodařilo načíst.', { cause: error })
+  }
+}
+
+const persistedState = readPersistedState()
+if (persistedState.teacherQuotes && !Array.isArray(persistedState.teacherQuotes)) {
+  throw new Error('Uložený seznam hlášek nemá platný formát.')
+}
+if (persistedState.userBoards && !Array.isArray(persistedState.userBoards)) {
+  throw new Error('Uložené bingo desky nemají platný formát.')
+}
+let teacherQuotes = persistedState.teacherQuotes ?? defaultTeacherQuotes
+
 /**
  * Ukládání bingo desek jednotlivých uživatelů (klíčem je userId).
  */
-const userBoards = new Map<string, BingoBoard>()
-let dailyWinner: DailyBingoWinner | null = null
+const userBoards = new Map<string, BingoBoard>(persistedState.userBoards)
+let dailyWinner = persistedState.dailyWinner ?? null
+
+function persistState(): void {
+  const state: PersistedBingoState = {
+    teacherQuotes,
+    userBoards: Array.from(userBoards.entries()),
+    dailyWinner,
+  }
+  localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(state))
+}
 
 /**
  * Ukládání statistik a bingo counteru pro uživatele.
@@ -143,9 +187,9 @@ const userStats = new Map<string, UserBingoStats>()
 
 function getActiveUserId(): string {
   try {
-    return localStorage.getItem('teacher-control.mock-user-id') || 'u-student'
+    return sessionStorage.getItem('teacher-control.mock-user-id') || 'u-teacher'
   } catch {
-    return 'u-student'
+    return 'u-teacher'
   }
 }
 
@@ -203,6 +247,13 @@ function calculateBingoCount(cells: BingoCell[], size: number): number {
   return bingos
 }
 
+function getLocalDate(): string {
+  const today = new Date()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${today.getFullYear()}-${month}-${day}`
+}
+
 /**
  * Vygeneruje novou náhodnou desku pro zadaného uživatele.
  */
@@ -258,6 +309,7 @@ function createNewBoard(
   }
 
   userBoards.set(userId, board)
+  persistState()
   return board
 }
 
@@ -268,39 +320,6 @@ function createNewBoard(
  * - Počítadlo bingo výher (Bingo counter)
  */
 export const bingoHandlers = [
-  http.get('*/api/bingo/daily-winner', () => {
-    const today = new Date().toISOString().slice(0, 10)
-    return HttpResponse.json(dailyWinner?.date === today ? dailyWinner : null)
-  }),
-
-  http.post('*/api/bingo/daily-winner/claim', async ({ request }: { request: Request }) => {
-    let body: Partial<ClaimDailyBingoWinnerRequest>
-    try {
-      body = (await request.json()) as Partial<ClaimDailyBingoWinnerRequest>
-    } catch {
-      return HttpResponse.json({ title: 'Neplatný formát JSON', status: 400 }, { status: 400 })
-    }
-
-    const userId = getActiveUserId()
-    const board = userBoards.get(userId)
-    if (!body.boardId || !body.displayName?.trim() || !board || board.id !== body.boardId || board.bingoCount === 0) {
-      return HttpResponse.json({ title: 'Neplatný požadavek na vítězství', status: 400 }, { status: 400 })
-    }
-
-    const today = new Date().toISOString().slice(0, 10)
-    if (dailyWinner?.date !== today) {
-      dailyWinner = {
-        userId,
-        displayName: body.displayName.trim(),
-        boardId: board.id,
-        date: today,
-        completedAt: new Date().toISOString(),
-      }
-    }
-
-    return HttpResponse.json(dailyWinner)
-  }),
-
   // 1. Získání aktuální aktivní desky přihlášeného uživatele (pokud nemá, vytvoří se nová)
   http.get('*/api/bingo/board', () => {
     const userId = getActiveUserId()
@@ -398,6 +417,7 @@ export const bingoHandlers = [
         }
       }
 
+      persistState()
       const response: ToggleCellResponse = {
         board,
         newBingoAchieved,
@@ -445,17 +465,52 @@ export const bingoHandlers = [
     }
 
     teacherQuotes = [...teacherQuotes, newQuote]
+    persistState()
     return HttpResponse.json(newQuote, { status: 201 })
   }),
 
-  // 6. Získání bingo counteru a statistik uživatele
+  // 6. Načtení nebo atomické zapsání dnešního krále/královny
+  http.get('*/api/bingo/daily-winner', () => {
+    return HttpResponse.json(dailyWinner?.date === getLocalDate() ? dailyWinner : null)
+  }),
+
+  http.post('*/api/bingo/daily-winner', async ({ request }: { request: Request }) => {
+    let body: Partial<ClaimDailyBingoWinnerRequest>
+    try {
+      body = (await request.json()) as Partial<ClaimDailyBingoWinnerRequest>
+    } catch {
+      return HttpResponse.json({ title: 'Neplatný formát JSON', status: 400 }, { status: 400 })
+    }
+
+    const userId = getActiveUserId()
+    const board = userBoards.get(userId)
+    if (!board || board.id !== body.boardId || board.bingoCount === 0 || !body.displayName?.trim()) {
+      return HttpResponse.json({ title: 'Bingo deska není platná', status: 400 }, { status: 400 })
+    }
+
+    const today = getLocalDate()
+    if (dailyWinner?.date !== today) {
+      dailyWinner = {
+        userId,
+        displayName: body.displayName.trim(),
+        boardId: board.id,
+        date: today,
+        completedAt: new Date().toISOString(),
+      }
+      persistState()
+    }
+
+    return HttpResponse.json(dailyWinner)
+  }),
+
+  // 7. Získání bingo counteru a statistik uživatele
   http.get('*/api/bingo/stats', () => {
     const userId = getActiveUserId()
     const stats = getOrCreateUserStats(userId)
     return HttpResponse.json(stats)
   }),
 
-  // 7. Reset statistik / bingo counteru
+  // 8. Reset statistik / bingo counteru
   http.post('*/api/bingo/stats/reset', () => {
     const userId = getActiveUserId()
     const stats = getOrCreateUserStats(userId)
