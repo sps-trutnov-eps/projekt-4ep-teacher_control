@@ -43,12 +43,6 @@ public class ReviewsController(AppDbContext db) : ControllerBase
 {
     private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-    public override void OnActionExecuting(ActionExecutingContext context)
-    {
-        if (string.IsNullOrWhiteSpace(User.FindFirstValue(ClaimTypes.NameIdentifier)))
-            context.Result = Unauthorized();
-        base.OnActionExecuting(context);
-    }
 
     [HttpGet("teachers")]
     public async Task<ActionResult<List<TeacherResponse>>> GetTeachers(
