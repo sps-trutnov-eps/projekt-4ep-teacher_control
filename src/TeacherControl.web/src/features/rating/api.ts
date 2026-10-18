@@ -1,36 +1,43 @@
 import { useQuery } from '@tanstack/react-query'
-import { fetchJson, api } from '@/shared/api'
-import type { Teacher } from './types'
+import { api, fetchJson } from '@/shared/api'
+import type { TeacherListItem, TeacherProfile } from './types'
+
+/**
+ * API klient pro rating:
+ * - useTeachers(): volá /rating/teachers (dokud backend nedodá endpoint do OpenAPI)
+ * - useTeacher(id): volá /api/rating/teacher/{teacherId}/profile přes openapi-fetch
+ */
 
 const ratingKeys = {
   all: ['rating'] as const,
   teachers: () => [...ratingKeys.all, 'teachers'] as const,
-  teacher: (id: string) => [...ratingKeys.all, 'teacher', id] as const,
+  teacher: (id: number) => [...ratingKeys.all, 'teacher', id] as const,
 }
 
 export function useTeachers() {
   return useQuery({
     queryKey: ratingKeys.teachers(),
-    queryFn: () => fetchJson<Teacher[]>('/teachers'),
+    queryFn: () => fetchJson<TeacherListItem[]>('/rating/teachers'),
   })
 }
 
-export function useTeacher(id: string | null) {
+export function useTeacher(id: number | null) {
   return useQuery({
-    queryKey: ratingKeys.teacher(id!),
-    queryFn: async () => {
-      // Použito openapi-fetch `api.GET` pro endpoint v OpenAPI
-      // (typ vrací neznámé hodnoty (zatím), backend nedefinoval 200 response schéma)
-      const { data, error } = await api.GET('/api/rating/teacher/{teacherId}/profile', {
+    queryKey: ratingKeys.teacher(id ?? 0),
+    queryFn: async ({ signal }) => {
+      const { data, response } = await api.GET('/api/rating/teacher/{teacherId}/profile', {
         params: {
-          path: { teacherId: Number(id?.replace('t-', '')) || 0 },
+          path: { teacherId: id! },
         },
+        signal,
       })
-      if (error) {
-        throw new Error('Nepodařilo se načíst detail učitele')
+
+      if (!response.ok || !data) {
+        throw new Error(`Nepodařilo se načíst profil učitele (${response.status})`)
       }
-      return data as unknown as Teacher
+
+      return data as unknown as TeacherProfile
     },
-    enabled: !!id,
+    enabled: Boolean(id) && (id ?? 0) > 0,
   })
 }
