@@ -11,10 +11,52 @@ namespace TeacherControl.Api.Features.TeacherBingo.Controllers;
 public class TeacherBingoController : ControllerBase
 {
     private readonly TeacherBingoService _teacherBingoService;
+    private readonly IDailyBingoWinnerService _dailyBingoWinnerService;
 
-    public TeacherBingoController(TeacherBingoService teacherBingoService)
+    public TeacherBingoController(
+        TeacherBingoService teacherBingoService,
+        IDailyBingoWinnerService dailyBingoWinnerService)
     {
         _teacherBingoService = teacherBingoService;
+        _dailyBingoWinnerService = dailyBingoWinnerService;
+    }
+
+    /// <summary>Returns today's first student to complete a bingo, if any.</summary>
+    [HttpGet("daily-winner")]
+    [EndpointSummary("Get today's daily bingo winner")]
+    public async Task<ActionResult<DailyBingoWinnerDto?>> GetDailyWinner(CancellationToken cancellationToken)
+    {
+        var winner = await _dailyBingoWinnerService.GetTodayAsync(cancellationToken);
+        return Ok(winner);
+    }
+
+    /// <summary>Claims today's winner title for the authenticated student.</summary>
+    [HttpPost("daily-winner/claim")]
+    [EndpointSummary("Claim today's daily bingo winner")]
+    [ProducesResponseType<DailyBingoWinnerDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<DailyBingoWinnerDto>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<DailyBingoWinnerDto>> ClaimDailyWinner(
+        [FromBody] ClaimDailyBingoWinnerRequest request,
+        CancellationToken cancellationToken)
+    {
+        var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (studentId is null)
+            return Unauthorized();
+
+        var result = await _dailyBingoWinnerService.ClaimAsync(studentId, request, cancellationToken);
+        if (result is null)
+            return Conflict(new ProblemDetails
+            {
+                Status = StatusCodes.Status409Conflict,
+                Title = "The specified board has not achieved bingo today."
+            });
+
+        if (!result.IsNew)
+            return Ok(result.Winner);
+
+        return CreatedAtAction(nameof(GetDailyWinner), result.Winner);
     }
 
     [HttpGet("board")]

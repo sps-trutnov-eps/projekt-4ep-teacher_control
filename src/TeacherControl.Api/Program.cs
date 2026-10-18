@@ -44,6 +44,7 @@ public class Program
         // takhle si registrujte service soubory pro DependencyInjection
         builder.Services.AddScoped<AbstenceService>();
         builder.Services.AddScoped<TeacherBingoService>();
+        builder.Services.AddScoped<IDailyBingoWinnerService, DailyBingoWinnerService>();
 
         var app = builder.Build();
         var isOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
