@@ -474,7 +474,7 @@ export const bingoHandlers = [
     return HttpResponse.json(dailyWinner?.date === getLocalDate() ? dailyWinner : null)
   }),
 
-  http.post('*/api/bingo/daily-winner', async ({ request }: { request: Request }) => {
+  http.post('*/api/bingo/daily-winner/claim', async ({ request }: { request: Request }) => {
     let body: Partial<ClaimDailyBingoWinnerRequest>
     try {
       body = (await request.json()) as Partial<ClaimDailyBingoWinnerRequest>

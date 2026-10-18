@@ -124,7 +124,7 @@ export function useClaimDailyBingoWinner() {
 
   return useMutation({
     mutationFn: (request: ClaimDailyBingoWinnerRequest) =>
-      fetchJson<DailyBingoWinner>('/bingo/daily-winner', {
+      fetchJson<DailyBingoWinner>('/bingo/daily-winner/claim', {
         method: 'POST',
         body: JSON.stringify(request),
       }),
