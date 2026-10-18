@@ -2,7 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchJson } from '@/shared/api'
 import type {
   BingoBoard,
+  ClaimDailyBingoWinnerRequest,
   CreateQuoteRequest,
+  DailyBingoWinner,
   QuoteFilters,
   TeacherQuote,
   ToggleCellResponse,
@@ -14,6 +16,7 @@ export const bingoKeys = {
   all: ['bingo'] as const,
   board: () => ['bingo', 'board'] as const,
   stats: () => ['bingo', 'stats'] as const,
+  dailyWinner: () => ['bingo', 'daily-winner'] as const,
   quotes: (teacherId?: string) =>
     teacherId ? (['bingo', 'quotes', teacherId] as const) : (['bingo', 'quotes'] as const),
 }
@@ -89,6 +92,34 @@ export function useCreateTeacherQuote() {
     onSuccess: () => {
       // Invaliduje všechny dotazy na hlášky (filtrované i celkové)
       queryClient.invalidateQueries({ queryKey: bingoKeys.quotes() })
+    },
+  })
+}
+
+/**
+ * Načte dnešního vítěze učitelského binga.
+ */
+export function useDailyBingoWinner() {
+  return useQuery({
+    queryKey: bingoKeys.dailyWinner(),
+    queryFn: () => fetchJson<DailyBingoWinner | null>('/bingo/daily-winner'),
+  })
+}
+
+/**
+ * Nárokuje dnešní vítězství po dokončení binga.
+ */
+export function useClaimDailyBingoWinner() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (request: ClaimDailyBingoWinnerRequest) =>
+      fetchJson<DailyBingoWinner>('/bingo/daily-winner/claim', {
+        method: 'POST',
+        body: JSON.stringify(request),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: bingoKeys.dailyWinner() })
     },
   })
 }
