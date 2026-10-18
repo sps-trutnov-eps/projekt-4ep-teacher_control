@@ -6,6 +6,7 @@ using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using System.Reflection;
 using TeacherControl.Api.Features.Rating.Services;
+using TeacherControl.Api.Features.Reviews.Services;
 
 namespace TeacherControl.Api;
 
@@ -46,6 +47,7 @@ public class Program
         builder.Services.AddScoped<AbstenceService>();
         builder.Services.AddScoped<TeacherBingoService>();
         builder.Services.AddScoped<RatingService>();
+        builder.Services.AddScoped<Reviews>();
 
         var app = builder.Build();
         var isOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
