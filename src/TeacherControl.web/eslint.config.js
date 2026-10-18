@@ -30,8 +30,7 @@ export default tseslint.config(
           paths: [
             {
               name: 'react-router-dom',
-              message:
-                "Balíček react-router-dom už neexistuje. Importuj z 'react-router'.",
+              message: "Balíček react-router-dom už neexistuje. Importuj z 'react-router'.",
             },
           ],
           patterns: [

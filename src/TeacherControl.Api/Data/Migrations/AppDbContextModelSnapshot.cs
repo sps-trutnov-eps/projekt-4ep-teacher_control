@@ -356,6 +356,9 @@ namespace TeacherControl.Api.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("LastSubmissionAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("LoginName")
                         .HasMaxLength(25)
                         .HasColumnType("character varying(25)");

@@ -17,10 +17,28 @@ pnpm dev
 
 Nic dalšího nastavovat nemusíš, mocky se ve vývoji zapnou samy. Běží to na http://localhost:5173.
 
+### Proti reálnému backendu
+
+V `src/TeacherControl.web` vytvoř `.env.local`:
+
+```bash
+VITE_USE_MOCKS=false
+```
+
+Pak v rootu repa:
+
+```bash
+cp .env.example .env
+docker compose -f db-only.compose.yaml up -d
+dotnet run --project src/TeacherControl.Api
+```
+
+A znovu `pnpm dev`.
+
 Před každým PR musí projít:
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm test && pnpm build
+pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
 ## Pět pravidel
