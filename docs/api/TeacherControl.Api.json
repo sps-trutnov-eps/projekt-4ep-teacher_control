@@ -5,26 +5,57 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/api/rating": {
+    "/api/bingo/daily-winner": {
+      "get": {
+        "tags": [
+          "TeacherBingo"
+        ],
+        "summary": "Get today's daily bingo winner",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyBingoWinnerDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyBingoWinnerDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyBingoWinnerDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bingo/daily-winner/claim": {
       "post": {
         "tags": [
-          "Rating"
+          "TeacherBingo"
         ],
+        "summary": "Claim today's daily bingo winner",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateReviewRequest"
+                "$ref": "#/components/schemas/ClaimDailyBingoWinnerRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateReviewRequest"
+                "$ref": "#/components/schemas/ClaimDailyBingoWinnerRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateReviewRequest"
+                "$ref": "#/components/schemas/ClaimDailyBingoWinnerRequest"
               }
             }
           },
@@ -32,115 +63,137 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyBingoWinnerDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyBingoWinnerDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyBingoWinnerDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyBingoWinnerDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyBingoWinnerDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyBingoWinnerDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
           }
         }
       }
     },
-    "/api/rating/teacher/{teacherId}": {
+    "/api/bingo/board": {
       "get": {
         "tags": [
-          "Rating"
-        ],
-        "parameters": [
-          {
-            "name": "teacherId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
+          "TeacherBingo"
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BingoBoardDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BingoBoardDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BingoBoardDto"
+                }
+              }
+            }
           }
         }
       }
     },
-    "/api/rating/teacher/{teacherId}/average": {
-      "get": {
+    "/api/bingo/board/new": {
+      "post": {
         "tags": [
-          "Rating"
-        ],
-        "parameters": [
-          {
-            "name": "teacherId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/rating/teacher/{teacherId}/profile": {
-      "get": {
-        "tags": [
-          "Rating"
-        ],
-        "parameters": [
-          {
-            "name": "teacherId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/rating/{reviewId}": {
-      "put": {
-        "tags": [
-          "Rating"
-        ],
-        "parameters": [
-          {
-            "name": "reviewId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
+          "TeacherBingo"
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateReviewRequest"
+                "$ref": "#/components/schemas/CreateBingoBoardRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateReviewRequest"
+                "$ref": "#/components/schemas/CreateBingoBoardRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateReviewRequest"
+                "$ref": "#/components/schemas/CreateBingoBoardRequest"
               }
             }
           },
@@ -148,144 +201,132 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/BingoBoardDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BingoBoardDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BingoBoardDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bingo/cells/{cellId}/toggle": {
+      "post": {
+        "tags": [
+          "TeacherBingo"
+        ],
+        "parameters": [
+          {
+            "name": "cellId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToggleBingoCellDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToggleBingoCellDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToggleBingoCellDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bingo/quotes": {
+      "get": {
+        "tags": [
+          "TeacherBingo"
+        ],
+        "parameters": [
+          {
+            "name": "teacherId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeacherQuoteDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeacherQuoteDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeacherQuoteDto"
+                  }
+                }
+              }
+            }
           }
         }
       },
-      "delete": {
-        "tags": [
-          "Rating"
-        ],
-        "parameters": [
-          {
-            "name": "reviewId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/abstence": {
-      "get": {
-        "tags": [
-          "Abstence"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TeacherAbstenceDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TeacherAbstenceDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TeacherAbstenceDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/abstence/{teacherId}": {
-      "get": {
-        "tags": [
-          "Abstence"
-        ],
-        "parameters": [
-          {
-            "name": "teacherId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/TeacherAbstenceDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TeacherAbstenceDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TeacherAbstenceDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/abstence/{teacherId}/late-arrival": {
       "post": {
         "tags": [
-          "Abstence"
-        ],
-        "parameters": [
-          {
-            "name": "teacherId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
+          "TeacherBingo"
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SubmitLateArrivalRequest"
+                "$ref": "#/components/schemas/CreateTeacherQuoteRequest"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/SubmitLateArrivalRequest"
+                "$ref": "#/components/schemas/CreateTeacherQuoteRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/SubmitLateArrivalRequest"
+                "$ref": "#/components/schemas/CreateTeacherQuoteRequest"
               }
             }
           },
@@ -297,17 +338,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/TeacherAbstenceDto"
+                  "$ref": "#/components/schemas/TeacherQuoteDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TeacherAbstenceDto"
+                  "$ref": "#/components/schemas/TeacherQuoteDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TeacherAbstenceDto"
+                  "$ref": "#/components/schemas/TeacherQuoteDto"
                 }
               }
             }
@@ -315,60 +356,57 @@
         }
       }
     },
-    "/api/abstence/{teacherId}/mood": {
-      "post": {
+    "/api/bingo/stats": {
+      "get": {
         "tags": [
-          "Abstence"
+          "TeacherBingo"
         ],
-        "parameters": [
-          {
-            "name": "teacherId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SubmitMoodRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SubmitMoodRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/SubmitMoodRequest"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/TeacherAbstenceDto"
+                  "$ref": "#/components/schemas/UserBingoStatsDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TeacherAbstenceDto"
+                  "$ref": "#/components/schemas/UserBingoStatsDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TeacherAbstenceDto"
+                  "$ref": "#/components/schemas/UserBingoStatsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bingo/stats/reset": {
+      "post": {
+        "tags": [
+          "TeacherBingo"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserBingoStatsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserBingoStatsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserBingoStatsDto"
                 }
               }
             }
@@ -379,117 +417,258 @@
   },
   "components": {
     "schemas": {
-      "CreateReviewRequest": {
+      "BingoBoardDto": {
+        "required": [
+          "id",
+          "userId",
+          "gridSize",
+          "cells",
+          "bingoCount",
+          "isCompleted",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "gridSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "cells": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BingoCellDto"
+            }
+          },
+          "bingoCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "isCompleted": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "BingoCellDto": {
+        "required": [
+          "id",
+          "row",
+          "col",
+          "quote",
+          "isMarked"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "row": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "col": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "quote": {
+            "$ref": "#/components/schemas/TeacherQuoteDto"
+          },
+          "isMarked": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ClaimDailyBingoWinnerRequest": {
+        "required": [
+          "boardId",
+          "displayName"
+        ],
+        "type": "object",
+        "properties": {
+          "boardId": {
+            "maxLength": 12,
+            "minLength": 0,
+            "pattern": "^[1-9][0-9]*$",
+            "type": "string"
+          },
+          "displayName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "CreateBingoBoardRequest": {
+        "type": "object",
+        "properties": {
+          "size": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32",
+            "default": 3
+          },
+          "teacherIds": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CreateTeacherQuoteRequest": {
         "required": [
           "teacherId",
-          "title",
-          "content",
-          "rating"
+          "teacherName",
+          "quote"
         ],
         "type": "object",
         "properties": {
           "teacherId": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "title": {
             "type": "string"
           },
-          "content": {
+          "teacherName": {
             "type": "string"
           },
-          "rating": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "format": "float"
+          "quote": {
+            "type": "string"
           }
         }
       },
-      "SubmitLateArrivalRequest": {
+      "DailyBingoWinnerDto": {
         "required": [
-          "minutes"
+          "userId",
+          "displayName",
+          "boardId",
+          "date",
+          "completedAt"
         ],
         "type": "object",
         "properties": {
-          "minutes": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          }
-        }
-      },
-      "SubmitMoodRequest": {
-        "required": [
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "value": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
-            "format": "float"
-          }
-        }
-      },
-      "TeacherAbstenceDto": {
-        "required": [
-          "teacherId",
-          "name",
-          "photoUrl",
-          "rating",
-          "mood",
-          "lateArrivalMinutesToday"
-        ],
-        "type": "object",
-        "properties": {
-          "teacherId": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "name": {
+          "userId": {
             "type": "string"
           },
-          "photoUrl": {
+          "displayName": {
+            "type": "string"
+          },
+          "boardId": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
             "type": [
               "null",
               "string"
             ]
           },
-          "rating": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+          "title": {
             "type": [
               "null",
-              "number",
               "string"
-            ],
-            "format": "float"
+            ]
           },
-          "mood": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
-              "number",
+              "null",
+              "integer",
               "string"
             ],
-            "format": "float"
+            "format": "int32"
           },
-          "lateArrivalMinutesToday": {
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "TeacherQuoteDto": {
+        "required": [
+          "id",
+          "teacherId",
+          "teacherName",
+          "quote"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "teacherId": {
+            "type": "string"
+          },
+          "teacherName": {
+            "type": "string"
+          },
+          "quote": {
+            "type": "string"
+          }
+        }
+      },
+      "ToggleBingoCellDto": {
+        "required": [
+          "board",
+          "newBingoAchieved",
+          "totalBingos"
+        ],
+        "type": "object",
+        "properties": {
+          "board": {
+            "$ref": "#/components/schemas/BingoBoardDto"
+          },
+          "newBingoAchieved": {
+            "type": "boolean"
+          },
+          "totalBingos": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
               "integer",
@@ -499,27 +678,32 @@
           }
         }
       },
-      "UpdateReviewRequest": {
+      "UserBingoStatsDto": {
         "required": [
-          "title",
-          "content",
-          "rating"
+          "userId",
+          "totalBingos",
+          "completedBoards"
         ],
         "type": "object",
         "properties": {
-          "title": {
+          "userId": {
             "type": "string"
           },
-          "content": {
-            "type": "string"
-          },
-          "rating": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+          "totalBingos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
             "type": [
-              "number",
+              "integer",
               "string"
             ],
-            "format": "float"
+            "format": "int32"
+          },
+          "completedBoards": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       }
@@ -527,10 +711,7 @@
   },
   "tags": [
     {
-      "name": "Rating"
-    },
-    {
-      "name": "Abstence"
+      "name": "TeacherBingo"
     }
   ]
 }

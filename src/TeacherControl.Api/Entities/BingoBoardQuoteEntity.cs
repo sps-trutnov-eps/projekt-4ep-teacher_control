@@ -10,7 +10,6 @@ public class BingoBoardQuoteEntity
 
     public required int QuoteId { get; set; }
     public required TeacherQuoteEntity Quote { get; set; }
-    
-    // jestli ji už marknul že to učitel řekl, kdyžtak si to přejmenujte - MK
-    public bool Marked { get; set; } = false;
+
+    public ICollection<BingoBoardQuoteMarkEntity> Marks { get; set; } = new List<BingoBoardQuoteMarkEntity>();
 }

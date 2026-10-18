@@ -165,13 +165,7 @@ namespace TeacherControl.Api.Data.Migrations
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date");
 
-                    b.Property<string>("StudentId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
 
                     b.ToTable("BingoBoards");
                 });
@@ -186,9 +180,6 @@ namespace TeacherControl.Api.Data.Migrations
 
                     b.Property<int>("BingoBoardId")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("Marked")
-                        .HasColumnType("boolean");
 
                     b.Property<int>("Position")
                         .HasColumnType("integer");
@@ -207,6 +198,50 @@ namespace TeacherControl.Api.Data.Migrations
                         {
                             t.HasCheckConstraint("CK_BingoBoardQuotes_Position", "\"Position\" >= 0");
                         });
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.BingoBoardQuoteMarkEntity", b =>
+                {
+                    b.Property<string>("StudentId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("BingoBoardQuoteId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("StudentId", "BingoBoardQuoteId");
+
+                    b.HasIndex("BingoBoardQuoteId");
+
+                    b.ToTable("BingoBoardQuoteMarks");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.DailyBingoWinnerEntity", b =>
+                {
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("BoardId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Date");
+
+                    b.HasIndex("BoardId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DailyBingoWinners");
                 });
 
             modelBuilder.Entity("TeacherControl.Api.Entities.HistoricTitleEntity", b =>
@@ -548,17 +583,6 @@ namespace TeacherControl.Api.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TeacherControl.Api.Entities.BingoBoardEntity", b =>
-                {
-                    b.HasOne("TeacherControl.Api.Entities.UserEntity", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("TeacherControl.Api.Entities.BingoBoardQuoteEntity", b =>
                 {
                     b.HasOne("TeacherControl.Api.Entities.BingoBoardEntity", "BingoBoard")
@@ -576,6 +600,44 @@ namespace TeacherControl.Api.Data.Migrations
                     b.Navigation("BingoBoard");
 
                     b.Navigation("Quote");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.BingoBoardQuoteMarkEntity", b =>
+                {
+                    b.HasOne("TeacherControl.Api.Entities.BingoBoardQuoteEntity", "BingoBoardQuote")
+                        .WithMany("Marks")
+                        .HasForeignKey("BingoBoardQuoteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TeacherControl.Api.Entities.UserEntity", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BingoBoardQuote");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.DailyBingoWinnerEntity", b =>
+                {
+                    b.HasOne("TeacherControl.Api.Entities.BingoBoardEntity", "Board")
+                        .WithMany()
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TeacherControl.Api.Entities.UserEntity", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Board");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TeacherControl.Api.Entities.HistoricTitleEntity", b =>
@@ -686,6 +748,11 @@ namespace TeacherControl.Api.Data.Migrations
             modelBuilder.Entity("TeacherControl.Api.Entities.BingoBoardEntity", b =>
                 {
                     b.Navigation("Quotes");
+                });
+
+            modelBuilder.Entity("TeacherControl.Api.Entities.BingoBoardQuoteEntity", b =>
+                {
+                    b.Navigation("Marks");
                 });
 
             modelBuilder.Entity("TeacherControl.Api.Entities.TeacherEntity", b =>

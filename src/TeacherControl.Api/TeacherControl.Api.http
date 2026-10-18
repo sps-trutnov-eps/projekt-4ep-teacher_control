@@ -4,3 +4,31 @@ GET {{TeacherControl.Api_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+### Get today's daily bingo winner (authenticated)
+GET {{TeacherControl.Api_HostAddress}}/api/bingo/daily-winner
+Accept: application/json
+
+###
+
+### Claim today's daily bingo winner (authenticated; board must have bingo)
+POST {{TeacherControl.Api_HostAddress}}/api/bingo/daily-winner/claim
+Content-Type: application/json
+
+{
+  "boardId": "1",
+  "displayName": "Student Name"
+}
+
+###
+
+### Claiming a board that does not exist or has no bingo returns 409
+POST {{TeacherControl.Api_HostAddress}}/api/bingo/daily-winner/claim
+Content-Type: application/json
+
+{
+  "boardId": "999999",
+  "displayName": "Student Name"
+}
+
+###
