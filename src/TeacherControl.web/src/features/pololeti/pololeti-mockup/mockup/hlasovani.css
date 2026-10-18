@@ -1,0 +1,264 @@
+/* Mockup: hlasování. Barvy a rozměry odpovídají výchozímu tématu Mantine. */
+
+:root {
+  --blue-6: #228be6;
+  --blue-7: #1c7ed6;
+  --blue-0: #e7f5ff;
+  --yellow-0: #fff9db;
+  --yellow-4: #ffd43b;
+  --gray-0: #f8f9fa;
+  --gray-3: #dee2e6;
+  --gray-6: #868e96;
+  --text: #212529;
+  --radius: 8px;
+  --header-h: 56px;
+  --nav-w: 220px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: #fff;
+  line-height: 1.55;
+}
+
+/* Rámeček aplikace (v appce ho dělá Mantine AppShell, tady jen pro náhled) */
+.shell-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--header-h);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-bottom: 1px solid var(--gray-3);
+  z-index: 10;
+}
+
+.shell-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.shell-user {
+  font-size: 14px;
+}
+
+.shell-nav {
+  position: fixed;
+  top: var(--header-h);
+  bottom: 0;
+  left: 0;
+  width: var(--nav-w);
+  padding: 8px;
+  background: #fff;
+  border-right: 1px solid var(--gray-3);
+}
+
+.shell-nav a {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 4px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.shell-nav a:hover {
+  background: var(--gray-0);
+}
+
+.shell-nav a.active {
+  background: var(--blue-0);
+  color: var(--blue-7);
+  font-weight: 500;
+}
+
+/* Obsah stránky */
+.page {
+  margin-top: var(--header-h);
+  margin-left: var(--nav-w);
+  padding: 16px;
+}
+
+.back-link {
+  font-size: 14px;
+  color: var(--blue-7);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.page-title {
+  margin: 16px 0 4px;
+  text-align: center;
+  font-size: 40px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.page-info {
+  margin: 0 auto 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--gray-6);
+}
+
+/* Provizorní text místo backendu */
+.notice {
+  max-width: 640px;
+  margin: 0 auto 32px;
+  padding: 12px 16px;
+  border: 1px solid var(--yellow-4);
+  border-radius: var(--radius);
+  background: var(--yellow-0);
+  font-size: 14px;
+}
+
+/* Karty učitelů */
+.vote-form {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.teachers {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.teachers li {
+  position: relative;
+}
+
+.vote-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.teacher-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding: 20px 16px 16px;
+  border: 1px solid var(--gray-3);
+  border-radius: var(--radius);
+  background: #fff;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.teacher-card:hover {
+  border-color: var(--blue-6);
+}
+
+.vote-input:focus-visible + .teacher-card {
+  outline: 2px solid var(--blue-6);
+  outline-offset: 2px;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: var(--blue-0);
+  color: var(--blue-7);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.teacher-name {
+  font-weight: 700;
+}
+
+.teacher-subject {
+  font-size: 14px;
+  color: var(--gray-6);
+}
+
+.teacher-votes {
+  margin: 8px 0 16px;
+  font-size: 14px;
+  color: var(--gray-6);
+}
+
+.vote-button {
+  margin-top: auto;
+  width: 100%;
+  padding: 8px 16px;
+  border: 1px solid var(--blue-6);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--blue-7);
+  font-size: 14px;
+  font-weight: 600;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.teacher-card:hover .vote-button {
+  background: var(--blue-0);
+}
+
+/* Vybraný učitel */
+.vote-input:checked + .teacher-card {
+  border-color: var(--blue-6);
+  background: var(--blue-0);
+}
+
+.vote-input:checked + .teacher-card .vote-button {
+  background: var(--blue-6);
+  color: #fff;
+}
+
+.vote-input:checked + .teacher-card .vote-button::before {
+  content: '✓ ';
+}
+
+/* Tablet a mobil */
+@media (max-width: 899px) {
+  .teachers {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .shell-nav {
+    display: none;
+  }
+
+  .page {
+    margin-left: 0;
+  }
+
+  .page-title {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 479px) {
+  .teachers {
+    grid-template-columns: 1fr;
+  }
+}
