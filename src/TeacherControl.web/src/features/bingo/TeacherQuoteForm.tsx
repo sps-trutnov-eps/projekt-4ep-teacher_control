@@ -84,7 +84,12 @@ export function TeacherQuoteForm({ teachers }: { teachers: TeacherOption[] }) {
             Hláška byla odeslána.
           </Text>
         ) : null}
-        <Button type="submit" loading={createQuote.isPending} disabled={teachers.length === 0} w="fit-content">
+        <Button
+          type="submit"
+          loading={createQuote.isPending}
+          disabled={teachers.length === 0}
+          w="fit-content"
+        >
           Odeslat hlášku
         </Button>
       </Stack>

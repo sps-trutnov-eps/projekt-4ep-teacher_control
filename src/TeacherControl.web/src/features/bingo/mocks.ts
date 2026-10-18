@@ -260,7 +260,7 @@ function getLocalDate(): string {
 function createNewBoard(
   userId: string,
   requestedSize = DEFAULT_GRID_SIZE,
-  selectedTeacherIds?: string[]
+  selectedTeacherIds?: string[],
 ): BingoBoard {
   const size = Math.max(2, Math.min(requestedSize, 6))
 
@@ -355,8 +355,14 @@ export const bingoHandlers = [
       }
     }
 
-    if (teacherIds && !teacherIds.some((teacherId) => teacherQuotes.some((quote) => quote.teacherId === teacherId))) {
-      return HttpResponse.json({ title: 'Vyberte alespoň jednoho učitele', status: 400 }, { status: 400 })
+    if (
+      teacherIds &&
+      !teacherIds.some((teacherId) => teacherQuotes.some((quote) => quote.teacherId === teacherId))
+    ) {
+      return HttpResponse.json(
+        { title: 'Vyberte alespoň jednoho učitele', status: 400 },
+        { status: 400 },
+      )
     }
 
     const newBoard = createNewBoard(userId, size, teacherIds)
@@ -364,69 +370,66 @@ export const bingoHandlers = [
   }),
 
   // 3. Označení / odznačení políčka a přepočet Bingo counteru
-  http.post(
-    '*/api/bingo/cells/:cellId/toggle',
-    ({ params }: { params: { cellId?: string } }) => {
-      const rawCellId = params.cellId
-      const cellId = Array.isArray(rawCellId) ? rawCellId[0] : rawCellId
+  http.post('*/api/bingo/cells/:cellId/toggle', ({ params }: { params: { cellId?: string } }) => {
+    const rawCellId = params.cellId
+    const cellId = Array.isArray(rawCellId) ? rawCellId[0] : rawCellId
 
-      if (!cellId) {
-        return HttpResponse.json({ title: 'Chybí ID políčka', status: 400 }, { status: 400 })
-      }
-
-      const userId = getActiveUserId()
-      const board = userBoards.get(userId)
-
-      if (!board) {
-        return HttpResponse.json({ title: 'Deska nenalezena', status: 404 }, { status: 404 })
-      }
-
-      const cell = board.cells.find((c) => c.id === cellId)
-      if (!cell) {
-        return HttpResponse.json({ title: 'Políčko nenalezeno', status: 404 }, { status: 404 })
-      }
-
-      // Přepnutí stavu označení
-      cell.isMarked = !cell.isMarked
-
-      const previousCount = board.bingoCount
-      const newCount = calculateBingoCount(board.cells, board.gridSize)
-      board.bingoCount = newCount
-
-      const stats = getOrCreateUserStats(userId)
-      let newBingoAchieved = false
-
-      if (newCount > previousCount) {
-        const difference = newCount - previousCount
-        stats.totalBingos += difference
-        newBingoAchieved = true
-      } else if (newCount < previousCount) {
-        const difference = previousCount - newCount
-        stats.totalBingos = Math.max(0, stats.totalBingos - difference)
-      }
-
-      if (board.cells.length > 0 && board.cells.every((c) => c.isMarked)) {
-        if (!board.isCompleted) {
-          board.isCompleted = true
-          stats.completedBoards++
-        }
-      } else {
-        if (board.isCompleted) {
-          board.isCompleted = false
-          stats.completedBoards = Math.max(0, stats.completedBoards - 1)
-        }
-      }
-
-      persistState()
-      const response: ToggleCellResponse = {
-        board,
-        newBingoAchieved,
-        totalBingos: stats.totalBingos,
-      }
-
-      return HttpResponse.json(response)
+    if (!cellId) {
+      return HttpResponse.json({ title: 'Chybí ID políčka', status: 400 }, { status: 400 })
     }
-  ),
+
+    const userId = getActiveUserId()
+    const board = userBoards.get(userId)
+
+    if (!board) {
+      return HttpResponse.json({ title: 'Deska nenalezena', status: 404 }, { status: 404 })
+    }
+
+    const cell = board.cells.find((c) => c.id === cellId)
+    if (!cell) {
+      return HttpResponse.json({ title: 'Políčko nenalezeno', status: 404 }, { status: 404 })
+    }
+
+    // Přepnutí stavu označení
+    cell.isMarked = !cell.isMarked
+
+    const previousCount = board.bingoCount
+    const newCount = calculateBingoCount(board.cells, board.gridSize)
+    board.bingoCount = newCount
+
+    const stats = getOrCreateUserStats(userId)
+    let newBingoAchieved = false
+
+    if (newCount > previousCount) {
+      const difference = newCount - previousCount
+      stats.totalBingos += difference
+      newBingoAchieved = true
+    } else if (newCount < previousCount) {
+      const difference = previousCount - newCount
+      stats.totalBingos = Math.max(0, stats.totalBingos - difference)
+    }
+
+    if (board.cells.length > 0 && board.cells.every((c) => c.isMarked)) {
+      if (!board.isCompleted) {
+        board.isCompleted = true
+        stats.completedBoards++
+      }
+    } else {
+      if (board.isCompleted) {
+        board.isCompleted = false
+        stats.completedBoards = Math.max(0, stats.completedBoards - 1)
+      }
+    }
+
+    persistState()
+    const response: ToggleCellResponse = {
+      board,
+      newBingoAchieved,
+      totalBingos: stats.totalBingos,
+    }
+
+    return HttpResponse.json(response)
+  }),
 
   // 4. Seznam učitelských hlášek (s možností filtru podle teacherId)
   http.get('*/api/bingo/quotes', ({ request }: { request: Request }) => {
@@ -452,7 +455,7 @@ export const bingoHandlers = [
     if (!body || !body.teacherId?.trim() || !body.quote?.trim() || !body.teacherName?.trim()) {
       return HttpResponse.json(
         { title: 'Chybí povinná pole (teacherId, teacherName, quote)', status: 400 },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -484,7 +487,12 @@ export const bingoHandlers = [
 
     const userId = getActiveUserId()
     const board = userBoards.get(userId)
-    if (!board || board.id !== body.boardId || board.bingoCount === 0 || !body.displayName?.trim()) {
+    if (
+      !board ||
+      board.id !== body.boardId ||
+      board.bingoCount === 0 ||
+      !body.displayName?.trim()
+    ) {
       return HttpResponse.json({ title: 'Bingo deska není platná', status: 400 }, { status: 400 })
     }
 

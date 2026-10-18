@@ -43,7 +43,9 @@ test('vyhledává učitele a umožňuje je jednotlivě vybrat', async () => {
   fireEvent.click(teacherCheckbox)
   expect((teacherCheckbox as HTMLInputElement).checked).toBe(false)
 
-  fireEvent.change(screen.getByRole('textbox', { name: 'Vyhledat učitele' }), { target: { value: 'Dvořák' } })
+  fireEvent.change(screen.getByRole('textbox', { name: 'Vyhledat učitele' }), {
+    target: { value: 'Dvořák' },
+  })
   expect(await screen.findByRole('checkbox', { name: 'Ing. Petr Dvořák' })).toBeDefined()
   expect(screen.queryByRole('checkbox', { name: 'Mgr. Jan Novák' })).toBeNull()
 })
@@ -58,7 +60,9 @@ test('umožňuje zrušit výběr všech učitelů', async () => {
 
   expect((teacherCheckbox as HTMLInputElement).checked).toBe(false)
   expect(screen.getByText('0 z 16 vybráno')).toBeDefined()
-  expect((screen.getByRole('button', { name: 'Zrušit výběr' }) as HTMLButtonElement).disabled).toBe(true)
+  expect((screen.getByRole('button', { name: 'Zrušit výběr' }) as HTMLButtonElement).disabled).toBe(
+    true,
+  )
 })
 
 test('odešle novou hlášku vybraného učitele', async () => {

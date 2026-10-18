@@ -218,7 +218,8 @@ export function BingoPage() {
               ) : null}
               {claimDailyWinner.isError ? (
                 <Alert color="red" title="Denní vítěz se nepodařil uložit" w="100%" maw={760}>
-                  Bingo je označené, ale vítěze dne se nepodařilo ověřit. Zkuste políčko označit znovu.
+                  Bingo je označené, ale vítěze dne se nepodařilo ověřit. Zkuste políčko označit
+                  znovu.
                 </Alert>
               ) : null}
             </>

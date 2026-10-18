@@ -59,7 +59,9 @@ export function useToggleBingoCell() {
 
   return useMutation({
     mutationFn: (cellId: string) =>
-      fetchJson<ToggleCellResponse>(`/bingo/cells/${encodeURIComponent(cellId)}/toggle`, { method: 'POST' }),
+      fetchJson<ToggleCellResponse>(`/bingo/cells/${encodeURIComponent(cellId)}/toggle`, {
+        method: 'POST',
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bingoKeys.board() })
       queryClient.invalidateQueries({ queryKey: bingoKeys.stats() })
@@ -75,7 +77,9 @@ export function useTeacherQuotes(filters: QuoteFilters = {}) {
     queryKey: bingoKeys.quotes(filters.teacherId),
     queryFn: () =>
       fetchJson<TeacherQuote[]>(
-        filters.teacherId ? `/bingo/quotes?teacherId=${encodeURIComponent(filters.teacherId)}` : '/bingo/quotes'
+        filters.teacherId
+          ? `/bingo/quotes?teacherId=${encodeURIComponent(filters.teacherId)}`
+          : '/bingo/quotes',
       ),
   })
 }
