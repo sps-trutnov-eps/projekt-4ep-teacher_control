@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,34 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
+using TeacherControl.Api.Features.Reviews.Models;
 
 namespace TeacherControl.Api.Features.Reviews.Controllers;
-
-public sealed class ReviewRequest
-{
-    [Required, StringLength(5000, MinimumLength = 1)]
-    public string Content { get; set; } = "";
-}
-
-public sealed class ReactionRequest : IValidatableObject
-{
-    public int Value { get; set; }
-
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        if (Value is not (-1 or 1))
-            yield return new ValidationResult("Hodnota musí být 1 (Like) nebo -1 (Dislike).", [nameof(Value)]);
-    }
-}
-
-public sealed record ReviewResponse(int Id, int TeacherId, string Content,
-    DateTime CreatedAt, DateTime? UpdatedAt, bool IsMine);
-public sealed record TeacherResponse(int Id, string Name, string? PhotoUrl, string Description,
-    double? AverageRating, int ReviewCount, int Likes, int Dislikes, int? MyReaction);
-public sealed record TeacherProfileResponse(int Id, string Name, string? Nickname, string? PhotoUrl,
-    string Description, float Mood, double? AverageRating, int ReviewCount, int Likes, int Dislikes,
-    int? MyReaction, List<ReviewResponse> Reviews);
-public sealed record ReactionResponse(int Likes, int Dislikes, int? MyReaction);
 
 [ApiController]
 [Authorize]
