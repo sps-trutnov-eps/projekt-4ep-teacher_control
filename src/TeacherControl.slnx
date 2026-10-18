@@ -3,6 +3,7 @@
     <File Path="../.env" />
     <File Path="../.env.example" />
     <File Path="../db-only.compose.yaml" />
+    <File Path="../docker-compose.yaml" />
     <File Path="../README.md" />
   </Folder>
   <Project Path="TeacherControl.Api/TeacherControl.Api.csproj" />
