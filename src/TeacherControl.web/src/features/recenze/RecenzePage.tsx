@@ -1,198 +1,180 @@
+import { Alert, Stack, Text } from '@mantine/core'
 import { useState } from 'react'
-import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  Alert,
-  Avatar,
-  Button,
-  Center,
-  Group,
-  Loader,
-  Paper,
-  Rating,
-  ScrollArea,
-  SimpleGrid,
-  Stack,
-  Text,
-  TextInput,
-  Textarea,
-  Title,
-} from '@mantine/core'
-import { useForm, useWatch } from 'react-hook-form'
-import { PageHeader } from '@/shared/ui'
-import { useCreateReview, useTeacherProfile, useTeacherReviews, useTeachers } from './api'
-import { reviewSchema, type ReviewFormValues } from './schema'
+import { useReviewTeachers } from './api'
+import { IconSearch } from './components/icons'
+import { ReviewForm } from './components/ReviewForm'
+import { TeacherDetail } from './components/TeacherDetail'
+import { TeacherList, TeacherListSkeleton } from './components/TeacherList'
+import { ALL_SUBJECTS, TeacherSearch } from './components/TeacherSearch'
+import { formatTeacherName } from './format'
+import classes from './Recenze.module.css'
+import type { ReviewTeacher, TeacherSort } from './types'
 
+const PAGE_SIZE = 8
+
+/** Pod touhle šířkou je vidět buď seznam, nebo detail — stejná hranice jako v CSS. */
+const SINGLE_COLUMN_QUERY = '(max-width: 74.99em)'
+
+type DetailMode = 'profile' | 'write'
+
+const TEACHER_SORTERS: Record<TeacherSort, (a: ReviewTeacher, b: ReviewTeacher) => number> = {
+  reviews: (a, b) => b.reviewCount - a.reviewCount,
+  rating: (a, b) => (b.averageRating ?? 0) - (a.averageRating ?? 0),
+  name: (a, b) => a.lastName.localeCompare(b.lastName, 'cs'),
+}
+
+/**
+ * F3 Recenze. Desktop: vyhledávání a seznam učitelů vlevo, detail s recenzemi vpravo.
+ * Užší obrazovky: seznam → detail → formulář, mezi nimi tlačítko Zpět (mobilní návrh).
+ */
 export function RecenzePage() {
+  const teachersQuery = useReviewTeachers()
+
   const [search, setSearch] = useState('')
-  const [selectedId, setSelectedId] = useState<number | null>(null)
-  const teachersQuery = useTeachers()
-  const profileQuery = useTeacherProfile(selectedId)
-  const reviewsQuery = useTeacherReviews(selectedId)
-  const createReview = useCreateReview(selectedId ?? 0)
-  const form = useForm<ReviewFormValues>({
-    resolver: zodResolver(reviewSchema),
-    defaultValues: { title: '', content: '', rating: 5 },
-  })
-  const selectedRating = useWatch({ control: form.control, name: 'rating' })
-  const teachers = teachersQuery.data ?? []
-  const filteredTeachers = teachers.filter((teacher) =>
-    teacher.name.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
-  )
+  const [subject, setSubject] = useState(ALL_SUBJECTS)
+  const [sort, setSort] = useState<TeacherSort>('reviews')
+  const [page, setPage] = useState(1)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [mode, setMode] = useState<DetailMode>('profile')
 
-  const submitReview = (values: ReviewFormValues) => {
-    if (selectedId === null) return
-    createReview.mutate(values, { onSuccess: () => form.reset() })
+  const scrollTopOnMobile = () => {
+    if (window.matchMedia(SINGLE_COLUMN_QUERY).matches) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
 
-  const sendReaction = (rating: 1 | 5) => {
-    if (selectedId === null) return
-    createReview.mutate({
-      title: rating === 5 ? 'Like' : 'Dislike',
-      content: rating === 5 ? 'Like' : 'Dislike',
-      rating,
-    })
+  const selectTeacher = (teacherId: string) => {
+    setSelectedId(teacherId)
+    setMode('profile')
+    scrollTopOnMobile()
   }
+
+  const changeMode = (next: DetailMode) => {
+    setMode(next)
+    scrollTopOnMobile()
+  }
+
+  const allTeachers = teachersQuery.data ?? []
+  const subjects = subjectsByCount(allTeachers)
+  const filtered = filterTeachers(allTeachers, search, subject).sort(TEACHER_SORTERS[sort])
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const pageItems = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   return (
-    <Stack>
-      <PageHeader title="Recenze" description="Najděte učitele a přidejte vlastní hodnocení." />
-      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-        <Paper withBorder p="md" radius="sm">
-          <Stack>
-            <TextInput
-              label="Hledat"
-              placeholder="Jméno učitele"
-              value={search}
-              onChange={(event) => setSearch(event.currentTarget.value)}
-            />
-            <ScrollArea h={{ base: 260, sm: 500 }}>
-              <Stack gap="xs">
-                {teachersQuery.isLoading ? (
-                  <Center p="xl">
-                    <Loader />
-                  </Center>
-                ) : null}
-                {teachersQuery.isError ? (
-                  <Alert color="red">Učitele se nepodařilo načíst.</Alert>
-                ) : null}
-                {filteredTeachers.map((teacher) => (
-                  <Button
-                    key={teacher.id}
-                    variant={selectedId === teacher.id ? 'light' : 'subtle'}
-                    justify="space-between"
-                    fullWidth
-                    onClick={() => setSelectedId(teacher.id)}
-                  >
-                    <Group gap="sm" wrap="nowrap">
-                      <Avatar src={teacher.photoUrl} radius="xl">
-                        {teacher.name[0]}
-                      </Avatar>
-                      <Stack gap={0} align="flex-start">
-                        <Text>{teacher.name}</Text>
-                        <Rating value={teacher.averageRating} readOnly size="xs" />
-                      </Stack>
-                    </Group>
-                    <Text size="sm" c="dimmed">
-                      {teacher.averageRating.toFixed(1)}
-                    </Text>
-                  </Button>
-                ))}
-                {!teachersQuery.isLoading && filteredTeachers.length === 0 ? (
-                  <Text c="dimmed">Žádný učitel neodpovídá hledání.</Text>
-                ) : null}
-              </Stack>
-            </ScrollArea>
-          </Stack>
-        </Paper>
-        <Paper withBorder p={{ base: 'md', sm: 'xl' }} radius="sm">
-          {selectedId === null ? (
-            <Center h="100%">
-              <Text c="dimmed">Vyberte učitele ze seznamu.</Text>
-            </Center>
-          ) : null}
-          {selectedId !== null && profileQuery.isLoading ? (
-            <Center h="100%">
-              <Loader />
-            </Center>
-          ) : null}
-          {selectedId !== null && profileQuery.data ? (
-            <Stack>
-              <Group justify="space-between" align="flex-start">
-                <div>
-                  <Title order={2}>{profileQuery.data.name}</Title>
-                  <Text c="dimmed">{profileQuery.data.reviewCount} recenzí</Text>
-                </div>
-                <Button variant="subtle" onClick={() => setSelectedId(null)}>
-                  Zpět
-                </Button>
-              </Group>
-              <Text>{profileQuery.data.description || 'Bez popisu.'}</Text>
-              <Group>
-                <Rating value={profileQuery.data.averageRating} readOnly />
-                <Text fw={700}>{profileQuery.data.averageRating.toFixed(1)} / 5</Text>
-              </Group>
-              <Group grow>
-                <Button
-                  color="teal"
-                  onClick={() => sendReaction(5)}
-                  loading={createReview.isPending}
-                >
-                  Like
-                </Button>
-                <Button
-                  color="red"
-                  variant="light"
-                  onClick={() => sendReaction(1)}
-                  loading={createReview.isPending}
-                >
-                  Dislike
-                </Button>
-              </Group>
-              <Title order={3}>Recenze</Title>
-              {reviewsQuery.isLoading ? <Loader size="sm" /> : null}
-              {(reviewsQuery.data ?? []).map((review) => (
-                <Paper key={review.id} withBorder p="sm">
-                  <Group justify="space-between">
-                    <Text fw={600}>{review.title}</Text>
-                    <Rating value={review.rating} readOnly size="sm" />
-                  </Group>
-                  <Text size="sm" mt="xs">
-                    {review.content}
-                  </Text>
-                </Paper>
-              ))}
-              {reviewsQuery.data?.length === 0 ? (
-                <Text c="dimmed">Zatím zde nejsou žádné recenze.</Text>
-              ) : null}
-              <form onSubmit={form.handleSubmit(submitReview)}>
-                <Stack>
-                  <Title order={3}>Přidat recenzi</Title>
-                  <TextInput
-                    label="Nadpis"
-                    {...form.register('title')}
-                    error={form.formState.errors.title?.message}
-                  />
-                  <Textarea
-                    label="Text recenze"
-                    minRows={4}
-                    {...form.register('content')}
-                    error={form.formState.errors.content?.message}
-                  />
-                  <Group justify="space-between">
-                    <Rating
-                      value={selectedRating}
-                      onChange={(value) => form.setValue('rating', value)}
-                    />
-                    <Button type="submit" loading={createReview.isPending}>
-                      Odeslat recenzi
-                    </Button>
-                  </Group>
-                </Stack>
-              </form>
+    <div className={classes.root}>
+      <Stack gap="lg">
+        <header>
+          <h1 className={classes.title}>Recenze učitelů</h1>
+          <p className={classes.subtitle}>
+            Přečti si, co o učitelích píšou ostatní studenti, a přidej vlastní recenzi.
+          </p>
+        </header>
+
+        <div className={classes.layout} data-has-selection={selectedId !== null || undefined}>
+          <section className={classes.listColumn} aria-label="Seznam učitelů">
+            <Stack gap="md">
+              <TeacherSearch
+                search={search}
+                onSearchChange={(value) => {
+                  setSearch(value)
+                  setPage(1)
+                }}
+                subjects={subjects}
+                subject={subject}
+                onSubjectChange={(value) => {
+                  setSubject(value)
+                  setPage(1)
+                }}
+                sort={sort}
+                onSortChange={(value) => {
+                  setSort(value)
+                  setPage(1)
+                }}
+              />
+
+              {teachersQuery.isPending ? (
+                <TeacherListSkeleton />
+              ) : teachersQuery.isError ? (
+                <Alert color="red" title="Chyba">
+                  Seznam učitelů se nepodařilo načíst. Zkus to prosím znovu.
+                </Alert>
+              ) : (
+                <TeacherList
+                  teachers={pageItems}
+                  selectedId={selectedId}
+                  onSelect={selectTeacher}
+                  page={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                />
+              )}
             </Stack>
-          ) : null}
-        </Paper>
-      </SimpleGrid>
-    </Stack>
+          </section>
+
+          <section className={classes.detailColumn} aria-label="Detail učitele">
+            {selectedId === null ? (
+              <EmptyDetail />
+            ) : mode === 'write' ? (
+              <ReviewForm
+                key={selectedId}
+                teacherId={selectedId}
+                onBack={() => changeMode('profile')}
+                onSubmitted={() => changeMode('profile')}
+              />
+            ) : (
+              <TeacherDetail
+                teacherId={selectedId}
+                onBack={() => setSelectedId(null)}
+                onWrite={() => changeMode('write')}
+              />
+            )}
+          </section>
+        </div>
+      </Stack>
+    </div>
   )
+}
+
+function EmptyDetail() {
+  return (
+    <div className={`${classes.panel} ${classes.placeholder}`}>
+      <Stack gap="xs" align="center">
+        <span className={classes.placeholderIcon}>
+          <IconSearch size={28} />
+        </span>
+        <Text fw={600} size="lg">
+          Vyber učitele ze seznamu
+        </Text>
+        <Text className={classes.muted} maw={320}>
+          Zobrazí se jeho profil, hodnocení v kategoriích a recenze od studentů.
+        </Text>
+      </Stack>
+    </div>
+  )
+}
+
+function subjectsByCount(teachers: ReviewTeacher[]) {
+  const counts = new Map<string, number>()
+  for (const teacher of teachers) {
+    counts.set(teacher.subject, (counts.get(teacher.subject) ?? 0) + 1)
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'cs'))
+    .map(([name]) => name)
+}
+
+/** Backend zatím filtrování nemá, filtruje se ze staženého seznamu (bez ohledu na diakritiku). */
+function filterTeachers(teachers: ReviewTeacher[], search: string, subject: string) {
+  const query = normalize(search.trim())
+
+  return teachers.filter((teacher) => {
+    if (subject !== ALL_SUBJECTS && teacher.subject !== subject) return false
+    if (!query) return true
+    return normalize(`${formatTeacherName(teacher)} ${teacher.subject}`).includes(query)
+  })
+}
+
+function normalize(value: string) {
+  return value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 }

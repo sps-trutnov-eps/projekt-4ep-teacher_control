@@ -9,6 +9,6 @@ import { recenzeHandlers } from '@/features/recenze/mocks'
 export const handlers = [
   ...vzorHandlers,
   ...abstenceHandlers,
-  ...recenzeHandlers,
   ...ratingHandlers,
+  ...recenzeHandlers,
 ]

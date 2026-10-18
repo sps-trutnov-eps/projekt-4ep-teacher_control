@@ -1,6 +1,6 @@
 import { MantineProvider } from '@mantine/core'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { expect, test } from 'vitest'
 import { MockAuthProvider } from '@/shared/auth'
 import { RecenzePage } from './RecenzePage'
@@ -19,16 +19,33 @@ function renderPage() {
   )
 }
 
-test('filtruje učitele a po výběru zobrazí jeho recenzi', async () => {
+test('vykreslí seznam učitelů z API', async () => {
   renderPage()
 
-  const search = await screen.findByRole('textbox', { name: 'Hledat' })
-  fireEvent.change(search, { target: { value: 'Jan' } })
+  expect(await screen.findByText('Mgr. Jan Novák')).toBeDefined()
+})
 
-  expect(screen.getByRole('button', { name: /Jan Novák/ })).toBeDefined()
-  expect(screen.queryByRole('button', { name: /Petr Svoboda/ })).toBeNull()
+test('vyhledávání filtruje učitele bez ohledu na diakritiku', async () => {
+  renderPage()
+  await screen.findByText('Mgr. Jan Novák')
 
-  fireEvent.click(screen.getByRole('button', { name: /Jan Novák/ }))
-  expect(await screen.findByText('Férový učitel')).toBeDefined()
-  expect(screen.getByRole('button', { name: 'Zpět' })).toBeDefined()
+  fireEvent.change(screen.getByRole('searchbox', { name: 'Hledat učitele' }), {
+    target: { value: 'svobodova' },
+  })
+
+  expect(screen.getByText('Bc. Eva Svobodová')).toBeDefined()
+  expect(screen.queryByText('Mgr. Jan Novák')).toBeNull()
+})
+
+test('po výběru učitele ukáže detail s recenzemi a Like/Dislike', async () => {
+  renderPage()
+
+  fireEvent.click(await screen.findByRole('button', { name: /Mgr\. Jan Novák/ }))
+
+  const detail = screen.getByRole('region', { name: 'Detail učitele' })
+  expect(await within(detail).findByText('Hodnocení v kategoriích')).toBeDefined()
+  expect(
+    (await within(detail).findAllByRole('button', { name: /Líbí se mi/ })).length,
+  ).toBeGreaterThan(0)
+  expect(within(detail).getByRole('button', { name: 'Zpět na seznam' })).toBeDefined()
 })

@@ -1,87 +1,68 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, fetchJson } from '@/shared/api'
+import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { fetchJson } from '@/shared/api'
 import type { ReviewFormValues } from './schema'
-import type {
-  LegacyTeacher,
-  LegacyTeacherProfile,
-  Review,
-  TeacherProfile,
-  TeacherSummary,
-} from './types'
+import type { Review, ReviewSort, ReviewTeacher, ReviewTeacherDetail, ReviewVote } from './types'
 
-const reviewKeys = {
+const recenzeKeys = {
   all: ['recenze'] as const,
-  teachers: () => [...reviewKeys.all, 'teachers'] as const,
-  profile: (id: number) => [...reviewKeys.all, 'profile', id] as const,
-  reviews: (id: number) => [...reviewKeys.all, 'reviews', id] as const,
+  teachers: () => [...recenzeKeys.all, 'teachers'] as const,
+  teacher: (teacherId: string) => [...recenzeKeys.all, 'teacher', teacherId] as const,
+  reviews: (teacherId: string, sort: ReviewSort) =>
+    [...recenzeKeys.all, 'reviews', teacherId, sort] as const,
 }
 
-export function useTeachers() {
+export function useReviewTeachers() {
   return useQuery({
-    queryKey: reviewKeys.teachers(),
-    queryFn: async () => {
-      const teachers = await fetchJson<LegacyTeacher[]>('/teachers')
-      return teachers.map<TeacherSummary>((teacher) => ({
-        id: Number(teacher.id.replace('t-', '')),
-        name: `${teacher.firstName} ${teacher.lastName}`,
-        photoUrl: teacher.photoUrl,
-        averageRating: teacher.ratings.overall,
-      }))
-    },
+    queryKey: recenzeKeys.teachers(),
+    queryFn: () => fetchJson<ReviewTeacher[]>('/recenze/teachers'),
   })
 }
 
-export function useTeacherProfile(teacherId: number | null) {
+export function useReviewTeacher(teacherId: string | null) {
   return useQuery({
-    queryKey: reviewKeys.profile(teacherId ?? 0),
-    enabled: teacherId !== null,
-    queryFn: async () => {
-      const { data, error } = await api.GET('/api/rating/teacher/{teacherId}/profile', {
-        params: { path: { teacherId: teacherId ?? 0 } },
-      })
-      if (error) throw new Error('Nepodařilo se načíst profil učitele.')
-      const teacher = data as unknown as LegacyTeacherProfile
-      return {
-        id: Number(teacher.id.replace('t-', '')),
-        name: `${teacher.firstName} ${teacher.lastName}`,
-        photoUrl: teacher.photoUrl,
-        averageRating: teacher.ratings.overall,
-        description: teacher.description,
-        mood: teacher.ratings.absence,
-        reviewCount: teacher.reviewCount,
-      } satisfies TeacherProfile
-    },
+    queryKey: recenzeKeys.teacher(teacherId ?? ''),
+    queryFn:
+      teacherId === null
+        ? skipToken
+        : () => fetchJson<ReviewTeacherDetail>(`/recenze/teachers/${teacherId}`),
   })
 }
 
-export function useTeacherReviews(teacherId: number | null) {
+export function useTeacherReviews(teacherId: string, sort: ReviewSort) {
   return useQuery({
-    queryKey: reviewKeys.reviews(teacherId ?? 0),
-    enabled: teacherId !== null,
-    queryFn: async () => {
-      const { data, error } = await api.GET('/api/rating/teacher/{teacherId}', {
-        params: { path: { teacherId: teacherId ?? 0 } },
-      })
-      if (error) throw new Error('Nepodařilo se načíst recenze.')
-      return data as unknown as Review[]
-    },
+    queryKey: recenzeKeys.reviews(teacherId, sort),
+    queryFn: () => fetchJson<Review[]>(`/recenze/teachers/${teacherId}/reviews?sort=${sort}`),
   })
 }
 
-export function useCreateReview(teacherId: number) {
+export function useCreateReview(teacherId: string) {
   const queryClient = useQueryClient()
+
   return useMutation({
-    mutationFn: async (values: ReviewFormValues) => {
-      const { data, error } = await api.POST('/api/rating', { body: { ...values, teacherId } })
-      if (error) throw new Error('Recenzi se nepodařilo odeslat.')
-      return data as unknown as Review
-    },
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: reviewKeys.profile(teacherId) }),
-        queryClient.invalidateQueries({ queryKey: reviewKeys.reviews(teacherId) }),
-        queryClient.invalidateQueries({ queryKey: reviewKeys.teachers() }),
-      ])
-    },
+    mutationFn: (values: ReviewFormValues) =>
+      fetchJson<Review>(`/recenze/teachers/${teacherId}/reviews`, {
+        method: 'POST',
+        body: JSON.stringify({ ...values, title: values.title || null }),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: recenzeKeys.all }),
+  })
+}
+
+interface VoteInput {
+  reviewId: string
+  /** null = zrušit hlas. */
+  vote: ReviewVote | null
+}
+
+export function useVoteReview() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ reviewId, vote }: VoteInput) =>
+      fetchJson<Review>(`/recenze/reviews/${reviewId}/vote`, {
+        method: 'PUT',
+        body: JSON.stringify({ vote }),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: recenzeKeys.all }),
   })
 }
