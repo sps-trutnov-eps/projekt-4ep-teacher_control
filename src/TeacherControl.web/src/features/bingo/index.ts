@@ -1,4 +1,5 @@
 export { BingoPage } from './BingoPage'
-export { default as coconutImage } from './coconut.png'
+export { default as coconut } from './assets/coconut.png'
+export { default as coconutImage } from './assets/coconut.jpg'
 export * from './types'
 export * from './api'
