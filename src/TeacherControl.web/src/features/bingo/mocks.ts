@@ -2,7 +2,9 @@ import { HttpResponse, http } from 'msw'
 import type {
   BingoBoard,
   BingoCell,
+  ClaimDailyBingoWinnerRequest,
   CreateQuoteRequest,
+  DailyBingoWinner,
   TeacherQuote,
   ToggleCellResponse,
   UserBingoStats,
@@ -132,6 +134,7 @@ let teacherQuotes: TeacherQuote[] = [
  * Ukládání bingo desek jednotlivých uživatelů (klíčem je userId).
  */
 const userBoards = new Map<string, BingoBoard>()
+let dailyWinner: DailyBingoWinner | null = null
 
 /**
  * Ukládání statistik a bingo counteru pro uživatele.
@@ -265,6 +268,39 @@ function createNewBoard(
  * - Počítadlo bingo výher (Bingo counter)
  */
 export const bingoHandlers = [
+  http.get('*/api/bingo/daily-winner', () => {
+    const today = new Date().toISOString().slice(0, 10)
+    return HttpResponse.json(dailyWinner?.date === today ? dailyWinner : null)
+  }),
+
+  http.post('*/api/bingo/daily-winner/claim', async ({ request }: { request: Request }) => {
+    let body: Partial<ClaimDailyBingoWinnerRequest>
+    try {
+      body = (await request.json()) as Partial<ClaimDailyBingoWinnerRequest>
+    } catch {
+      return HttpResponse.json({ title: 'Neplatný formát JSON', status: 400 }, { status: 400 })
+    }
+
+    const userId = getActiveUserId()
+    const board = userBoards.get(userId)
+    if (!body.boardId || !body.displayName?.trim() || !board || board.id !== body.boardId || board.bingoCount === 0) {
+      return HttpResponse.json({ title: 'Neplatný požadavek na vítězství', status: 400 }, { status: 400 })
+    }
+
+    const today = new Date().toISOString().slice(0, 10)
+    if (dailyWinner?.date !== today) {
+      dailyWinner = {
+        userId,
+        displayName: body.displayName.trim(),
+        boardId: board.id,
+        date: today,
+        completedAt: new Date().toISOString(),
+      }
+    }
+
+    return HttpResponse.json(dailyWinner)
+  }),
+
   // 1. Získání aktuální aktivní desky přihlášeného uživatele (pokud nemá, vytvoří se nová)
   http.get('*/api/bingo/board', () => {
     const userId = getActiveUserId()

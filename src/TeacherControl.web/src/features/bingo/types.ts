@@ -48,3 +48,16 @@ export interface ToggleCellResponse {
   newBingoAchieved: boolean
   totalBingos: number
 }
+
+export interface DailyBingoWinner {
+  userId: string
+  displayName: string
+  boardId: string
+  date: string
+  completedAt: string
+}
+
+export interface ClaimDailyBingoWinnerRequest {
+  boardId: string
+  displayName: string
+}
