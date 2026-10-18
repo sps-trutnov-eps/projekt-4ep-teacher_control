@@ -29,6 +29,7 @@ public class AppDbContext : IdentityDbContext<UserEntity>
     public DbSet<BingoBoardEntity> BingoBoards { get; set; }
     public DbSet<BingoBoardQuoteEntity> BingoBoardQuotes { get; set; }
     public DbSet<BingoBoardQuoteMarkEntity> BingoBoardQuoteMarks { get; set; }
+    public DbSet<DailyBingoWinnerEntity> DailyBingoWinners { get; set; }
 
     /// <summary>
     /// feat/pololeti
@@ -48,6 +49,8 @@ public class AppDbContext : IdentityDbContext<UserEntity>
             .HasIndex(q => new { q.BingoBoardId, q.Position }).IsUnique();
         modelBuilder.Entity<BingoBoardQuoteMarkEntity>()
             .HasKey(mark => new { mark.StudentId, mark.BingoBoardQuoteId });
+        modelBuilder.Entity<DailyBingoWinnerEntity>()
+            .HasKey(winner => winner.Date);
 
         modelBuilder.Entity<UserEntity>()
             .HasOne(u => u.Teacher).WithOne()
@@ -76,6 +79,12 @@ public class AppDbContext : IdentityDbContext<UserEntity>
         modelBuilder.Entity<BingoBoardQuoteMarkEntity>()
             .HasOne(mark => mark.BingoBoardQuote).WithMany(quote => quote.Marks)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<DailyBingoWinnerEntity>()
+            .HasOne(winner => winner.User).WithMany()
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<DailyBingoWinnerEntity>()
+            .HasOne(winner => winner.Board).WithMany()
+            .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<TitleVoteEntity>()
             .HasOne(v => v.Student).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<TitleVoteEntity>()

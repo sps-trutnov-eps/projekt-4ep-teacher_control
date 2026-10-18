@@ -230,7 +230,7 @@ public class TeacherBingoService(AppDbContext db)
 	private static TeacherQuoteDto MapQuote(TeacherQuoteEntity quote) =>
 		new(quote.Id.ToString(), quote.TeacherId.ToString(), quote.Teacher.Name, quote.Quote);
 
-	private static int CalculateBingoCount(IEnumerable<BingoBoardQuoteEntity> boardQuotes, string studentId)
+	internal static int CalculateBingoCount(IEnumerable<BingoBoardQuoteEntity> boardQuotes, string studentId)
 	{
 		var orderedQuotes = boardQuotes.OrderBy(item => item.Position).ToArray();
 		var size = (int)Math.Sqrt(orderedQuotes.Length);
