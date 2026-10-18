@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { BingoPage } from './BingoPage'
+import { MockAuthProvider } from '@/shared/auth'
 
 beforeEach(() => {
   vi.stubGlobal(
@@ -25,7 +26,9 @@ function renderPage() {
   render(
     <MantineProvider>
       <QueryClientProvider client={queryClient}>
-        <BingoPage />
+        <MockAuthProvider>
+          <BingoPage />
+        </MockAuthProvider>
       </QueryClientProvider>
     </MantineProvider>,
   )
