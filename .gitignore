@@ -215,5 +215,8 @@ nunit-*.xml
 .vs
 .vs/
 
+src/.vs
+src/.vs/
+
 src/.idea/
 
