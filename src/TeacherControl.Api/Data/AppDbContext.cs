@@ -11,6 +11,8 @@ public class AppDbContext : IdentityDbContext<UserEntity>
     }
 
     public DbSet<TeacherEntity> Teachers { get; set; }
+    public DbSet<TextReviewEntity> TextReviews { get; set; }
+    public DbSet<TeacherReactionEntity> TeacherReactions { get; set; }
 
     /// <summary>
     /// feat/recenze
@@ -40,6 +42,25 @@ public class AppDbContext : IdentityDbContext<UserEntity>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<TextReviewEntity>(entity =>
+        {
+            entity.HasIndex(r => new { r.TeacherId, r.AuthorId }).IsUnique();
+            entity.Property(r => r.Content).HasMaxLength(5000);
+            entity.HasOne(r => r.Teacher).WithMany().HasForeignKey(r => r.TeacherId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(r => r.Author).WithMany().HasForeignKey(r => r.AuthorId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<TeacherReactionEntity>(entity =>
+        {
+            entity.HasKey(r => new { r.TeacherId, r.UserId });
+            entity.HasOne(r => r.Teacher).WithMany().HasForeignKey(r => r.TeacherId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(r => r.User).WithMany().HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(t => t.HasCheckConstraint("CK_TeacherReactions_Value", "\"Value\" IN (-1, 1)"));
+        });
 
         modelBuilder.Entity<TitleVoteEntity>()
             .HasKey(v => new { v.StudentId, v.TeacherTitleId, v.Pololeti });
