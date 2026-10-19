@@ -1,0 +1,1 @@
+export { RecenzePage } from './RecenzePage'
