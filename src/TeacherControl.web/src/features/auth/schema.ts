@@ -14,7 +14,13 @@ export const schoolEmailSchema = z
 export const registerSchema = z
   .object({
     email: schoolEmailSchema,
-    password: z.string().min(8, 'Heslo musí mít alespoň 8 znaků'),
+    password: z
+      .string()
+      .min(8, 'Heslo musí mít alespoň 8 znaků')
+      .regex(/[a-z]/, 'Heslo musí obsahovat alespoň jedno malé písmeno')
+      .regex(/[A-Z]/, 'Heslo musí obsahovat alespoň jedno velké písmeno')
+      .regex(/[0-9]/, 'Heslo musí obsahovat alespoň jednu číslici')
+      .regex(/[^a-zA-Z0-9]/, 'Heslo musí obsahovat alespoň jeden speciální znak'),
     confirmPassword: z.string().min(1, 'Zadej potvrzení hesla'),
   })
   .refine((data) => data.password === data.confirmPassword, {

@@ -32,6 +32,7 @@ export function RegisterStepCredentials({
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
+    mode: 'onChange',
     defaultValues: {
       email: initialEmail,
       password: '',

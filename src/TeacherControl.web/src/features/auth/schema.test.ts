@@ -53,13 +53,69 @@ describe('auth schemas', () => {
     it('fails when password is shorter than 8 characters', () => {
       const result = registerSchema.safeParse({
         email: 'novak.jan@spstrutnov.cz',
-        password: 'short',
-        confirmPassword: 'short',
+        password: 'Pa1!',
+        confirmPassword: 'Pa1!',
       })
 
       expect(result.success).toBe(false)
       if (!result.success) {
         expect(result.error.issues[0]?.message).toContain('8')
+      }
+    })
+
+    it('fails when password has no uppercase letter', () => {
+      const result = registerSchema.safeParse({
+        email: 'novak.jan@spstrutnov.cz',
+        password: 'password123!',
+        confirmPassword: 'password123!',
+      })
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        const messages = result.error.issues.map((i) => i.message)
+        expect(messages).toContain('Heslo musí obsahovat alespoň jedno velké písmeno')
+      }
+    })
+
+    it('fails when password has no lowercase letter', () => {
+      const result = registerSchema.safeParse({
+        email: 'novak.jan@spstrutnov.cz',
+        password: 'PASSWORD123!',
+        confirmPassword: 'PASSWORD123!',
+      })
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        const messages = result.error.issues.map((i) => i.message)
+        expect(messages).toContain('Heslo musí obsahovat alespoň jedno malé písmeno')
+      }
+    })
+
+    it('fails when password has no number', () => {
+      const result = registerSchema.safeParse({
+        email: 'novak.jan@spstrutnov.cz',
+        password: 'Password!!',
+        confirmPassword: 'Password!!',
+      })
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        const messages = result.error.issues.map((i) => i.message)
+        expect(messages).toContain('Heslo musí obsahovat alespoň jednu číslici')
+      }
+    })
+
+    it('fails when password has no special character', () => {
+      const result = registerSchema.safeParse({
+        email: 'novak.jan@spstrutnov.cz',
+        password: 'Password123',
+        confirmPassword: 'Password123',
+      })
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        const messages = result.error.issues.map((i) => i.message)
+        expect(messages).toContain('Heslo musí obsahovat alespoň jeden speciální znak')
       }
     })
 

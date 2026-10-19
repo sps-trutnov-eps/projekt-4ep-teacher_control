@@ -13,8 +13,8 @@ export const APP_ROUTES = [
   { path: '/recenze', label: 'F3 Recenze', element: <FeatureTodo code="F3" name="Recenze" /> },
   { path: '/abstence', label: 'F4 Abstence', element: <FeatureTodo code="F4" name="Abstence" /> },
   { path: '/pololeti', label: 'F5 Pololetí', element: <FeatureTodo code="F5" name="Pololetí" /> },
-  { path: '/login', label: 'F6 Login', element: <LoginPage /> },
-  { path: '/register', label: 'F6 Registrace', element: <RegisterPage /> },
+  { path: '/login', element: <LoginPage /> },
+  { path: '/register', element: <RegisterPage /> },
 ]
 
 export function AppRoutes() {
