@@ -212,6 +212,8 @@ nunit-*.xml
 *.suo
 *.sw?
 
+.vs
+.vs/
 
 src/.idea/
 
