@@ -13,19 +13,19 @@ public class TeacherProfileResponse
     [JsonPropertyName("bio")]
     public required string Bio { get; set; }
 
-    /// <summary>Prùmìr hodnocení z recenzí (1-5), 0 pokud ádné nejsou.</summary>
+    /// <summary>PrÅ¯mÄ›r hodnocenÃ­ z recenzÃ­ (1-5), 0 pokud Å¾Ã¡dnÃ© nejsou.</summary>
     [JsonPropertyName("review")]
     public required float Review { get; set; }
 
-    /// <summary>0-5, kde 5 = uèitel s nejmenší absencí, 0 = uèitel s nejvìtší absencí.</summary>
+    /// <summary>0-5, kde 5 = uÄitel s nejmenÅ¡Ã­ absencÃ­, 0 = uÄitel s nejvÄ›tÅ¡Ã­ absencÃ­.</summary>
     [JsonPropertyName("abstention")]
     public required float Abstention { get; set; }
 
-    /// <summary>0-5, relativnì k uèiteli s nejvíce odškrtnutımi hláškami.</summary>
+    /// <summary>0-5, relativnÄ› k uÄiteli s nejvÃ­ce odÅ¡krtnutÃ½mi hlÃ¡Å¡kami.</summary>
     [JsonPropertyName("binginess")]
     public required float Binginess { get; set; }
 
-    /// <summary>Ocenìní, která uèitel získal (nejvíc hlasù v dané kategorii a pololetí).</summary>
+    /// <summary>OcenÄ›nÃ­, kterÃ© uÄitel zÃ­skal (nejvÃ­c hlasÅ¯ v danÃ© kategorii a pololetÃ­).</summary>
     [JsonPropertyName("awards")]
     public required List<TeacherAwardResponse> Awards { get; set; }
 }
