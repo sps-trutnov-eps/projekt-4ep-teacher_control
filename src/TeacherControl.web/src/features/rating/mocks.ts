@@ -1,50 +1,73 @@
 import { HttpResponse, http } from 'msw'
-import type { Rating } from './types'
+import type { Teacher } from './types'
 
-let ratings: Rating[] = [
+const teachers: Teacher[] = [
   {
-    id: 'r-1',
-    subject: 'Matematika',
-    score: 4,
-    comment: 'Dobře vysvětlené příklady.',
-    authorName: 'Student Novák',
-    createdAt: '2026-09-01T10:15:00.000Z',
+    id: 't-1',
+    firstName: 'Jan',
+    lastName: 'Novák',
+    photoUrl: null,
+    description:
+      'Informace o učitelovi Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    ratings: {
+      overall: 4,
+      absence: 5,
+      bingo: 3,
+    },
+    awards: [
+      {
+        id: 'a-1',
+        name: 'Pololetí jenž učitel vyhrál.',
+        description: 'Nejlepší učitel prvního pololetí.',
+      },
+    ],
   },
   {
-    id: 'r-2',
-    subject: 'Programování',
-    score: 5,
-    comment: null,
-    authorName: 'Student Veselá',
-    createdAt: '2026-09-03T08:40:00.000Z',
+    id: 't-2',
+    firstName: 'Petr',
+    lastName: 'Svoboda',
+    photoUrl: null,
+    description: 'Informace o dalším učiteli...',
+    ratings: {
+      overall: 5,
+      absence: 4,
+      bingo: 5,
+    },
+    awards: [],
+  },
+  {
+    id: 't-3',
+    firstName: 'Marie',
+    lastName: 'Dvořáková',
+    photoUrl: null,
+    description: 'Další popis učitelky...',
+    ratings: {
+      overall: 3,
+      absence: 3,
+      bingo: 2,
+    },
+    awards: [
+      {
+        id: 'a-2',
+        name: 'Nejlepší učitel druhého pololetí.',
+        description: 'Ocenění z roku 2024.',
+      },
+    ],
   },
 ]
 
-/** MSW handlery featury. Přidávej sem endpointy, které backend ještě nemá hotové. */
 export const ratingHandlers = [
-  http.get('/api/ratings', ({ request }) => {
-    const subject = new URL(request.url).searchParams.get('subject')
-    const result = subject
-      ? ratings.filter((rating) => rating.subject.toLowerCase().includes(subject.toLowerCase()))
-      : ratings
+  // List endpoint (not in OpenAPI yet)
+  http.get('*/api/teachers', () => HttpResponse.json(teachers)),
 
-    return HttpResponse.json(result)
-  }),
-
-  http.post('/api/ratings', async ({ request }) => {
-    const body = (await request.json()) as Omit<Rating, 'id' | 'authorName' | 'createdAt'>
-
-    const created: Rating = {
-      id: `r-${ratings.length + 1}`,
-      subject: body.subject,
-      score: body.score,
-      comment: body.comment ?? null,
-      authorName: 'Přihlášený uživatel',
-      createdAt: new Date().toISOString(),
+  // Detail endpoint
+  http.get('*/api/rating/teacher/:teacherId/profile', ({ params }) => {
+    const teacher = teachers.find(
+      (t) => t.id === params.teacherId || t.id === `t-${params.teacherId}`,
+    )
+    if (teacher) {
+      return HttpResponse.json(teacher)
     }
-
-    ratings = [...ratings, created]
-
-    return HttpResponse.json(created, { status: 201 })
+    return new HttpResponse(null, { status: 404 })
   }),
 ]

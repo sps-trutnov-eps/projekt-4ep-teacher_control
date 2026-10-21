@@ -24,7 +24,8 @@ public static class DevelopmentAuthentication
         {
             UserName = email,
             Email = email,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            FinishedBingoCount = 0
         }, password);
 
         if (!result.Succeeded)

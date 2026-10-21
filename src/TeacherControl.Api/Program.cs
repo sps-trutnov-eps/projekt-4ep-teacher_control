@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using System.Reflection;
+using TeacherControl.Api.Features.Rating.Services;
 
 namespace TeacherControl.Api;
 
@@ -44,6 +45,7 @@ public class Program
         // takhle si registrujte service soubory pro DependencyInjection
         builder.Services.AddScoped<AbstenceService>();
         builder.Services.AddScoped<TeacherBingoService>();
+        builder.Services.AddScoped<RatingService>();
 
         var app = builder.Build();
         var isOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
@@ -57,23 +59,32 @@ public class Program
             {
                 await db.Database.MigrateAsync();
             }
+
+            await DatabaseSeeder.SeedAsync(app.Services);
         }
 
         app.MapOpenApi();
         if (app.Environment.IsDevelopment())
         {
             if (!isOpenApiGeneration)
+            {
                 await DevelopmentAuthentication.SeedAsync(app.Services, app.Configuration);
+            }
             app.MapDevelopmentAuthentication();
         }
 
         app.UseHttpsRedirection();
+
+        app.UseRouting();
+        
         app.UseAuthentication();
         app.UseAuthorization();
 
-
         app.MapControllers();
-
+        app.MapControllerRoute(
+            name: "default",
+            pattern: "{controller=Home}/{action=Index}/{id?}");
+        
         await app.RunAsync();
     }
 }

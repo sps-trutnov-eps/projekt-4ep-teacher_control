@@ -1,5 +1,5 @@
 {
-  "name": "front-app",
+  "name": "teacher-control-web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "eslint .",
+    "lint": "eslint . && prettier --check .",
     "typecheck": "tsc -b",
     "test": "vitest run --passWithNoTests",
     "format": "prettier --write .",

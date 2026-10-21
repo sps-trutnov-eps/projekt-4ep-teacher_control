@@ -1,40 +1,64 @@
-import { Divider, Stack, TextInput } from '@mantine/core'
 import { useState } from 'react'
+import { Box, Flex, ScrollArea, Loader, Center, Alert } from '@mantine/core'
 import { PageHeader } from '@/shared/ui'
-import { useAuth } from '@/shared/auth'
-import { RatingForm } from './components/RatingForm'
-import { RatingList } from './components/RatingList'
+import { useTeachers, useTeacher } from './api'
+import { TeacherList } from './components/TeacherList'
+import { TeacherDetail } from './components/TeacherDetail'
 
 export function RatingPage() {
-  const { hasRole } = useAuth()
-  const [subject, setSubject] = useState('')
+  const { data: teachers, isLoading: isLoadingTeachers, isError: isErrorTeachers } = useTeachers()
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
-  // Oprávnění se řeší přes role, nikdy přes jméno uživatele.
-  const canCreate = hasRole('student')
+  const { data: selectedTeacher, isLoading: isLoadingTeacher } = useTeacher(selectedId)
 
   return (
-    <Stack>
-      <PageHeader
-        title="Rating"
-        description="Referenční featura. Ostatní týmy kopírují tvar kódu odtud."
-      />
+    <Box h="calc(100vh - 100px)" display="flex" style={{ flexDirection: 'column' }}>
+      <PageHeader title="Rating" description="Hodnocení učitelů" />
 
-      {canCreate ? (
-        <>
-          <RatingForm />
-          <Divider my="sm" />
-        </>
-      ) : null}
+      <Flex flex={1} style={{ overflow: 'hidden' }} mt="md">
+        {/* Levý panel - seznam učitelů. Na mobilu se schová, pokud je vybrán učitel */}
+        <Box
+          w={{ base: '100%', sm: 300 }}
+          display={{ base: selectedId ? 'none' : 'block', sm: 'block' }}
+          style={{ borderRight: '1px solid var(--mantine-color-gray-3)' }}
+        >
+          <ScrollArea h="100%">
+            {isLoadingTeachers ? (
+              <Center h="100%">
+                <Loader />
+              </Center>
+            ) : isErrorTeachers || !teachers ? (
+              <Alert color="red">Chyba při načítání učitelů.</Alert>
+            ) : (
+              <TeacherList
+                teachers={teachers}
+                selectedTeacherId={selectedId}
+                onSelect={setSelectedId}
+              />
+            )}
+          </ScrollArea>
+        </Box>
 
-      <TextInput
-        label="Filtr podle předmětu"
-        placeholder="Např. Matematika"
-        maw={320}
-        value={subject}
-        onChange={(event) => setSubject(event.currentTarget.value)}
-      />
-
-      <RatingList filters={{ subject: subject || undefined }} />
-    </Stack>
+        {/* Pravý panel - detail učitele. Na mobilu je přes celou šířku a zobrazí se jen pokud je vybrán */}
+        <Box
+          flex={1}
+          style={{ overflowY: 'auto' }}
+          bg="white"
+          display={{ base: selectedId ? 'block' : 'none', sm: 'block' }}
+        >
+          {isLoadingTeacher ? (
+            <Center h="100%">
+              <Loader />
+            </Center>
+          ) : selectedTeacher ? (
+            <TeacherDetail teacher={selectedTeacher} onBack={() => setSelectedId(null)} />
+          ) : (
+            <Center h="100%" c="dimmed">
+              Vyberte učitele ze seznamu pro zobrazení podrobností
+            </Center>
+          )}
+        </Box>
+      </Flex>
+    </Box>
   )
 }

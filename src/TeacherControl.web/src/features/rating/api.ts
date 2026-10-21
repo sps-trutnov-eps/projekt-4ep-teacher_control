@@ -1,47 +1,36 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/shared/api'
-import type { RatingFilters } from './types'
-import type { RatingFormValues } from './schema'
+import { useQuery } from '@tanstack/react-query'
+import { fetchJson, api } from '@/shared/api'
+import type { Teacher } from './types'
 
-/** Query key konvence: [featura, typ, ...parametry]. */
 const ratingKeys = {
   all: ['rating'] as const,
-  list: (filters: RatingFilters) => ['rating', 'list', filters] as const,
+  teachers: () => [...ratingKeys.all, 'teachers'] as const,
+  teacher: (id: string) => [...ratingKeys.all, 'teacher', id] as const,
 }
 
-export function useRatings(filters: RatingFilters = {}) {
+export function useTeachers() {
   return useQuery({
-    queryKey: ratingKeys.list(filters),
-    queryFn: async () => {
-      const { data, error } = await api.GET('/ratings', {
-        params: { query: { subject: filters.subject } },
-      })
-
-      if (error) {
-        throw new Error('Hodnocení se nepodařilo načíst.')
-      }
-
-      return data
-    },
+    queryKey: ratingKeys.teachers(),
+    queryFn: () => fetchJson<Teacher[]>('/teachers'),
   })
 }
 
-export function useCreateRating() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async (values: RatingFormValues) => {
-      const { data, error } = await api.POST('/ratings', { body: values })
-
+export function useTeacher(id: string | null) {
+  return useQuery({
+    queryKey: ratingKeys.teacher(id!),
+    queryFn: async () => {
+      // Použito openapi-fetch `api.GET` pro endpoint v OpenAPI
+      // (typ vrací neznámé hodnoty (zatím), backend nedefinoval 200 response schéma)
+      const { data, error } = await api.GET('/api/rating/teacher/{teacherId}/profile', {
+        params: {
+          path: { teacherId: Number(id?.replace('t-', '')) || 0 },
+        },
+      })
       if (error) {
-        throw new Error('Hodnocení se nepodařilo uložit.')
+        throw new Error('Nepodařilo se načíst detail učitele')
       }
-
-      return data
+      return data as unknown as Teacher
     },
-    onSuccess: () => {
-      // Po mutaci se seznam invaliduje, ať se překreslí čerstvá data.
-      queryClient.invalidateQueries({ queryKey: ratingKeys.all })
-    },
+    enabled: !!id,
   })
 }

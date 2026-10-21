@@ -1,11 +1,21 @@
-import type { components } from '@/shared/api'
+export interface TeacherAward {
+  id: string
+  name: string
+  description: string
+}
 
-/**
- * Typy featury. Tvary, které chodí z API, se neopisují ručně, berou se z generovaného schématu.
- * Sem patří jen to, co si featura drží sama (filtry, view modely).
- */
-export type Rating = components['schemas']['Rating']
+export interface TeacherRating {
+  overall: number
+  absence: number
+  bingo: number
+}
 
-export interface RatingFilters {
-  subject?: string
+export interface Teacher {
+  id: string
+  firstName: string
+  lastName: string
+  photoUrl: string | null
+  description: string
+  ratings: TeacherRating
+  awards: TeacherAward[]
 }

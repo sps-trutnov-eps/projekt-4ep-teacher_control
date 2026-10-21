@@ -4,5 +4,5 @@
   z `/docs/api/TeacherControl.Api.json`.
 - `client.ts` je jediné místo v aplikaci, kde se smí volat síť. Ve featurách se používá `api` z tohohle
   balíčku uvnitř TanStack Query hooků v `api.ts` featury.
-- `/docs/api/TeacherControl.Api.json` je zatím placeholder z bootstrapu. Jakmile backend dodá reálný export,
-  spusť `pnpm gen:api` znovu.
+- Endpointy ve schématu jsou zatím nekompletní. Dokud tvůj endpoint ve schématu není, použij
+  `fetchJson()` a tvar odpovědi si popiš v `types.ts` své featury — viz `features/vzor`.

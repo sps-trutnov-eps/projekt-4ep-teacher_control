@@ -1,0 +1,1 @@
+export { VzorPage } from './VzorPage'
