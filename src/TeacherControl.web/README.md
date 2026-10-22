@@ -38,7 +38,7 @@ A znovu `pnpm dev`.
 Před každým PR musí projít:
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm test && pnpm build
+pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
 ## Pět pravidel
