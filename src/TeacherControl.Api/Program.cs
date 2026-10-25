@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using TeacherControl.Api.Features.Abstence.Services;
+using TeacherControl.Api.Features.Login.Services;
 using TeacherControl.Api.Features.Rating.Services;
 using TeacherControl.Api.Features.TeacherBingo.Services;
 
@@ -23,9 +24,18 @@ public class Program
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Configure ConnectionStrings:DefaultConnection.")));
         builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
-            options.User.RequireUniqueEmail = true)
+        {
+            options.User.RequireUniqueEmail = true;
+            options.Password.RequiredLength = 8;
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.SignIn.RequireConfirmedEmail = true;
+        })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
+        builder.Services.AddMemoryCache();
         builder.Services.ConfigureApplicationCookie(options =>
         {
             options.Cookie.HttpOnly = true;
@@ -48,6 +58,8 @@ public class Program
         builder.Services.AddScoped<AbstenceService>();
         builder.Services.AddScoped<TeacherBingoService>();
         builder.Services.AddScoped<RatingService>();
+        builder.Services.AddScoped<IEmailService, MockEmailService>();
+        builder.Services.AddScoped<LoginService>();
 
         var app = builder.Build();
         var isOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
@@ -72,7 +84,6 @@ public class Program
             {
                 await DevelopmentAuthentication.SeedAsync(app.Services, app.Configuration);
             }
-            app.MapDevelopmentAuthentication();
         }
 
         app.UseHttpsRedirection();

@@ -30,6 +30,8 @@
 
     <ItemGroup>
       <Folder Include="Common\" />
+      <Folder Include="Features\Login\DTOs\" />
+      <Folder Include="Features\Login\Services\" />
     </ItemGroup>
 
 </Project>
