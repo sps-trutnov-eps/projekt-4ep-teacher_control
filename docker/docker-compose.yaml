@@ -2,7 +2,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: src/TeacherControl.web/Dockerfile
+      dockerfile: ../src/TeacherControl.web/Dockerfile
     restart: unless-stopped
     depends_on:
       api:
@@ -19,7 +19,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: src/TeacherControl.Api/Dockerfile
+      dockerfile: ../src/TeacherControl.Api/Dockerfile
     restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: Production

@@ -2,7 +2,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: src/TeacherControl.web/Dockerfile
+      dockerfile: ../src/TeacherControl.web/Dockerfile
     restart: unless-stopped
     depends_on:
       api:
