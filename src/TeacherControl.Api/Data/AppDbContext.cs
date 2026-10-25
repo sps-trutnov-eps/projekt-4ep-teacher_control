@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+
 using TeacherControl.Api.Entities;
 
 namespace TeacherControl.Api.Data;

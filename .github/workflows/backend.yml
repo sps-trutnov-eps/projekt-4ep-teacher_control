@@ -1,0 +1,49 @@
+name: backend
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - feat/*
+
+  pull_request:
+    paths:
+      - 'src/TeacherControl.Api/**'
+      - '.github/workflows/backend.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-slim
+    defaults:
+      run:
+        working-directory: src/TeacherControl.Api
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '10.0.x'   # matches the SDK used in the Dockerfile
+
+    - name: Build project
+      run: dotnet build
+
+  format:
+    runs-on: ubuntu-slim
+    defaults:
+      run:
+        working-directory: src/TeacherControl.Api
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '10.0.x'   # matches the SDK used in the Dockerfile
+
+    - name: Check formatting
+      id: format
+      run: dotnet format TeacherControl.Api.csproj --verify-no-changes
