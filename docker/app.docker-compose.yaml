@@ -24,7 +24,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_HTTP_PORTS: 8080
-      ConnectionStrings__DefaultConnection: Host=${POSTGRES_HOST:?Set POSTGRES_HOST in Coolify};Port=${POSTGRES_PORT:-5432};Database=${POSTGRES_DB:-teacher_control};Username=${POSTGRES_USER:-teacher_control};Password="${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in Coolify}";SSL Mode=${POSTGRES_SSL_MODE:-VerifyFull}
+      ConnectionStrings__DefaultConnection: Host=${POSTGRES_HOST:?Set POSTGRES_HOST in .env};Port=${POSTGRES_PORT:-5432};Database=${POSTGRES_DB:-teacher_control};Username=${POSTGRES_USER:-teacher_control};Password="${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}";SSL Mode=${POSTGRES_SSL_MODE:-Require};Trust Server Certificate=${POSTGRES_TRUST_SERVER_CERTIFICATE:-true}
     expose:
       - "8080"
     healthcheck:
