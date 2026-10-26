@@ -2,7 +2,7 @@
 
 ## docker-compose.yaml
 
-Pro použití tohoto souboru stačí pouze spustit příkaz `docker compose up -d`.
+Pro použití tohoto souboru stačí pouze spustit příkaz `docker compose --env-file ../.env up -d`.
 
 Má čtyři proměnné, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_USER` a `PORT`, s tím že vyjma `POSTGRES_PASSWORD` je vše volitelné a
 ve výchozí hodnota portu je `8080`, ostatní mají výchozí hodnotu `teacher_control`.
@@ -13,7 +13,7 @@ udělá z něj `.env`, tak máte vlastně vše potřebné nastavené, jelikož s
 ## db-only.docker-compose.yaml
 
 Spustí pouze databázi PostgreSQL, například pro lokální vývoj, kdy API běží mimo Docker.
-Příkaz: `docker compose -f db-only.docker-compose.yaml up -d`.
+Příkaz: `docker compose -f db-only.docker-compose.yaml --env-file ../.env up -d`.
 
 Má tři proměnné, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_USER` a `POSTGRES_PORT`, s tím že vyjma
 `POSTGRES_PASSWORD` je vše volitelné. Výchozí hodnota portu je `5432`, `POSTGRES_DB` a `POSTGRES_USER`
@@ -24,7 +24,7 @@ Databáze je dostupná pouze z místního počítače (`127.0.0.1`).
 ## app.docker-compose.yaml
 
 Spustí aplikaci (web a API) bez databáze, ta se připojuje k externímu serveru PostgreSQL.
-Příkaz: `docker compose -f app.docker-compose.yaml up -d --build`.
+Příkaz: `docker compose -f app.docker-compose.yaml --env-file ../.env up -d --build`.
 
 Povinné proměnné jsou `POSTGRES_HOST` a `POSTGRES_PASSWORD`. Volitelné jsou `POSTGRES_PORT` (výchozí `5432`),
 `POSTGRES_DB` a `POSTGRES_USER` (obě výchozí `teacher_control`), `POSTGRES_SSL_MODE` (výchozí `VerifyFull`)
