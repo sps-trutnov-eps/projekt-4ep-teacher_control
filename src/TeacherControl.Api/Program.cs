@@ -6,6 +6,7 @@ using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using System.Reflection;
 using TeacherControl.Api.Features.Rating.Services;
+using TeacherControl.Api.Features.Versioning.Services;
 
 namespace TeacherControl.Api;
 
@@ -42,10 +43,19 @@ public class Program
         });
         builder.Services.AddAuthorization();
 
+        builder.Services.AddMemoryCache();
+        builder.Services.AddHttpClient("github", c =>
+        {
+            c.BaseAddress = new Uri("https://api.github.com/");
+            c.DefaultRequestHeaders.UserAgent.ParseAdd("TeacherControl-Api");
+            c.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
+        });
+        
         // takhle si registrujte service soubory pro DependencyInjection
         builder.Services.AddScoped<AbstenceService>();
         builder.Services.AddScoped<TeacherBingoService>();
         builder.Services.AddScoped<RatingService>();
+        builder.Services.AddScoped<VersionService>();
 
         var app = builder.Build();
         var isOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
