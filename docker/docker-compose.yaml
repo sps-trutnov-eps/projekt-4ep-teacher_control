@@ -24,6 +24,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_HTTP_PORTS: 8080
+      SOURCE_COMMIT: ${SOURCE_COMMIT}
       ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=${POSTGRES_DB:-teacher_control};Username=${POSTGRES_USER:-teacher_control};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in Coolify}
     depends_on:
       db:
