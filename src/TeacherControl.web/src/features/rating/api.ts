@@ -1,10 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
-import { api, fetchJson } from '@/shared/api'
-import type { TeacherListItem, TeacherProfile } from './types'
+import { api } from '@/shared/api'
 
 /**
  * API klient pro rating:
- * - useTeachers(): volá /rating/teachers (dokud backend nedodá endpoint do OpenAPI)
+ * - useTeachers(): volá /api/rating/teachers přes openapi-fetch
  * - useTeacher(id): volá /api/rating/teacher/{teacherId}/profile přes openapi-fetch
  */
 
@@ -17,7 +16,15 @@ const ratingKeys = {
 export function useTeachers() {
   return useQuery({
     queryKey: ratingKeys.teachers(),
-    queryFn: () => fetchJson<TeacherListItem[]>('/rating/teachers'),
+    queryFn: async ({ signal }) => {
+      const { data, response } = await api.GET('/api/rating/teachers', { signal })
+
+      if (!response.ok || !data) {
+        throw new Error(`Nepodařilo se načíst seznam učitelů (${response.status})`)
+      }
+
+      return data
+    },
   })
 }
 
@@ -36,7 +43,7 @@ export function useTeacher(id: number | null) {
         throw new Error(`Nepodařilo se načíst profil učitele (${response.status})`)
       }
 
-      return data as unknown as TeacherProfile
+      return data
     },
     enabled: Boolean(id) && (id ?? 0) > 0,
   })

@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router'
-import { Box, Flex, ScrollArea, Loader, Center, Alert } from '@mantine/core'
+import { Box, Flex, ScrollArea, Loader, Center, Alert, Text } from '@mantine/core'
 import { PageHeader } from '@/shared/ui'
 import { useTeachers, useTeacher } from './api'
 import { TeacherList } from './components/TeacherList'
@@ -116,9 +116,9 @@ export function RatingPage() {
                       <circle cx="12" cy="7" r="4" />
                     </svg>
                   </Box>
-                  <Box size="16px" c="#64748B">
+                  <Text c="#64748B" style={{ fontSize: '16px' }}>
                     Vyberte učitele ze seznamu pro zobrazení podrobností
-                  </Box>
+                  </Text>
                 </Box>
               </Center>
             </Box>
