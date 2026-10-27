@@ -29,7 +29,7 @@ Pak v rootu repa:
 
 ```bash
 cp .env.example .env
-docker compose -f docker/db-only.compose.yaml --env-file .env up -d
+docker compose -f docker/db-only.docker-compose.yaml --env-file .env up -d
 dotnet run --project src/TeacherControl.Api
 ```
 
