@@ -1,4 +1,4 @@
-import { Box, Title, Text, Stack, Group, Rating, Center, Button, Image } from '@mantine/core'
+import { Box, Title, Text, Stack, Group, Rating, Center, Button, Image, Card } from '@mantine/core'
 import type { TeacherProfile } from '../types'
 
 interface TeacherDetailProps {
@@ -8,37 +8,16 @@ interface TeacherDetailProps {
 
 export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
   return (
-    <Box
-      style={{
-        backgroundColor: '#FFFFFF',
-        borderRadius: '12px',
-        border: '1px solid #D9E3F0',
-        boxShadow: '0 2px 4px #D9E3F0',
-        flex: 1,
-        minHeight: '100%',
-        overflow: 'hidden',
-        fontFamily: "'Inter', Arial, sans-serif",
-      }}
-    >
+    <Card h="100%" p={0} style={{ overflow: 'hidden' }}>
       {/* Fotografie učitele nebo placeholder */}
-      <Box h={{ base: 140, sm: 200 }} bg="#F4F7FB" pos="relative" style={{ overflow: 'hidden' }}>
+      <Box h={{ base: 140, sm: 200 }} bg="gray.1" pos="relative" style={{ overflow: 'hidden' }}>
         <Button
           variant="outline"
           size="xs"
           pos="absolute"
           top={10}
           left={10}
-          style={{
-            zIndex: 2,
-            minHeight: '40px',
-            borderRadius: '8px',
-            borderColor: '#1655A3',
-            color: '#1655A3',
-            backgroundColor: '#FFFFFF',
-            fontSize: '1rem',
-            fontWeight: 600,
-            fontFamily: "'Inter', Arial, sans-serif",
-          }}
+          style={{ zIndex: 2 }}
           onClick={onBack}
           display={{ base: 'block', sm: 'none' }}
         >
@@ -48,109 +27,49 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
           <Image src={teacher.image_url} alt={teacher.full_name} h="100%" w="100%" fit="cover" />
         ) : (
           <Center h="100%">
-            <Text
-              style={{
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                color: '#64748B',
-                fontFamily: "'Inter', Arial, sans-serif",
-              }}
-            >
+            <Text c="dimmed" fw={700} size="xl">
               FOTO
             </Text>
           </Center>
         )}
       </Box>
 
-      <Box p={{ base: 16, sm: 24 }}>
-        <Stack gap={24}>
-          <Title
-            order={2}
-            ta="center"
-            style={{
-              fontSize: '1.5rem',
-              fontWeight: 700,
-              color: '#173B70',
-              fontFamily: "'Inter', Arial, sans-serif",
-            }}
-          >
+      <Box p="lg">
+        <Stack gap="lg">
+          <Title order={2} ta="center">
             {teacher.full_name}
           </Title>
 
-          <Text
-            ta="justify"
-            style={{
-              fontSize: '1rem',
-              color: '#000000',
-              lineHeight: 1.6,
-              fontFamily: "'Inter', Arial, sans-serif",
-            }}
-          >
+          <Text size="md" ta="justify" style={{ lineHeight: 1.6 }}>
             {teacher.bio}
           </Text>
 
           <Box maw={320}>
-            <Title
-              order={3}
-              mb={16}
-              style={{
-                fontSize: '1.25rem',
-                fontWeight: 600,
-                color: '#173B70',
-                fontFamily: "'Inter', Arial, sans-serif",
-              }}
-            >
+            <Title order={3} mb="sm">
               Hodnocení:
             </Title>
-            <Group justify="space-between" mb={8}>
-              <Text
-                style={{
-                  fontSize: '0.875rem',
-                  color: '#64748B',
-                  fontFamily: "'Inter', Arial, sans-serif",
-                }}
-              >
+            <Group justify="space-between" mb="xs">
+              <Text size="sm" c="dimmed">
                 Recenze:
               </Text>
-              <Rating value={teacher.review} readOnly fractions={2} color="#D99A17" />
+              <Rating value={teacher.review} readOnly fractions={2} />
             </Group>
-            <Group justify="space-between" mb={8}>
-              <Text
-                style={{
-                  fontSize: '0.875rem',
-                  color: '#64748B',
-                  fontFamily: "'Inter', Arial, sans-serif",
-                }}
-              >
+            <Group justify="space-between" mb="xs">
+              <Text size="sm" c="dimmed">
                 Abstence:
               </Text>
-              <Rating value={teacher.abstention} readOnly fractions={2} color="#D99A17" />
+              <Rating value={teacher.abstention} readOnly fractions={2} />
             </Group>
             <Group justify="space-between">
-              <Text
-                style={{
-                  fontSize: '0.875rem',
-                  color: '#64748B',
-                  fontFamily: "'Inter', Arial, sans-serif",
-                }}
-              >
+              <Text size="sm" c="dimmed">
                 Bingovost:
               </Text>
-              <Rating value={teacher.binginess} readOnly fractions={2} color="#D99A17" />
+              <Rating value={teacher.binginess} readOnly fractions={2} />
             </Group>
           </Box>
 
           <Box maw={320}>
-            <Title
-              order={3}
-              mb={16}
-              style={{
-                fontSize: '1.25rem',
-                fontWeight: 600,
-                color: '#173B70',
-                fontFamily: "'Inter', Arial, sans-serif",
-              }}
-            >
+            <Title order={3} mb="sm">
               Ocenění:
             </Title>
             {teacher.awards.length > 0 ? (
@@ -162,34 +81,20 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
                       : item.year
                     : null
                 return (
-                  <Text
-                    key={idx}
-                    mb={8}
-                    style={{
-                      fontSize: '1rem',
-                      color: '#000000',
-                      fontFamily: "'Inter', Arial, sans-serif",
-                    }}
-                  >
+                  <Text key={idx} size="md" mb="xs">
                     {item.award}
                     {displayYear !== null ? ` (${displayYear})` : ''}
                   </Text>
                 )
               })
             ) : (
-              <Text
-                style={{
-                  fontSize: '0.875rem',
-                  color: '#64748B',
-                  fontFamily: "'Inter', Arial, sans-serif",
-                }}
-              >
+              <Text size="sm" c="dimmed">
                 Žádná ocenění
               </Text>
             )}
           </Box>
         </Stack>
       </Box>
-    </Box>
+    </Card>
   )
 }
