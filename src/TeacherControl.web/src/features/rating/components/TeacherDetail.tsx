@@ -13,9 +13,11 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
         backgroundColor: '#FFFFFF',
         borderRadius: '12px',
         border: '1px solid #D9E3F0',
+        boxShadow: '0 2px 4px #D9E3F0',
         flex: 1,
         minHeight: '100%',
         overflow: 'hidden',
+        fontFamily: "'Inter', Arial, sans-serif",
       }}
     >
       {/* Fotografie učitele nebo placeholder */}
@@ -28,10 +30,14 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
           left={10}
           style={{
             zIndex: 2,
+            minHeight: '40px',
             borderRadius: '8px',
             borderColor: '#1655A3',
             color: '#1655A3',
             backgroundColor: '#FFFFFF',
+            fontSize: '1rem',
+            fontWeight: 600,
+            fontFamily: "'Inter', Arial, sans-serif",
           }}
           onClick={onBack}
           display={{ base: 'block', sm: 'none' }}
@@ -42,7 +48,14 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
           <Image src={teacher.image_url} alt={teacher.full_name} h="100%" w="100%" fit="cover" />
         ) : (
           <Center h="100%">
-            <Text c="#64748B" fw={700} size="xl">
+            <Text
+              style={{
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                color: '#64748B',
+                fontFamily: "'Inter', Arial, sans-serif",
+              }}
+            >
               FOTO
             </Text>
           </Center>
@@ -51,32 +64,76 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
 
       <Box p={{ base: 16, sm: 24 }}>
         <Stack gap={24}>
-          <Title order={2} ta="center" fw={700} c="#173B70" style={{ fontSize: '24px' }}>
+          <Title
+            order={2}
+            ta="center"
+            style={{
+              fontSize: '1.5rem',
+              fontWeight: 700,
+              color: '#173B70',
+              fontFamily: "'Inter', Arial, sans-serif",
+            }}
+          >
             {teacher.full_name}
           </Title>
 
-          <Text c="#64748B" size="sm" ta="justify" style={{ fontSize: '14px', lineHeight: 1.6 }}>
+          <Text
+            ta="justify"
+            style={{
+              fontSize: '1rem',
+              color: '#000000',
+              lineHeight: 1.6,
+              fontFamily: "'Inter', Arial, sans-serif",
+            }}
+          >
             {teacher.bio}
           </Text>
 
           <Box maw={320}>
-            <Title order={3} fw={600} mb={16} c="#173B70" style={{ fontSize: '20px' }}>
+            <Title
+              order={3}
+              mb={16}
+              style={{
+                fontSize: '1.25rem',
+                fontWeight: 600,
+                color: '#173B70',
+                fontFamily: "'Inter', Arial, sans-serif",
+              }}
+            >
               Hodnocení:
             </Title>
             <Group justify="space-between" mb={8}>
-              <Text size="sm" c="#000000" style={{ fontSize: '14px' }}>
+              <Text
+                style={{
+                  fontSize: '0.875rem',
+                  color: '#64748B',
+                  fontFamily: "'Inter', Arial, sans-serif",
+                }}
+              >
                 Recenze:
               </Text>
               <Rating value={teacher.review} readOnly fractions={2} color="#D99A17" />
             </Group>
             <Group justify="space-between" mb={8}>
-              <Text size="sm" c="#000000" style={{ fontSize: '14px' }}>
+              <Text
+                style={{
+                  fontSize: '0.875rem',
+                  color: '#64748B',
+                  fontFamily: "'Inter', Arial, sans-serif",
+                }}
+              >
                 Abstence:
               </Text>
               <Rating value={teacher.abstention} readOnly fractions={2} color="#D99A17" />
             </Group>
             <Group justify="space-between">
-              <Text size="sm" c="#000000" style={{ fontSize: '14px' }}>
+              <Text
+                style={{
+                  fontSize: '0.875rem',
+                  color: '#64748B',
+                  fontFamily: "'Inter', Arial, sans-serif",
+                }}
+              >
                 Bingovost:
               </Text>
               <Rating value={teacher.binginess} readOnly fractions={2} color="#D99A17" />
@@ -84,7 +141,16 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
           </Box>
 
           <Box maw={320}>
-            <Title order={3} fw={600} mb={16} c="#173B70" style={{ fontSize: '20px' }}>
+            <Title
+              order={3}
+              mb={16}
+              style={{
+                fontSize: '1.25rem',
+                fontWeight: 600,
+                color: '#173B70',
+                fontFamily: "'Inter', Arial, sans-serif",
+              }}
+            >
               Ocenění:
             </Title>
             {teacher.awards.length > 0 ? (
@@ -96,14 +162,28 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
                       : item.year
                     : null
                 return (
-                  <Text key={idx} size="sm" mb={8} c="#000000" style={{ fontSize: '14px' }}>
+                  <Text
+                    key={idx}
+                    mb={8}
+                    style={{
+                      fontSize: '1rem',
+                      color: '#000000',
+                      fontFamily: "'Inter', Arial, sans-serif",
+                    }}
+                  >
                     {item.award}
                     {displayYear !== null ? ` (${displayYear})` : ''}
                   </Text>
                 )
               })
             ) : (
-              <Text size="sm" c="#64748B" style={{ fontSize: '14px' }}>
+              <Text
+                style={{
+                  fontSize: '0.875rem',
+                  color: '#64748B',
+                  fontFamily: "'Inter', Arial, sans-serif",
+                }}
+              >
                 Žádná ocenění
               </Text>
             )}

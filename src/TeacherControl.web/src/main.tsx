@@ -1,5 +1,6 @@
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
+import './index.css'
 
 import { MantineProvider } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
@@ -10,6 +11,7 @@ import { BrowserRouter } from 'react-router'
 import { App } from './App'
 import { queryClient } from '@/shared/api'
 import { MockAuthProvider } from '@/shared/auth'
+import { theme } from './theme'
 
 /** MSW jede ve vývoji defaultně. Vypneš ho v .env.local přes VITE_USE_MOCKS=false. */
 async function startMocks() {
@@ -30,7 +32,7 @@ if (rootElement === null) {
 const render = () => {
   createRoot(rootElement).render(
     <StrictMode>
-      <MantineProvider>
+      <MantineProvider theme={theme}>
         <Notifications />
         <QueryClientProvider client={queryClient}>
           <MockAuthProvider>

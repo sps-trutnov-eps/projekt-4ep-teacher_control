@@ -33,7 +33,7 @@ function SimpleRating({ value }: { value: number | null }) {
 
 export function TeacherList({ teachers, selectedTeacherId, onSelect }: TeacherListProps) {
   return (
-    <Stack gap={0} bd="1px solid #D9E3F0">
+    <Stack gap={0} bd="1px solid #D9E3F0" style={{ fontFamily: "'Inter', Arial, sans-serif" }}>
       {teachers.map((teacher) => (
         <UnstyledButton
           key={teacher.id}
@@ -43,6 +43,7 @@ export function TeacherList({ teachers, selectedTeacherId, onSelect }: TeacherLi
           style={{
             borderBottom: '1px solid #D9E3F0',
             transition: 'background-color 150ms ease',
+            fontFamily: "'Inter', Arial, sans-serif",
           }}
         >
           <Group gap={12} wrap="nowrap" align="center">
@@ -54,17 +55,39 @@ export function TeacherList({ teachers, selectedTeacherId, onSelect }: TeacherLi
               color="#1655A3"
             />
             <Stack gap={4}>
-              <Text fw={600} size="md" lh={1.2} c="#173B70" style={{ fontSize: '16px' }}>
+              <Text
+                lh={1.2}
+                style={{
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  color: '#173B70',
+                  fontFamily: "'Inter', Arial, sans-serif",
+                }}
+              >
                 {teacher.full_name}
               </Text>
               <Group gap={6}>
-                <Text size="xs" c="#64748B" lh={1} style={{ fontSize: '14px' }}>
+                <Text
+                  lh={1}
+                  style={{
+                    fontSize: '0.875rem',
+                    color: '#64748B',
+                    fontFamily: "'Inter', Arial, sans-serif",
+                  }}
+                >
                   Rating:
                 </Text>
                 {teacher.review !== null ? (
                   <SimpleRating value={teacher.review} />
                 ) : (
-                  <Text size="xs" c="#64748B" lh={1} style={{ fontSize: '14px' }}>
+                  <Text
+                    lh={1}
+                    style={{
+                      fontSize: '0.875rem',
+                      color: '#64748B',
+                      fontFamily: "'Inter', Arial, sans-serif",
+                    }}
+                  >
                     Bez hodnocení
                   </Text>
                 )}

@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router'
-import { Box, Flex, ScrollArea, Loader, Center, Alert, Text } from '@mantine/core'
+import { Box, Flex, ScrollArea, Loader, Center, Group, Text } from '@mantine/core'
 import { PageHeader } from '@/shared/ui'
 import { useTeachers, useTeacher } from './api'
 import { TeacherList } from './components/TeacherList'
@@ -22,11 +22,19 @@ export function RatingPage() {
   }
 
   return (
-    <Box h="calc(100vh - 100px)" display="flex" style={{ flexDirection: 'column' }}>
+    <Box
+      h="calc(100vh - 100px)"
+      display="flex"
+      style={{
+        flexDirection: 'column',
+        backgroundColor: '#F4F7FB',
+        fontFamily: "'Inter', Arial, sans-serif",
+      }}
+    >
       <PageHeader title="Rating" description="Hodnocení učitelů" />
 
       <Flex flex={1} gap={24} style={{ overflow: 'hidden' }} mt={16}>
-        {/* Levý panel – výběr učitelů (karta podle design pravidel: zaoblení 12 px, okraj #D9E3F0) */}
+        {/* Levý panel – výběr učitelů (karta: bílé pozadí, zaoblení 12 px, okraj a stín #D9E3F0) */}
         <Box
           w={{ base: '100%', sm: 320 }}
           display={{ base: selectedTeacherId ? 'none' : 'block', sm: 'block' }}
@@ -34,6 +42,7 @@ export function RatingPage() {
             backgroundColor: '#FFFFFF',
             borderRadius: '12px',
             border: '1px solid #D9E3F0',
+            boxShadow: '0 2px 4px #D9E3F0',
             overflow: 'hidden',
           }}
         >
@@ -44,17 +53,38 @@ export function RatingPage() {
               </Center>
             ) : isErrorTeachers || !teachers ? (
               <Box p={16}>
-                <Alert
-                  color="red"
+                <Box
+                  p={16}
                   style={{
-                    backgroundColor: '#FFFFFF',
-                    border: '1px solid #DC2626',
-                    color: '#DC2626',
-                    borderRadius: '8px',
+                    backgroundColor: '#FEF2F2',
+                    border: '1px solid #D9E3F0',
+                    borderRadius: '12px',
+                    boxShadow: '0 2px 4px #D9E3F0',
+                    fontFamily: "'Inter', Arial, sans-serif",
                   }}
                 >
-                  Chyba při načítání učitelů.
-                </Alert>
+                  <Group gap={8} align="baseline">
+                    <Text
+                      style={{
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        color: '#DC2626',
+                        fontFamily: "'Inter', Arial, sans-serif",
+                      }}
+                    >
+                      Chyba:
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: '0.875rem',
+                        color: '#000000',
+                        fontFamily: "'Inter', Arial, sans-serif",
+                      }}
+                    >
+                      Chyba při načítání učitelů.
+                    </Text>
+                  </Group>
+                </Box>
               </Box>
             ) : (
               <TeacherList
@@ -78,6 +108,7 @@ export function RatingPage() {
                 backgroundColor: '#FFFFFF',
                 borderRadius: '12px',
                 border: '1px solid #D9E3F0',
+                boxShadow: '0 2px 4px #D9E3F0',
                 padding: '32px',
                 minHeight: '100%',
               }}
@@ -94,6 +125,7 @@ export function RatingPage() {
                 backgroundColor: '#FFFFFF',
                 borderRadius: '12px',
                 border: '1px solid #D9E3F0',
+                boxShadow: '0 2px 4px #D9E3F0',
                 padding: '32px',
                 minHeight: '100%',
               }}
@@ -116,7 +148,13 @@ export function RatingPage() {
                       <circle cx="12" cy="7" r="4" />
                     </svg>
                   </Box>
-                  <Text c="#64748B" style={{ fontSize: '16px' }}>
+                  <Text
+                    style={{
+                      fontSize: '1rem',
+                      color: '#64748B',
+                      fontFamily: "'Inter', Arial, sans-serif",
+                    }}
+                  >
                     Vyberte učitele ze seznamu pro zobrazení podrobností
                   </Text>
                 </Box>

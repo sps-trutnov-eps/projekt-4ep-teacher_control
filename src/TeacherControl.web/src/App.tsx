@@ -51,7 +51,7 @@ export function App() {
         ))}
       </AppShell.Navbar>
 
-      <AppShell.Main>
+      <AppShell.Main style={{ backgroundColor: '#F4F7FB' }}>
         <RequireAuth>
           <AppRoutes />
         </RequireAuth>
