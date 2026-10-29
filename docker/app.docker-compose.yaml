@@ -1,0 +1,37 @@
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: ./src/TeacherControl.web/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${PORT:-80}:80"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  api:
+    build:
+      context: ..
+      dockerfile: ./src/TeacherControl.Api/Dockerfile
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: 8080
+      SOURCE_COMMIT: ${SOURCE_COMMIT:-}
+      GITHUB_REPOSITORY: ${GITHUB_REPOSITORY:-}
+      ConnectionStrings__DefaultConnection: Host=${POSTGRES_HOST:?Set POSTGRES_HOST in .env};Port=${POSTGRES_PORT:-5432};Database=${POSTGRES_DB:-teacher_control};Username=${POSTGRES_USER:-teacher_control};Password="${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}";SSL Mode=${POSTGRES_SSL_MODE:-Require};Trust Server Certificate=${POSTGRES_TRUST_SERVER_CERTIFICATE:-true}
+    expose:
+      - "8080"
+    healthcheck:
+      test: [ "CMD", "bash", "-c", "</dev/tcp/127.0.0.1/8080" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
