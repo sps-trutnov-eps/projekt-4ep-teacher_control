@@ -6,6 +6,6 @@ public class BingoBoardEntity
     public DateOnly Date { get; set; } = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Europe/Prague"));
     public required string StudentId { get; set; }
     public required UserEntity Student { get; set; }
-    
+
     public ICollection<BingoBoardQuoteEntity> Quotes { get; set; } = new List<BingoBoardQuoteEntity>();
 }

@@ -1,12 +1,14 @@
-using TeacherControl.Api.Features.Abstence.Services;
-using TeacherControl.Api.Features.TeacherBingo.Services;
+using System.Reflection;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
-using System.Reflection;
+using TeacherControl.Api.Features.Abstence.Services;
 using TeacherControl.Api.Features.Rating.Services;
 using TeacherControl.Api.Features.Versioning.Services;
+using TeacherControl.Api.Features.TeacherBingo.Services;
 
 namespace TeacherControl.Api;
 
@@ -59,7 +61,7 @@ public class Program
 
         var app = builder.Build();
         var isOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
-        
+
         if (!isOpenApiGeneration)
         {
             await using var scope = app.Services.CreateAsyncScope();
@@ -86,7 +88,7 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseRouting();
-        
+
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -94,7 +96,7 @@ public class Program
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
-        
+
         await app.RunAsync();
     }
 }
