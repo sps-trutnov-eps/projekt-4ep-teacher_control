@@ -1,14 +1,12 @@
-using System.Text.Json;
 using System.Reflection;
+using System.Text.Json;
 using TeacherControl.Api.Features.Versioning.Models;
 
 namespace TeacherControl.Api.Features.Versioning.Services;
 
 public class VersionService
 {
-    private readonly string _shaVersion;
-    private readonly string? _repoPath;
-    private VersionDto _versionDto;
+    private readonly VersionDto _versionDto;
     
     public VersionService(
         IConfiguration configuration, 
@@ -17,25 +15,18 @@ public class VersionService
     {
         var metadata = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyMetadataAttribute>()
             .ToDictionary(attribute => attribute.Key, attribute => attribute.Value);
-        _shaVersion = FirstConfiguredValue(configuration, "SOURCE_COMMIT")
-                      ?? metadata.GetValueOrDefault("SourceCommit")
-                      ?? "Neznámo";
-        _repoPath = FirstConfiguredValue(configuration, "GITHUB_REPOSITORY")
-                    ?? metadata.GetValueOrDefault("GitHubRepository");
+        var shaVersion = FirstConfiguredValue(configuration, "SOURCE_COMMIT")
+                         ?? metadata.GetValueOrDefault("SourceCommit")
+                         ?? "Neznámo";
+        var repoPath = FirstConfiguredValue(configuration, "GITHUB_REPOSITORY")
+                       ?? metadata.GetValueOrDefault("GitHubRepository");
         
-        _versionDto = SetVersionDto(_shaVersion, _repoPath, httpClientFactory, logger).Result;
+        _versionDto = SetVersionDto(shaVersion, repoPath, httpClientFactory, logger).Result;
     }
 
     private static string? FirstConfiguredValue(IConfiguration configuration, params string[] keys)
     {
-        foreach (var key in keys)
-        {
-            var value = configuration[key]?.Trim();
-            if (!string.IsNullOrEmpty(value))
-                return value;
-        }
-
-        return null;
+        return keys.Select(key => configuration[key]?.Trim()).FirstOrDefault(value => !string.IsNullOrEmpty(value));
     }
     
     private async Task<VersionDto> SetVersionDto(string sha, string? path, IHttpClientFactory httpClientFactory, ILogger<VersionService> logger)
