@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
+
 using TeacherControl.Api.Features.Versioning.Models;
 
 namespace TeacherControl.Api.Features.Versioning.Services;
@@ -7,10 +8,10 @@ namespace TeacherControl.Api.Features.Versioning.Services;
 public class VersionService
 {
     private readonly VersionDto _versionDto;
-    
+
     public VersionService(
-        IConfiguration configuration, 
-        IHttpClientFactory httpClientFactory, 
+        IConfiguration configuration,
+        IHttpClientFactory httpClientFactory,
         ILogger<VersionService> logger)
     {
         var metadata = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyMetadataAttribute>()
@@ -20,7 +21,7 @@ public class VersionService
                          ?? "Neznámo";
         var repoPath = FirstConfiguredValue(configuration, "GITHUB_REPOSITORY")
                        ?? metadata.GetValueOrDefault("GitHubRepository");
-        
+
         _versionDto = SetVersionDto(shaVersion, repoPath, httpClientFactory, logger).Result;
     }
 
@@ -28,8 +29,9 @@ public class VersionService
     {
         return keys.Select(key => configuration[key]?.Trim()).FirstOrDefault(value => !string.IsNullOrEmpty(value));
     }
-    
-    private async Task<VersionDto> SetVersionDto(string sha, string? path, IHttpClientFactory httpClientFactory, ILogger<VersionService> logger)
+
+    private async Task<VersionDto> SetVersionDto(string sha, string? path, IHttpClientFactory httpClientFactory,
+        ILogger<VersionService> logger)
     {
         var fallback = new VersionDto { Sha = sha };
 
@@ -61,7 +63,7 @@ public class VersionService
                 Date = author.GetProperty("date").GetString(),
                 Url = root.GetProperty("html_url").GetString()
             };
-            
+
             return versionDto;
         }
         catch (Exception ex)
@@ -70,6 +72,6 @@ public class VersionService
             return fallback;
         }
     }
-    
+
     public VersionDto GetVersion() => _versionDto;
 }

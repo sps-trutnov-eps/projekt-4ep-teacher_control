@@ -7,8 +7,8 @@ using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using TeacherControl.Api.Features.Abstence.Services;
 using TeacherControl.Api.Features.Rating.Services;
-using TeacherControl.Api.Features.Versioning.Services;
 using TeacherControl.Api.Features.TeacherBingo.Services;
+using TeacherControl.Api.Features.Versioning.Services;
 
 namespace TeacherControl.Api;
 
@@ -22,9 +22,10 @@ public class Program
         builder.Services.AddOpenApi();
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("Configure ConnectionStrings:DefaultConnection.")));
+                              ?? throw new InvalidOperationException(
+                                  "Configure ConnectionStrings:DefaultConnection.")));
         builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
-            options.User.RequireUniqueEmail = true)
+                options.User.RequireUniqueEmail = true)
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
         builder.Services.ConfigureApplicationCookie(options =>
@@ -52,7 +53,7 @@ public class Program
             c.DefaultRequestHeaders.UserAgent.ParseAdd("TeacherControl-Api");
             c.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
         });
-        
+
         // takhle si registrujte service soubory pro DependencyInjection
         builder.Services.AddScoped<AbstenceService>();
         builder.Services.AddScoped<TeacherBingoService>();
@@ -82,6 +83,7 @@ public class Program
             {
                 await DevelopmentAuthentication.SeedAsync(app.Services, app.Configuration);
             }
+
             app.MapDevelopmentAuthentication();
         }
 
