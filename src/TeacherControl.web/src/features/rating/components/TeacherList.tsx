@@ -1,5 +1,5 @@
 import { UnstyledButton, Text, Group, Avatar, Stack, Rating } from '@mantine/core'
-import type { TeacherListItem } from '../types'
+import { DEFAULT_TEACHER_IMAGE, type TeacherListItem } from '../types'
 
 interface TeacherListProps {
   teachers: TeacherListItem[]
@@ -23,7 +23,7 @@ export function TeacherList({ teachers, selectedTeacherId, onSelect }: TeacherLi
         >
           <Group gap="sm" wrap="nowrap" align="center">
             <Avatar
-              src={teacher.image_url}
+              src={teacher.image_url || DEFAULT_TEACHER_IMAGE}
               name={teacher.full_name}
               alt={teacher.full_name}
               radius="xl"

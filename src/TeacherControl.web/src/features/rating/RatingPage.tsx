@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router'
 import { Box, Flex, ScrollArea, Loader, Center, Alert, Card, Stack, Text } from '@mantine/core'
 import { PageHeader } from '@/shared/ui'
-import { useTeachers, useTeacher } from './api'
+import { useTeachers, useTeacherDetails } from './api'
 import { TeacherList } from './components/TeacherList'
 import { TeacherDetail } from './components/TeacherDetail'
 
@@ -11,7 +11,10 @@ export function RatingPage() {
   const selectedTeacherId = teacherIdParam ? Number(teacherIdParam) : null
 
   const { data: teachers, isLoading: isLoadingTeachers, isError: isErrorTeachers } = useTeachers()
-  const { data: selectedTeacher, isLoading: isLoadingTeacher } = useTeacher(selectedTeacherId)
+  const { data: teacherDetails, isLoading: isLoadingDetails } = useTeacherDetails(selectedTeacherId)
+
+  // Učitel se bere přímo z paměti (ze seznamu načteného přes /api/rating/teachers)
+  const selectedTeacher = teachers?.find((t) => t.id === selectedTeacherId) ?? null
 
   const handleSelectTeacher = (id: number) => {
     setSearchParams({ teacher: String(id) })
@@ -60,14 +63,26 @@ export function RatingPage() {
           style={{ overflowY: 'auto' }}
           display={{ base: selectedTeacherId ? 'block' : 'none', sm: 'block' }}
         >
-          {isLoadingTeacher ? (
-            <Card h="100%">
-              <Center h="100%">
-                <Loader />
-              </Center>
-            </Card>
-          ) : selectedTeacher ? (
-            <TeacherDetail teacher={selectedTeacher} onBack={handleBack} />
+          {selectedTeacherId ? (
+            isLoadingDetails || isLoadingTeachers ? (
+              <Card h="100%">
+                <Center h="100%">
+                  <Loader />
+                </Center>
+              </Card>
+            ) : selectedTeacher && teacherDetails ? (
+              <TeacherDetail
+                teacher={selectedTeacher}
+                details={teacherDetails}
+                onBack={handleBack}
+              />
+            ) : (
+              <Card h="100%">
+                <Center h="100%">
+                  <Text c="dimmed">Učitel nebyl nalezen</Text>
+                </Center>
+              </Card>
+            )
           ) : (
             <Card h="100%">
               <Center h="100%">

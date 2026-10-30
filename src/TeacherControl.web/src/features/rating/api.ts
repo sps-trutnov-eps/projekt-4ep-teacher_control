@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/shared/api'
+import type { TeacherDetails, TeacherListItem } from './types'
 
 /**
  * API klient pro rating:
- * - useTeachers(): volá /api/rating/teachers přes openapi-fetch
- * - useTeacher(id): volá /api/rating/teacher/{teacherId}/profile přes openapi-fetch
+ * - useTeachers(): volá /api/rating/teachers přes openapi-fetch (vrací TeacherListItem[])
+ * - useTeacherDetails(id): volá /api/rating/teacher/{teacherId} pro doplňující údaje (bio, abstention, binginess, awards)
  */
 
 const ratingKeys = {
@@ -23,16 +24,16 @@ export function useTeachers() {
         throw new Error(`Nepodařilo se načíst seznam učitelů (${response.status})`)
       }
 
-      return data
+      return data as TeacherListItem[]
     },
   })
 }
 
-export function useTeacher(id: number | null) {
+export function useTeacherDetails(id: number | null) {
   return useQuery({
     queryKey: ratingKeys.teacher(id ?? 0),
     queryFn: async ({ signal }) => {
-      const { data, response } = await api.GET('/api/rating/teacher/{teacherId}/profile', {
+      const { data, response } = await api.GET('/api/rating/teacher/{teacherId}', {
         params: {
           path: { teacherId: id! },
         },
@@ -40,11 +41,14 @@ export function useTeacher(id: number | null) {
       })
 
       if (!response.ok || !data) {
-        throw new Error(`Nepodařilo se načíst profil učitele (${response.status})`)
+        throw new Error(`Nepodařilo se načíst detail učitele (${response.status})`)
       }
 
-      return data
+      return data as TeacherDetails
     },
     enabled: Boolean(id) && (id ?? 0) > 0,
   })
 }
+
+/** Alias pro useTeacherDetails pro zpětnou kompatibilitu */
+export const useTeacher = useTeacherDetails

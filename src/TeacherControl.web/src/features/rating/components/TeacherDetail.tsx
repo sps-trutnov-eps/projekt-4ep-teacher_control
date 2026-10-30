@@ -1,15 +1,18 @@
-import { Box, Title, Text, Stack, Group, Rating, Center, Button, Image, Card } from '@mantine/core'
-import type { TeacherProfile } from '../types'
+import { Box, Title, Text, Stack, Group, Rating, Button, Image, Card } from '@mantine/core'
+import { DEFAULT_TEACHER_IMAGE, type TeacherDetails, type TeacherListItem } from '../types'
 
 interface TeacherDetailProps {
-  teacher: TeacherProfile
+  teacher: TeacherListItem
+  details: TeacherDetails
   onBack: () => void
 }
 
-export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
+export function TeacherDetail({ teacher, details, onBack }: TeacherDetailProps) {
+  const imageUrl = teacher.image_url || DEFAULT_TEACHER_IMAGE
+
   return (
     <Card h="100%" p={0} style={{ overflow: 'hidden' }}>
-      {/* Fotografie učitele nebo placeholder */}
+      {/* Fotografie učitele nebo náhradní obrázek při null */}
       <Box h={{ base: 140, sm: 200 }} bg="gray.1" pos="relative" style={{ overflow: 'hidden' }}>
         <Button
           variant="outline"
@@ -23,15 +26,14 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
         >
           ← Zpět
         </Button>
-        {teacher.image_url ? (
-          <Image src={teacher.image_url} alt={teacher.full_name} h="100%" w="100%" fit="cover" />
-        ) : (
-          <Center h="100%">
-            <Text c="dimmed" fw={700} size="xl">
-              FOTO
-            </Text>
-          </Center>
-        )}
+        <Image
+          src={imageUrl}
+          fallbackSrc={DEFAULT_TEACHER_IMAGE}
+          alt={teacher.full_name}
+          h="100%"
+          w="100%"
+          fit="cover"
+        />
       </Box>
 
       <Box p="lg">
@@ -41,7 +43,7 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
           </Title>
 
           <Text size="md" ta="justify" style={{ lineHeight: 1.6 }}>
-            {teacher.bio}
+            {details.bio}
           </Text>
 
           <Box maw={320}>
@@ -52,19 +54,19 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
               <Text size="sm" c="dimmed">
                 Recenze:
               </Text>
-              <Rating value={teacher.review} readOnly fractions={2} />
+              <Rating value={teacher.review ?? 0} readOnly fractions={2} />
             </Group>
             <Group justify="space-between" mb="xs">
               <Text size="sm" c="dimmed">
                 Abstence:
               </Text>
-              <Rating value={teacher.abstention} readOnly fractions={2} />
+              <Rating value={details.abstention} readOnly fractions={2} />
             </Group>
             <Group justify="space-between">
               <Text size="sm" c="dimmed">
                 Bingovost:
               </Text>
-              <Rating value={teacher.binginess} readOnly fractions={2} />
+              <Rating value={details.binginess} readOnly fractions={2} />
             </Group>
           </Box>
 
@@ -72,8 +74,8 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
             <Title order={3} mb="sm">
               Ocenění:
             </Title>
-            {teacher.awards.length > 0 ? (
-              teacher.awards.map((item, idx) => {
+            {details.awards.length > 0 ? (
+              details.awards.map((item, idx) => {
                 const displayYear =
                   typeof item.year === 'number'
                     ? item.year < 1000
