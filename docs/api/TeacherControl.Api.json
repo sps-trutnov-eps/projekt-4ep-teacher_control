@@ -5,6 +5,35 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/version": {
+      "get": {
+        "tags": [
+          "Version"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/rating": {
       "post": {
         "tags": [
@@ -403,6 +432,8 @@
             "type": "string"
           },
           "rating": {
+            "maximum": 5,
+            "minimum": 1,
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
             "type": [
               "number",
@@ -514,6 +545,8 @@
             "type": "string"
           },
           "rating": {
+            "maximum": 5,
+            "minimum": 1,
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
             "type": [
               "number",
@@ -522,10 +555,48 @@
             "format": "float"
           }
         }
+      },
+      "VersionDto": {
+        "type": "object",
+        "properties": {
+          "sha": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "message": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "author": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "date": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "url": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
       }
     }
   },
   "tags": [
+    {
+      "name": "Version"
+    },
     {
       "name": "Rating"
     },

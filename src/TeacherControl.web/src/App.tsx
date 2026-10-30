@@ -1,7 +1,8 @@
-import { AppShell, Burger, Group, NavLink, Text, Title } from '@mantine/core'
+import { AppShell, Box, Burger, Group, NavLink, Text, Title } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { Link, useLocation } from 'react-router'
 import { DevUserSwitcher, RequireAuth, useAuth } from '@/shared/auth'
+import { AppVersion } from './AppVersion'
 import { APP_ROUTES, AppRoutes } from './routes'
 
 export function App() {
@@ -49,6 +50,9 @@ export function App() {
             onClick={closeNavbar}
           />
         ))}
+        <Box mt="auto" p="xs">
+          <AppVersion />
+        </Box>
       </AppShell.Navbar>
 
       <AppShell.Main>
