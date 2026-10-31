@@ -4,6 +4,43 @@
  */
 
 export interface paths {
+    "/api/version": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["VersionDto"];
+                        "application/json": components["schemas"]["VersionDto"];
+                        "text/json": components["schemas"]["VersionDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rating": {
         parameters: {
             query?: never;
@@ -411,6 +448,13 @@ export interface components {
             content: string;
             /** Format: float */
             rating: number | string;
+        };
+        VersionDto: {
+            sha?: null | string;
+            message?: null | string;
+            author?: null | string;
+            date?: null | string;
+            url?: null | string;
         };
     };
     responses: never;
