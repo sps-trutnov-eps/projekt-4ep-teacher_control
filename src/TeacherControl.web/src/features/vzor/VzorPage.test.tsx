@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { expect, test } from 'vitest'
 import { MockAuthProvider } from '@/shared/auth'
+import { theme } from '@/shared/theme'
 import { VzorPage } from './VzorPage'
 
 /**
@@ -13,7 +14,7 @@ function renderPage() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
 
   render(
-    <MantineProvider>
+    <MantineProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
         <MockAuthProvider>
           <VzorPage />
