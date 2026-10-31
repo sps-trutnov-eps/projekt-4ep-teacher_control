@@ -1,18 +1,21 @@
-import { Box, Title, Text, Stack, Group, Rating, Center, Button, Image } from '@mantine/core'
-import type { TeacherProfile } from '../types'
+import { Box, Title, Text, Stack, Group, Rating, Button, Image, Card } from '@mantine/core'
+import { DEFAULT_TEACHER_IMAGE, type TeacherDetails, type TeacherListItem } from '../types'
 
 interface TeacherDetailProps {
-  teacher: TeacherProfile
+  teacher: TeacherListItem
+  details: TeacherDetails
   onBack: () => void
 }
 
-export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
+export function TeacherDetail({ teacher, details, onBack }: TeacherDetailProps) {
+  const imageUrl = teacher.image_url || DEFAULT_TEACHER_IMAGE
+
   return (
-    <Box bg="white" style={{ flex: 1, minHeight: '100%' }}>
-      {/* Fotografie učitele nebo placeholder */}
-      <Box h={{ base: 140, sm: 200 }} bg="gray.3" pos="relative" style={{ overflow: 'hidden' }}>
+    <Card h="100%" p={0} style={{ overflow: 'hidden' }}>
+      {/* Fotografie učitele nebo náhradní obrázek při null */}
+      <Box h={{ base: 140, sm: 200 }} bg="gray.1" pos="relative" style={{ overflow: 'hidden' }}>
         <Button
-          variant="default"
+          variant="outline"
           size="xs"
           pos="absolute"
           top={10}
@@ -23,56 +26,69 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
         >
           ← Zpět
         </Button>
-        {teacher.image_url ? (
-          <Image src={teacher.image_url} alt={teacher.full_name} h="100%" w="100%" fit="cover" />
-        ) : (
-          <Center h="100%">
-            <Text c="gray.6" fw={700} size="xl">
-              FOTO
-            </Text>
-          </Center>
-        )}
+        <Image
+          src={imageUrl}
+          fallbackSrc={DEFAULT_TEACHER_IMAGE}
+          alt={teacher.full_name}
+          h="100%"
+          w="100%"
+          fit="cover"
+        />
       </Box>
 
-      <Box p={{ base: 'md', sm: 'xl' }}>
-        <Stack gap="xl">
-          <Title order={2} ta="center" fw={400}>
+      <Box p="lg">
+        <Stack gap="lg">
+          <Title order={2} ta="center">
             {teacher.full_name}
           </Title>
 
-          <Text c="dimmed" size="sm" ta="justify">
-            {teacher.bio}
+          <Text size="md" ta="justify" style={{ lineHeight: 1.6 }}>
+            {details.bio}
           </Text>
 
-          <Box maw={300}>
-            <Title order={3} size="h4" fw={500} mb="sm">
+          <Box maw={320}>
+            <Title order={3} mb="sm">
               Hodnocení:
             </Title>
             <Group justify="space-between" mb="xs">
-              <Text size="sm">Recenze:</Text>
-              <Rating value={teacher.review} readOnly fractions={2} color="yellow" />
+              <Text size="sm" c="dimmed">
+                Recenze:
+              </Text>
+              <Rating value={teacher.review ?? 0} readOnly fractions={2} />
             </Group>
             <Group justify="space-between" mb="xs">
-              <Text size="sm">Abstence:</Text>
-              <Rating value={teacher.abstention} readOnly fractions={2} color="yellow" />
+              <Text size="sm" c="dimmed">
+                Abstence:
+              </Text>
+              <Rating value={details.abstention} readOnly fractions={2} />
             </Group>
             <Group justify="space-between">
-              <Text size="sm">Bingovost:</Text>
-              <Rating value={teacher.binginess} readOnly fractions={2} color="yellow" />
+              <Text size="sm" c="dimmed">
+                Bingovost:
+              </Text>
+              <Rating value={details.binginess} readOnly fractions={2} />
             </Group>
           </Box>
 
-          <Box maw={300}>
-            <Title order={3} size="h4" fw={500} mb="sm">
+          <Box maw={320}>
+            <Title order={3} mb="sm">
               Ocenění:
             </Title>
-            {teacher.awards.length > 0 ? (
-              teacher.awards.map((item, idx) => (
-                <Text key={idx} size="sm" mb="xs">
-                  {item.award}
-                  {item.year ? ` (${item.year})` : ''}
-                </Text>
-              ))
+            {details.awards.length > 0 ? (
+              details.awards.map((item, idx) => {
+                const displayYear =
+                  typeof item.year === 'number'
+                    ? item.year < 1000
+                      ? 2026 + item.year
+                      : item.year
+                    : null
+                return (
+                  <Text key={idx} size="md" mb="xs">
+                    {item.award}
+                    {displayYear !== null ? ` (${displayYear})` : ''}
+                  </Text>
+                )
+              })
             ) : (
               <Text size="sm" c="dimmed">
                 Žádná ocenění
@@ -81,6 +97,6 @@ export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
           </Box>
         </Stack>
       </Box>
-    </Box>
+    </Card>
   )
 }
