@@ -43,6 +43,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/rating/teachers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TeacherListItemDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rating/teacher/{teacherId}": {
         parameters: {
             query?: never;
@@ -66,7 +101,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TeacherProfileResponse"];
+                    };
                 };
             };
         };
@@ -136,7 +173,9 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/json": components["schemas"]["TeacherProfileResponse"];
+                    };
                 };
             };
         };
@@ -411,6 +450,31 @@ export interface components {
             content: string;
             /** Format: float */
             rating: number | string;
+        };
+        TeacherAwardDto: {
+            award: string;
+            /** Format: int32 */
+            year: number;
+        };
+        TeacherListItemDto: {
+            /** Format: int32 */
+            id: number;
+            full_name: string;
+            image_url: null | string;
+            /** Format: float */
+            review: null | number;
+        };
+        TeacherProfileResponse: {
+            full_name: string;
+            image_url?: null | string;
+            bio: string;
+            /** Format: float */
+            review: number;
+            /** Format: float */
+            abstention: number;
+            /** Format: float */
+            binginess: number;
+            awards: components["schemas"]["TeacherAwardDto"][];
         };
     };
     responses: never;

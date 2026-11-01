@@ -1,28 +1,19 @@
-export interface TeacherAward {
-  award: string
-  year?: string | null
-}
+import type { components } from '@/shared/api'
 
-/** Učitel v seznamu výběru pro hodnocení (/rating) */
-export interface TeacherListItem {
-  id: number
-  full_name: string
-  image_url: string | null
-  review: number | null
-}
+export const DEFAULT_TEACHER_IMAGE = 'https://images.unsplash.com/photo-1591880765528-4f5630af786c'
+
+export type TeacherAward = components['schemas']['TeacherAwardDto']
+export type TeacherListItem = components['schemas']['TeacherListItemDto']
 
 /**
- * Detail/profil učitele pro hodnocení (/rating?teacher=id).
- * Přesně odpovídá struktuře TeacherProfileResponse:
- * full_name, image_url, bio, review, abstention, binginess, awards.
+ * Doplňující údaje učitele z GET /api/rating/teacher/{id}.
+ * Neobsahuje id, full_name, image_url ani review, protože ty jsou již v paměti ze seznamu učitelů (/api/rating/teachers).
  */
-export interface TeacherProfile {
-  id: number
-  full_name: string
-  image_url: string | null
+export interface TeacherDetails {
   bio: string
-  review: number
   abstention: number
   binginess: number
   awards: TeacherAward[]
 }
+
+export interface TeacherProfile extends TeacherListItem, TeacherDetails {}
