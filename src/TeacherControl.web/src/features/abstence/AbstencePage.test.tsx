@@ -141,21 +141,19 @@ describe('AbstencePage oproti návrhu', () => {
     expect(screen.queryByText('Martin Černý')).toBeNull()
   })
 
-  it('detail: záložky Zobrazit/Hodnotit z designu, Zobrazit ukazuje dnešní zpoždění a metr jen pro čtení', () => {
+  it('detail: zobrazení ukazuje dnešní zpoždění a metr jen pro čtení', () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
 
-    // Detail se otevře: popisek profilu + záložky z designu (SegmentedControl = radio).
+    // Detail se otevře: popisek profilu
     expect(screen.getByText('Profil učitele — zpoždění a nálada')).toBeTruthy()
-    expect(screen.getByRole('radio', { name: 'Zobrazit' })).toBeTruthy()
-    expect(screen.getByRole('radio', { name: 'Hodnotit' })).toBeTruthy()
 
-    // Dnešní zpoždění na záložce Zobrazit (text je rozdělený do vnořených elementů).
+    // Dnešní zpoždění v režimu Zobrazit (text je rozdělený do vnořených elementů).
     expect(screen.getByText(/Dnes nahlášeno/)).toBeTruthy()
     expect(screen.getByText('15 min')).toBeTruthy()
 
-    // Metr nálady je na Zobrazit jen pro čtení — žádná tlačítka úrovní.
+    // Metr nálady je v režimu Zobrazit jen pro čtení — žádná tlačítka úrovní.
     expect(screen.queryByRole('button', { name: /Nastavit náladu/ })).toBeNull()
     expect(screen.getAllByLabelText('Nálada učitele: Špatná nálada').length).toBeGreaterThan(0)
   })
@@ -164,7 +162,8 @@ describe('AbstencePage oproti návrhu', () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
-    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+    fireEvent.click(screen.getByLabelText('Změnit režim zobrazení'))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Hodnotit' }))
 
     fireEvent.click(screen.getByRole('button', { name: /Nastavit náladu na 2 z 5/ }))
 
@@ -184,7 +183,8 @@ describe('AbstencePage oproti návrhu', () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
-    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+    fireEvent.click(screen.getByLabelText('Změnit režim zobrazení'))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Hodnotit' }))
 
     fireEvent.click(screen.getByRole('button', { name: '+5' }))
 
@@ -203,7 +203,8 @@ describe('AbstencePage oproti návrhu', () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
-    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+    fireEvent.click(screen.getByLabelText('Změnit režim zobrazení'))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Hodnotit' }))
 
     fireEvent.click(screen.getByRole('button', { name: '+15' }))
     fireEvent.click(screen.getByRole('button', { name: /Nastavit náladu na 3 z 5/ }))
@@ -219,7 +220,8 @@ describe('AbstencePage oproti návrhu', () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
-    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+    fireEvent.click(screen.getByLabelText('Změnit režim zobrazení'))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Hodnotit' }))
 
     fireEvent.click(screen.getByRole('button', { name: 'Uložit' }))
 
@@ -234,7 +236,8 @@ describe('AbstencePage oproti návrhu', () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
-    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+    fireEvent.click(screen.getByLabelText('Změnit režim zobrazení'))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Hodnotit' }))
 
     fireEvent.change(screen.getByLabelText('Vlastní zpoždění (minuty)'), {
       target: { value: '0' },

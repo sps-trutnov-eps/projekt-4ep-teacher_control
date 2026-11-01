@@ -1,4 +1,4 @@
-import { Group, SegmentedControl, Stack, Text } from '@mantine/core'
+import { Group, Stack, Text } from '@mantine/core'
 import { useState } from 'react'
 import { PageHeader } from '@/shared/ui'
 import { useAuth } from '@/shared/auth'
@@ -11,20 +11,19 @@ import { TeacherStars } from './TeacherStars'
 
 interface TeacherDetailProps {
   teacher: Teacher
+  appMode?: 'preview' | 'rate'
+  onTabChange?: (next: 'preview' | 'rate') => void
 }
 
-/**
- * Detail učitele podle designu. Metr nálady sedí podle návrhu vpravo nahoře profilu.
- * Záložka Zobrazit: dnešní zpoždění a metr jen pro čtení. Záložka Hodnotit: metr jde vybrat
- * kliknutím, ale na backend se hodnota odešle až tlačítkem "Uložit" ve formuláři.
- */
-export function TeacherDetail({ teacher }: TeacherDetailProps) {
+export function TeacherDetail({ teacher, appMode = 'preview' }: TeacherDetailProps) {
   const { isAuthenticated } = useAuth()
-  const [tab, setTab] = useState<'view' | 'rate'>('view')
+
+  const isRateMode = appMode === 'rate'
+
   // Klik na úroveň v metru je zatím jen lokální výběr, aby šlo chybu opravit před uložením.
   const [selectedMood, setSelectedMood] = useState<number | null>(null)
 
-  const canRate = isAuthenticated && tab === 'rate'
+  const canRate = isAuthenticated && isRateMode
   const shownMood = selectedMood ?? teacher.mood
   const moodLevel = getMoodLevel(shownMood)
   // Posílá se jen hodnota, která se proti backendu opravdu změnila (sdílený cooldown).
@@ -34,7 +33,6 @@ export function TeacherDetail({ teacher }: TeacherDetailProps) {
     <Stack gap="md">
       <PageHeader title={teacher.name} description="Profil učitele — zpoždění a nálada" />
 
-      {/* wrap="nowrap" drží metr vpravo i na mobilu — jinak by spadl na vlastní řádek vlevo. */}
       <Group align="flex-start" justify="space-between" gap="md" wrap="nowrap">
         <Group gap="md" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
           <TeacherAvatar
@@ -53,19 +51,6 @@ export function TeacherDetail({ teacher }: TeacherDetailProps) {
 
         <MoodMeter mood={shownMood} editable={canRate} onSelect={setSelectedMood} />
       </Group>
-
-      {isAuthenticated ? (
-        <SegmentedControl
-          fullWidth
-          value={tab}
-          onChange={setTab}
-          aria-label="Menu profilu učitele"
-          data={[
-            { value: 'view', label: 'Zobrazit' },
-            { value: 'rate', label: 'Hodnotit' },
-          ]}
-        />
-      ) : null}
 
       {canRate ? (
         <DelayForm teacherId={teacher.teacherId} mood={moodToSave} />
