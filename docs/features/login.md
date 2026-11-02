@@ -1,17 +1,11 @@
 # Login feature
-> Poznámka: Jelikož je tato featura závislá na školní infrastruktuře a active directory, takže část projektu nemůže postupovat do té doby dokuď nám školní administrátoři nedají přístup.
-
-> Dne 9.10.2026 je zatím školní AD nepřístupné, protože nám administrátoři nedali přístup
-
-> V případě že se nakonec ukáže že přístup do školního AD bude nemožný tak se tato featura rozšíří o vytváření, uchovávání, authentikaci, authorizaci uživatelských účtů
 
 ## MUSTs
-1) Přihlášení do aplikace přes školní účet.
-    - Rozpoznání mezi učiteli a žáky
-    - V případě že napojení na školní sít nedopadne tak se musí implementovat i registrace účtů
-    - Login stránka (jestliže napojení na školní síť bude přes Entra tak login stránka bude přes Microsfot)
-    - Uložení daz z AD do lokální databáze
-    - **Bude hotová když:** bude se moct přihlásit do aplikace, buďto přes školní účet nebo vytvořený účet
+1) Přihlášení do aplikace přes verifikaci školního emailu.
+    - Registrace
+    - Login
+    - Uložení do lokální databáze
+    - **Bude hotová když:** bude se moct přihlásit do aplikace, vytvořit účet
     - **Zodpovědný:** Ondřej Imlauf
 
 2) Profil/Stránka uživatele
