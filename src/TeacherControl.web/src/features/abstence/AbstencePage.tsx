@@ -1,6 +1,5 @@
-import { Box, Group, Stack, TextInput } from '@mantine/core'
+import { Box, Group, Stack, TextInput, Title } from '@mantine/core'
 import { useState } from 'react'
-import { PageHeader } from '@/shared/ui'
 import { useTeacher } from './api'
 import { TeacherDetail } from './components/TeacherDetail'
 import { TeacherList } from './components/TeacherList'
@@ -15,7 +14,18 @@ export function AbstencePage() {
 
   return (
     <Stack gap="md">
-      <PageHeader title="Abstence" description="Zpoždění učitelů po zvonění a jejich nálada." />
+      <Box bg="#173B70" px="md" py="lg" style={{ borderRadius: 8 }}>
+        <Title
+          order={1}
+          c="#FFFFFF"
+          ta="center"
+          fz={28}
+          fw={700}
+          style={{ fontFamily: 'Inter, Arial, sans-serif' }}
+        >
+          Abstence
+        </Title>
+      </Box>
 
       <TextInput
         label="Vyhledat učitele"

@@ -1,10 +1,11 @@
-import { Group, SegmentedControl, Stack, Text } from '@mantine/core'
+import { Group, Stack, Text } from '@mantine/core'
 import { useState } from 'react'
 import { PageHeader } from '@/shared/ui'
 import { useAuth } from '@/shared/auth'
 import { getMoodLevel } from '../mood'
 import type { Teacher } from '../types'
 import { DelayForm } from './DelayForm'
+import { ModeMenu, type DetailTab } from './ModeMenu'
 import { MoodMeter } from './MoodMeter'
 import { TeacherAvatar } from './TeacherAvatar'
 import { TeacherStars } from './TeacherStars'
@@ -20,7 +21,7 @@ interface TeacherDetailProps {
  */
 export function TeacherDetail({ teacher }: TeacherDetailProps) {
   const { isAuthenticated } = useAuth()
-  const [tab, setTab] = useState<'view' | 'rate'>('view')
+  const [tab, setTab] = useState<DetailTab>('view')
   // Klik na úroveň v metru je zatím jen lokální výběr, aby šlo chybu opravit před uložením.
   const [selectedMood, setSelectedMood] = useState<number | null>(null)
 
@@ -32,7 +33,10 @@ export function TeacherDetail({ teacher }: TeacherDetailProps) {
 
   return (
     <Stack gap="md">
-      <PageHeader title={teacher.name} description="Profil učitele — zpoždění a nálada" />
+      <Group justify="space-between" align="flex-start" gap="sm" wrap="nowrap">
+        <PageHeader title={teacher.name} description="Profil učitele — zpoždění a nálada" />
+        {isAuthenticated ? <ModeMenu value={tab} onChange={setTab} /> : null}
+      </Group>
 
       {/* wrap="nowrap" drží metr vpravo i na mobilu — jinak by spadl na vlastní řádek vlevo. */}
       <Group align="flex-start" justify="space-between" gap="md" wrap="nowrap">
@@ -53,19 +57,6 @@ export function TeacherDetail({ teacher }: TeacherDetailProps) {
 
         <MoodMeter mood={shownMood} editable={canRate} onSelect={setSelectedMood} />
       </Group>
-
-      {isAuthenticated ? (
-        <SegmentedControl
-          fullWidth
-          value={tab}
-          onChange={setTab}
-          aria-label="Menu profilu učitele"
-          data={[
-            { value: 'view', label: 'Zobrazit' },
-            { value: 'rate', label: 'Hodnotit' },
-          ]}
-        />
-      ) : null}
 
       {canRate ? (
         <DelayForm teacherId={teacher.teacherId} mood={moodToSave} />

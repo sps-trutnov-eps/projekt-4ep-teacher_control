@@ -71,6 +71,16 @@ vi.mock('./api', async (importOriginal) => ({
   useSubmitMood: (id: number) => useSubmitMood(id),
 }))
 
+/**
+ * Otevře kulaté menu v pravém horním rohu profilu a přepne záložku.
+ * `hidden: true` je kvůli jsdom: floating-ui nemá rozměry, tak Mantine dropdown schová
+ * přes display: none, ale v prohlížeči je vidět. Test potřebuje jen položku kliknout.
+ */
+async function switchTab(label: 'Zobrazit' | 'Hodnotit') {
+  fireEvent.click(screen.getByRole('button', { name: 'Menu profilu učitele' }))
+  fireEvent.click(await screen.findByRole('menuitem', { name: label, hidden: true }))
+}
+
 function renderPage() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -141,15 +151,13 @@ describe('AbstencePage oproti návrhu', () => {
     expect(screen.queryByText('Martin Černý')).toBeNull()
   })
 
-  it('detail: záložky Zobrazit/Hodnotit z designu, Zobrazit ukazuje dnešní zpoždění a metr jen pro čtení', () => {
+  it('detail: kulaté menu v pravém horním rohu nabídne Zobrazit/Hodnotit, Zobrazit ukazuje dnešní zpoždění', async () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
 
-    // Detail se otevře: popisek profilu + záložky z designu (SegmentedControl = radio).
     expect(screen.getByText('Profil učitele — zpoždění a nálada')).toBeTruthy()
-    expect(screen.getByRole('radio', { name: 'Zobrazit' })).toBeTruthy()
-    expect(screen.getByRole('radio', { name: 'Hodnotit' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Menu profilu učitele' })).toBeTruthy()
 
     // Dnešní zpoždění na záložce Zobrazit (text je rozdělený do vnořených elementů).
     expect(screen.getByText(/Dnes nahlášeno/)).toBeTruthy()
@@ -158,13 +166,22 @@ describe('AbstencePage oproti návrhu', () => {
     // Metr nálady je na Zobrazit jen pro čtení — žádná tlačítka úrovní.
     expect(screen.queryByRole('button', { name: /Nastavit náladu/ })).toBeNull()
     expect(screen.getAllByLabelText('Nálada učitele: Špatná nálada').length).toBeGreaterThan(0)
+
+    // Obě záložky se ukážou až po kliknutí na kulaté tlačítko.
+    expect(screen.queryByRole('menuitem', { name: 'Zobrazit', hidden: true })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Menu profilu učitele' }))
+    expect(await screen.findByRole('menuitem', { name: 'Zobrazit', hidden: true })).toBeTruthy()
+    expect(await screen.findByRole('menuitem', { name: 'Hodnotit', hidden: true })).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Hodnotit', hidden: true }))
+    expect(await screen.findByRole('button', { name: /Nastavit náladu na 1 z 5/ })).toBeTruthy()
   })
 
   it('Hodnotit: klik na úroveň v metru jen vybere, uloží se až tlačítkem Uložit', async () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
-    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+    await switchTab('Hodnotit')
 
     fireEvent.click(screen.getByRole('button', { name: /Nastavit náladu na 2 z 5/ }))
 
@@ -184,7 +201,7 @@ describe('AbstencePage oproti návrhu', () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
-    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+    await switchTab('Hodnotit')
 
     fireEvent.click(screen.getByRole('button', { name: '+5' }))
 
@@ -203,7 +220,7 @@ describe('AbstencePage oproti návrhu', () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
-    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+    await switchTab('Hodnotit')
 
     fireEvent.click(screen.getByRole('button', { name: '+15' }))
     fireEvent.click(screen.getByRole('button', { name: /Nastavit náladu na 3 z 5/ }))
@@ -219,7 +236,7 @@ describe('AbstencePage oproti návrhu', () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
-    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+    await switchTab('Hodnotit')
 
     fireEvent.click(screen.getByRole('button', { name: 'Uložit' }))
 
@@ -234,7 +251,7 @@ describe('AbstencePage oproti návrhu', () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
-    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+    await switchTab('Hodnotit')
 
     fireEvent.change(screen.getByLabelText('Vlastní zpoždění (minuty)'), {
       target: { value: '0' },
