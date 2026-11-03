@@ -1,23 +1,24 @@
+
 # Pravidla designu
 
 ## Barevná paleta
 
 Hlavními barvami aplikace jsou modrá a bílá, inspirované barvami SPŠ Trutnov. Doplňkové barvy slouží pro text, upozornění a další komponenty.
 
-| Barva              | HEX kód   | Použití                           |
-| ------------------ | --------- | --------------------------------- |
-| Primární modrá     | `#1655A3` | Hlavní tlačítka, odkazy, navigace |
-| Tmavě modrá        | `#173B70` | Nadpisy, aktivní položky          |
-| Světle modrá       | `#EAF2FF` | Zvýrazněné sekce, pozadí          |
-| Bílá               | `#FFFFFF` | Karty, formuláře                  |
-| Světle šedá        | `#F4F7FB` | Pozadí stránky                    |
-| Černá              | `#000000` | Běžný text                        |
-| Středně šedá       | `#64748B` | Vedlejší a pomocný text           |
-| Šedomodrá          | `#D9E3F0` | Okraje a oddělovací čáry          |
-| Zelená             | `#15803D` | Úspěšné akce a potvrzení          |
-| Červená            | `#DC2626` | Chyby, odstranění                 |
-| Zlatá              | `#D99A17` | Vybrané hvězdičky hodnocení       |
-| Šedá pro hvězdičky | `#CBD5E1` | Nevybrané hvězdičky               |
+| Barva | HEX kód | Použití |
+|---|---|---|
+| Primární modrá | `#1655A3` | Hlavní tlačítka, odkazy, navigace |
+| Tmavě modrá | `#173B70` | Nadpisy, aktivní položky |
+| Světle modrá | `#EAF2FF` | Zvýrazněné sekce, pozadí |
+| Bílá | `#FFFFFF` | Karty, formuláře |
+| Světle šedá | `#F4F7FB` | Pozadí stránky |
+| Černá | `#000000` | Běžný text |
+| Středně šedá | `#64748B` | Vedlejší a pomocný text |
+| Šedomodrá | `#D9E3F0` | Okraje a oddělovací čáry |
+| Zelená | `#15803D` | Úspěšné akce a potvrzení |
+| Červená | `#DC2626` | Chyby, odstranění |
+| Zlatá | `#D99A17` | Vybrané hvězdičky hodnocení |
+| Šedá pro hvězdičky | `#CBD5E1` | Nevybrané hvězdičky |
 
 ## Typografie
 
@@ -25,14 +26,14 @@ Pro celou stránku se bude používat font **Inter** a záložní font je Arial,
 
 Velikosti textu:
 
-| Prvek              | Velikost | Styl      |
-| ------------------ | -------- | --------- |
-| Hlavní nadpis (H1) | 28 px    | Tučný     |
-| Nadpis sekce (H2)  | 24 px    | Tučný     |
-| Menší nadpis (H3)  | 20 px    | Polotučný |
-| Běžný text         | 16 px    | Normální  |
-| Pomocný text       | 14 px    | Normální  |
-| Text tlačítek      | 16 px    | Polotučný |
+| Prvek | Velikost | Styl |
+|---|---|---|
+| Hlavní nadpis (H1) | 28 px | Tučný |
+| Nadpis sekce (H2) | 24 px | Tučný |
+| Menší nadpis (H3) | 20 px | Polotučný |
+| Běžný text | 16 px | Normální |
+| Pomocný text | 14 px | Normální |
+| Text tlačítek | 16 px | Polotučný |
 
 Text bude zarovnán převážně vlevo. Nadpisy a důležité informace můžou být zarovnané na střed.
 
@@ -114,3 +115,4 @@ Aplikace musí být použitelná na počítačích, tabletech i mobilních telef
 - Na menších obrazovkách se mohou karty řadit pod sebe
 - Tlačítka a formuláře musí být pohodlně ovladatelné i na mobilu
 - Text musí zůstat dobře čitelný na všech zařízeních
+
