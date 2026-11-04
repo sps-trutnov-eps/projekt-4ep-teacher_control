@@ -139,6 +139,15 @@ describe('AbstencePage oproti návrhu', () => {
     expect(screen.getAllByLabelText('Nálada učitele: Špatná nálada').length).toBeGreaterThan(0)
   })
 
+  it('bez výběru netahá detail učitele s ID 0 (ID v databázi začínají na 1)', () => {
+    renderPage()
+
+    // Detail vedle seznamu je prázdný, dokud uživatel nikoho nevybere.
+    expect(screen.queryByText('Profil učitele — zpoždění a nálada')).toBeNull()
+    expect(useTeacher.mock.calls.every(([teacherId]) => teacherId !== 0)).toBe(true)
+    expect(useTeacher).toHaveBeenLastCalledWith(null)
+  })
+
   it('vyhledávání filtruje seznam podle jména (filtr řeší frontend)', () => {
     renderPage()
 

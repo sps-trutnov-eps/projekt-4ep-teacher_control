@@ -48,9 +48,13 @@ export function AbstencePage() {
   )
 }
 
-/** Detail vedle seznamu se zobrazuje jen na desktopu — na mobilu jede rozklik v seznamu. */
+/**
+ * Detail vedle seznamu se zobrazuje jen na desktopu — na mobilu jede rozklik v seznamu.
+ * Dokud není nic vybrané, posílá se `null` (ne 0) — jinak by se ptalo na učitele s ID 0,
+ * který v databázi neexistuje (ID začínají na 1).
+ */
 function SideDetail({ teacherId }: { teacherId: number | null }) {
-  const { data: teacher, isPending, isError } = useTeacher(teacherId ?? 0)
+  const { data: teacher, isPending, isError } = useTeacher(teacherId)
 
   if (teacherId === null) {
     return null
