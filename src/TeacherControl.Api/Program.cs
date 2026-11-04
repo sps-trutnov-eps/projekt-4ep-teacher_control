@@ -1,11 +1,14 @@
-using TeacherControl.Api.Features.Abstence.Services;
-using TeacherControl.Api.Features.TeacherBingo.Services;
+using System.Reflection;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
-using System.Reflection;
+using TeacherControl.Api.Features.Abstence.Services;
 using TeacherControl.Api.Features.Rating.Services;
+using TeacherControl.Api.Features.TeacherBingo.Services;
+using TeacherControl.Api.Features.Versioning.Services;
 
 namespace TeacherControl.Api;
 
@@ -19,9 +22,10 @@ public class Program
         builder.Services.AddOpenApi();
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("Configure ConnectionStrings:DefaultConnection.")));
+                              ?? throw new InvalidOperationException(
+                                  "Configure ConnectionStrings:DefaultConnection.")));
         builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
-            options.User.RequireUniqueEmail = true)
+                options.User.RequireUniqueEmail = true)
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
         builder.Services.ConfigureApplicationCookie(options =>
@@ -42,14 +46,23 @@ public class Program
         });
         builder.Services.AddAuthorization();
 
+        builder.Services.AddMemoryCache();
+        builder.Services.AddHttpClient("github", c =>
+        {
+            c.BaseAddress = new Uri("https://api.github.com/");
+            c.DefaultRequestHeaders.UserAgent.ParseAdd("TeacherControl-Api");
+            c.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
+        });
+
         // takhle si registrujte service soubory pro DependencyInjection
         builder.Services.AddScoped<AbstenceService>();
         builder.Services.AddScoped<TeacherBingoService>();
         builder.Services.AddScoped<RatingService>();
+        builder.Services.AddScoped<VersionService>();
 
         var app = builder.Build();
         var isOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
-        
+
         if (!isOpenApiGeneration)
         {
             await using var scope = app.Services.CreateAsyncScope();
@@ -70,13 +83,14 @@ public class Program
             {
                 await DevelopmentAuthentication.SeedAsync(app.Services, app.Configuration);
             }
+
             app.MapDevelopmentAuthentication();
         }
 
         app.UseHttpsRedirection();
 
         app.UseRouting();
-        
+
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -84,7 +98,7 @@ public class Program
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
-        
+
         await app.RunAsync();
     }
 }
