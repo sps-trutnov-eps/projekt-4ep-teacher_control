@@ -1,6 +1,5 @@
-import { Box, Group, Stack, TextInput } from '@mantine/core'
+import { Box, Group, Stack, TextInput, Title } from '@mantine/core'
 import { useState } from 'react'
-import { PageHeader } from '@/shared/ui'
 import { useTeacher } from './api'
 import { TeacherDetail } from './components/TeacherDetail'
 import { TeacherList } from './components/TeacherList'
@@ -15,7 +14,18 @@ export function AbstencePage() {
 
   return (
     <Stack gap="md">
-      <PageHeader title="Abstence" description="Zpoždění učitelů po zvonění a jejich nálada." />
+      <Box bg="#173B70" px="md" py="lg" style={{ borderRadius: 8 }}>
+        <Title
+          order={1}
+          c="#FFFFFF"
+          ta="center"
+          fz={28}
+          fw={700}
+          style={{ fontFamily: 'Inter, Arial, sans-serif' }}
+        >
+          Abstence
+        </Title>
+      </Box>
 
       <TextInput
         label="Vyhledat učitele"
@@ -38,9 +48,13 @@ export function AbstencePage() {
   )
 }
 
-/** Detail vedle seznamu se zobrazuje jen na desktopu — na mobilu jede rozklik v seznamu. */
+/**
+ * Detail vedle seznamu se zobrazuje jen na desktopu — na mobilu jede rozklik v seznamu.
+ * Dokud není nic vybrané, posílá se `null` (ne 0) — jinak by se ptalo na učitele s ID 0,
+ * který v databázi neexistuje (ID začínají na 1).
+ */
 function SideDetail({ teacherId }: { teacherId: number | null }) {
-  const { data: teacher, isPending, isError } = useTeacher(teacherId ?? 0)
+  const { data: teacher, isPending, isError } = useTeacher(teacherId)
 
   if (teacherId === null) {
     return null
@@ -50,5 +64,6 @@ function SideDetail({ teacherId }: { teacherId: number | null }) {
     return null
   }
 
-  return <TeacherDetail teacher={teacher} />
+  // key přepne stav detailu (výběr nálady, rozepsané zpoždění) při změně učitele.
+  return <TeacherDetail key={teacher.teacherId} teacher={teacher} />
 }
