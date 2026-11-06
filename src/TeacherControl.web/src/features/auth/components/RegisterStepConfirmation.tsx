@@ -1,14 +1,4 @@
-import {
-  Alert,
-  Anchor,
-  Button,
-  Center,
-  Group,
-  PinInput,
-  Stack,
-  Text,
-  Title,
-} from '@mantine/core'
+import { Alert, Anchor, Button, Center, Group, PinInput, Stack, Text, Title } from '@mantine/core'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'

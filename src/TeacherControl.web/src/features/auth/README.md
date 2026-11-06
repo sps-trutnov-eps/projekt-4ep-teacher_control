@@ -19,9 +19,11 @@ aby se kvůli tomu nemusely měnit ostatní featury.
 ## Co je potřeba naimplementovat (TODO pro frontend)
 
 ### 1. Registrační stránka + potvrzení e-mailu
+
 Vytvořit novou registrační stránku (oddělenou od přihlašovací stránky, s možností přecházet mezi přihlášením a registrací), která má **2 kroky**:
 
 #### Krok 1: Zadání registračních údajů
+
 - Formulář (React Hook Form + Zod v `schema.ts`):
   - **Školní e-mail**: povinný, validní e-mail, **musí končit doménou `@spstrutnov.cz`** (např. `jmeno.prijmeni@spstrutnov.cz`).
   - **Heslo** (a případně potvrzení hesla): dle požadavků backendu.
@@ -29,6 +31,7 @@ Vytvořit novou registrační stránku (oddělenou od přihlašovací stránky, 
 - Odkaz pro přechod na přihlašovací stránku („Už máš účet? Přihlas se“).
 
 #### Krok 2: Potvrzení kódu z e-mailu (uvnitř registrační stránky)
+
 - Zobrazí informaci, na jaký e-mail byl kód odeslán.
 - Pole pro zadání **potvrzovacího kódu** z e-mailu (validace přes Zod).
 - Po odeslání a ověření kódu na backendu se účet aktivuje/vytvoří a uživatel je přesměrován (na přihlášení nebo rovnou přihlášen na `/`).
@@ -41,6 +44,7 @@ Vytvořit novou registrační stránku (oddělenou od přihlašovací stránky, 
 ---
 
 ### 2. Úprava přihlašovací stránky (`LoginPage.tsx`)
+
 - Upravit přihlašovací formulář z původního AD `username` (`jmeno.prijmeni`) na **školní e-mail (`@spstrutnov.cz`) + heslo**.
 - Přidat odkaz / tlačítko pro přechod na registrační stránku („Nemáš účet? Zaregistruj se“).
 - Napojit odeslání formuláře na reálné přihlášení místo prázdného mock `login()`.
@@ -48,7 +52,9 @@ Vytvořit novou registrační stránku (oddělenou od přihlašovací stránky, 
 ---
 
 ### 3. Povinná struktura souborů podle `AGENTS.md`
+
 Ve složce `src/features/auth/` musí být dodržena standardní struktura podle referenční featury `src/features/rating`:
+
 - [ ] `schema.ts` — Zod schémata (`loginSchema`, `registerSchema` s kontrolou `@spstrutnov.cz`, `confirmCodeSchema`) a odvozené typy přes `z.infer`.
 - [ ] `api.ts` — TanStack Query hooky (`useMutation` / `useQuery`) volající `api` ze `@/shared/api` (přihlášení, odhlášení, registrace, potvrzení kódu, opětovné zaslání kódu, načtení aktuálního uživatele `/api/auth/me`).
 - [ ] `mocks.ts` — MSW handlery pro auth endpointy (a jejich registrace v `src/mocks/handlers/index.ts`), aby šel celý flow testovat i bez běžícího backendu.
@@ -57,7 +63,7 @@ Ve složce `src/features/auth/` musí být dodržena standardní struktura podle
 - [ ] Zapojení případné nové routy v `src/routes/index.tsx`.
 
 > **Připomenutí pravidel z `AGENTS.md`:**
+>
 > - Používat výhradně **Mantine** komponenty (např. `TextInput`, `PasswordInput`, `PinInput`, `Button`, `Card`, `Stack`, `Alert`).
 > - Žádné `fetch()` mimo `@/shared/api`, žádné `useEffect` pro fetchování dat, žádné `any` ani default exporty.
 > - Před PR musí projít `pnpm lint && pnpm typecheck && pnpm build`.
-

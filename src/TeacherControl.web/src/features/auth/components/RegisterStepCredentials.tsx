@@ -1,13 +1,4 @@
-import {
-  Alert,
-  Anchor,
-  Button,
-  PasswordInput,
-  Stack,
-  Text,
-  TextInput,
-  Title,
-} from '@mantine/core'
+import { Alert, Anchor, Button, PasswordInput, Stack, Text, TextInput, Title } from '@mantine/core'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router'

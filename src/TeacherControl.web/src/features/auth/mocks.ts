@@ -79,7 +79,8 @@ export const authHandlers = [
     if (code !== MOCK_CONFIRMATION_CODE && pending && pending.code !== code) {
       const error: ProblemDetails = {
         title: 'Neplatný kód',
-        detail: 'Zadaný potvrzovací kód je nesprávný. Zkontrolujte e-mail nebo si nechte poslat nový.',
+        detail:
+          'Zadaný potvrzovací kód je nesprávný. Zkontrolujte e-mail nebo si nechte poslat nový.',
         status: 400,
       }
       return HttpResponse.json(error, { status: 400 })

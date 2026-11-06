@@ -47,11 +47,11 @@ export function LoginPage() {
     setError(null)
 
     try {
-      await loginMutation.mutateAsync({
+      const result = await loginMutation.mutateAsync({
         email: data.email,
         password: data.password,
       })
-      await login()
+      await login(result.user)
       notifications.show({
         title: 'Přihlášeno',
         message: 'Byl jsi úspěšně přihlášen do systému.',
@@ -60,9 +60,7 @@ export function LoginPage() {
       navigate('/')
     } catch (err) {
       const message =
-        err instanceof Error
-          ? err.message
-          : 'Přihlášení se nezdařilo. Zkontroluj e-mail a heslo.'
+        err instanceof Error ? err.message : 'Přihlášení se nezdařilo. Zkontroluj e-mail a heslo.'
       setError(message)
     }
   }
