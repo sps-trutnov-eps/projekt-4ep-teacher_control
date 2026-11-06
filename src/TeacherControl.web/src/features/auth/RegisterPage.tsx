@@ -62,7 +62,7 @@ export function RegisterPage() {
   const handleConfirmationSubmit = async (values: ConfirmCodeFormValues) => {
     setError(null)
     try {
-      await confirmCodeMutation.mutateAsync({
+      const result = await confirmCodeMutation.mutateAsync({
         email,
         code: values.code,
       })
@@ -74,7 +74,7 @@ export function RegisterPage() {
       })
 
       // Po úspěšném ověření rovnou přihlásíme a přesměrujeme na hlavní stránku
-      await login()
+      await login(result.user)
       navigate('/')
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Ověření kódu se nezdařilo.'

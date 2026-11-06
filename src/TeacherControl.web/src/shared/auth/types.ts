@@ -11,6 +11,6 @@ export interface AuthContextValue {
   isAuthenticated: boolean
   roles: Role[]
   hasRole: (role: Role) => boolean
-  login: () => Promise<void>
+  login: (user: User) => Promise<void>
   logout: () => Promise<void>
 }

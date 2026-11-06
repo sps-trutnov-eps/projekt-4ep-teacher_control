@@ -19,7 +19,7 @@ export const authKeys = {
 export function useRegister() {
   return useMutation<RegisterResponse, Error, RegisterRequest>({
     mutationFn: async (values) => {
-      const { data, error } = await api.POST('/auth/register', { body: values })
+      const { data, error } = await api.POST('/api/auth/register', { body: values })
 
       if (error) {
         throw new Error(error.detail ?? error.title ?? 'Registrace se nezdařila.')
@@ -35,7 +35,7 @@ export function useConfirmCode() {
 
   return useMutation<ConfirmCodeResponse, Error, ConfirmCodeRequest>({
     mutationFn: async (values) => {
-      const { data, error } = await api.POST('/auth/confirm-code', { body: values })
+      const { data, error } = await api.POST('/api/auth/confirm-code', { body: values })
 
       if (error) {
         throw new Error(error.detail ?? error.title ?? 'Ověření kódu se nezdařilo.')
@@ -52,7 +52,7 @@ export function useConfirmCode() {
 export function useResendCode() {
   return useMutation<ResendCodeResponse, Error, ResendCodeRequest>({
     mutationFn: async (values) => {
-      const { data, error } = await api.POST('/auth/resend-code', { body: values })
+      const { data, error } = await api.POST('/api/auth/resend-code', { body: values })
 
       if (error) {
         throw new Error(error.detail ?? error.title ?? 'Opětovné odeslání kódu se nezdařilo.')
@@ -68,7 +68,7 @@ export function useLoginMutation() {
 
   return useMutation<LoginResponse, Error, LoginRequest>({
     mutationFn: async (values) => {
-      const { data, error } = await api.POST('/auth/login', { body: values })
+      const { data, error } = await api.POST('/api/auth/login', { body: values })
 
       if (error) {
         throw new Error(error.detail ?? error.title ?? 'Přihlášení se nezdařilo.')
@@ -86,7 +86,7 @@ export function useCurrentUser() {
   return useQuery({
     queryKey: authKeys.me,
     queryFn: async () => {
-      const { data, error } = await api.GET('/auth/me')
+      const { data, error } = await api.GET('/api/auth/me')
 
       if (error) {
         throw new Error('Nepodařilo se načíst profil uživatele.')

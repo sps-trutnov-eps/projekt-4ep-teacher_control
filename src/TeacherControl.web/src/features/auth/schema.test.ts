@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  confirmCodeSchema,
-  loginSchema,
-  registerSchema,
-  schoolEmailSchema,
-} from './schema'
+import { confirmCodeSchema, loginSchema, registerSchema, schoolEmailSchema } from './schema'
 
 describe('auth schemas', () => {
   describe('schoolEmailSchema', () => {

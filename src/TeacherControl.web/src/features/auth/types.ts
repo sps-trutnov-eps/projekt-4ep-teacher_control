@@ -47,7 +47,7 @@ export interface ProblemDetails {
 // Rozšíření paths pro openapi-fetch, dokud backend nevygeneruje své OpenAPI schéma do schema.d.ts
 declare module '@/shared/api/generated/schema' {
   interface paths {
-    '/auth/register': {
+    '/api/auth/register': {
       post: {
         requestBody: {
           content: {
@@ -68,7 +68,7 @@ declare module '@/shared/api/generated/schema' {
         }
       }
     }
-    '/auth/confirm-code': {
+    '/api/auth/confirm-code': {
       post: {
         requestBody: {
           content: {
@@ -89,7 +89,7 @@ declare module '@/shared/api/generated/schema' {
         }
       }
     }
-    '/auth/resend-code': {
+    '/api/auth/resend-code': {
       post: {
         requestBody: {
           content: {
@@ -110,7 +110,7 @@ declare module '@/shared/api/generated/schema' {
         }
       }
     }
-    '/auth/login': {
+    '/api/auth/login': {
       post: {
         requestBody: {
           content: {
@@ -131,7 +131,7 @@ declare module '@/shared/api/generated/schema' {
         }
       }
     }
-    '/auth/me': {
+    '/api/auth/me': {
       get: {
         responses: {
           200: {
@@ -142,7 +142,7 @@ declare module '@/shared/api/generated/schema' {
         }
       }
     }
-    '/auth/logout': {
+    '/api/auth/logout': {
       post: {
         responses: {
           200: {
