@@ -71,6 +71,16 @@ vi.mock('./api', async (importOriginal) => ({
   useSubmitMood: (id: number) => useSubmitMood(id),
 }))
 
+/**
+ * Otevře kulaté menu v pravém horním rohu profilu a přepne záložku.
+ * `hidden: true` je kvůli jsdom: floating-ui nemá rozměry, tak Mantine dropdown schová
+ * přes display: none, ale v prohlížeči je vidět. Test potřebuje jen položku kliknout.
+ */
+async function switchTab(label: 'Zobrazit' | 'Hodnotit') {
+  fireEvent.click(screen.getByRole('button', { name: 'Menu profilu učitele' }))
+  fireEvent.click(await screen.findByRole('menuitem', { name: label, hidden: true }))
+}
+
 function renderPage() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -129,6 +139,15 @@ describe('AbstencePage oproti návrhu', () => {
     expect(screen.getAllByLabelText('Nálada učitele: Špatná nálada').length).toBeGreaterThan(0)
   })
 
+  it('bez výběru netahá detail učitele s ID 0 (ID v databázi začínají na 1)', () => {
+    renderPage()
+
+    // Detail vedle seznamu je prázdný, dokud uživatel nikoho nevybere.
+    expect(screen.queryByText('Profil učitele — zpoždění a nálada')).toBeNull()
+    expect(useTeacher.mock.calls.every(([teacherId]) => teacherId !== 0)).toBe(true)
+    expect(useTeacher).toHaveBeenLastCalledWith(null)
+  })
+
   it('vyhledávání filtruje seznam podle jména (filtr řeší frontend)', () => {
     renderPage()
 
@@ -141,15 +160,13 @@ describe('AbstencePage oproti návrhu', () => {
     expect(screen.queryByText('Martin Černý')).toBeNull()
   })
 
-  it('detail: záložky Zobrazit/Hodnotit z designu, Zobrazit ukazuje dnešní zpoždění a metr jen pro čtení', () => {
+  it('detail: kulaté menu v pravém horním rohu nabídne Zobrazit/Hodnotit, Zobrazit ukazuje dnešní zpoždění', async () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
 
-    // Detail se otevře: popisek profilu + záložky z designu (SegmentedControl = radio).
     expect(screen.getByText('Profil učitele — zpoždění a nálada')).toBeTruthy()
-    expect(screen.getByRole('radio', { name: 'Zobrazit' })).toBeTruthy()
-    expect(screen.getByRole('radio', { name: 'Hodnotit' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Menu profilu učitele' })).toBeTruthy()
 
     // Dnešní zpoždění na záložce Zobrazit (text je rozdělený do vnořených elementů).
     expect(screen.getByText(/Dnes nahlášeno/)).toBeTruthy()
@@ -158,45 +175,103 @@ describe('AbstencePage oproti návrhu', () => {
     // Metr nálady je na Zobrazit jen pro čtení — žádná tlačítka úrovní.
     expect(screen.queryByRole('button', { name: /Nastavit náladu/ })).toBeNull()
     expect(screen.getAllByLabelText('Nálada učitele: Špatná nálada').length).toBeGreaterThan(0)
+
+    // Obě záložky se ukážou až po kliknutí na kulaté tlačítko.
+    expect(screen.queryByRole('menuitem', { name: 'Zobrazit', hidden: true })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Menu profilu učitele' }))
+    expect(await screen.findByRole('menuitem', { name: 'Zobrazit', hidden: true })).toBeTruthy()
+    expect(await screen.findByRole('menuitem', { name: 'Hodnotit', hidden: true })).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Hodnotit', hidden: true }))
+    expect(await screen.findByRole('button', { name: /Nastavit náladu na 1 z 5/ })).toBeTruthy()
   })
 
-  it('Hodnotit: metr nálady je editovatelný, klik na úroveň uloží hodnotu', () => {
+  it('Hodnotit: klik na úroveň v metru jen vybere, uloží se až tlačítkem Uložit', async () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
-    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+    await switchTab('Hodnotit')
 
     fireEvent.click(screen.getByRole('button', { name: /Nastavit náladu na 2 z 5/ }))
 
-    expect(submitMoodMock).toHaveBeenCalledWith({ value: 2 })
+    // Výběr nálady se zatím nikam neposílá — uživatel může chybu ještě opravit.
+    expect(submitMoodMock).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Uložit' }))
+
+    await waitFor(() => {
+      expect(submitMoodMock).toHaveBeenCalledWith({ value: 2 })
+    })
+    // Zpoždění se neměnilo, tak se neposílá (sdílený cooldown by druhé volání odmítlo).
+    expect(submitLateArrivalMock).not.toHaveBeenCalled()
   })
 
-  it('Hodnotit: rychlé tlačítko +5 uloží zpoždění jedním klikem', () => {
+  it('Hodnotit: rychlé tlačítko +5 jen vyplní pole, odešle se až Uložit', async () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
-    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+    await switchTab('Hodnotit')
 
     fireEvent.click(screen.getByRole('button', { name: '+5' }))
 
-    expect(submitLateArrivalMock).toHaveBeenCalledWith({ minutes: 5 })
+    expect(submitLateArrivalMock).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Uložit' }))
+
+    await waitFor(() => {
+      expect(submitLateArrivalMock).toHaveBeenCalledWith({ minutes: 5 })
+    })
+    // Nálada se nevybrala, tak se neposílá.
+    expect(submitMoodMock).not.toHaveBeenCalled()
+  })
+
+  it('Hodnotit: Uložit odešle zpoždění i náladu jedním klikem', async () => {
+    renderPage()
+
+    fireEvent.click(screen.getByText('Petr Svoboda'))
+    await switchTab('Hodnotit')
+
+    fireEvent.click(screen.getByRole('button', { name: '+15' }))
+    fireEvent.click(screen.getByRole('button', { name: /Nastavit náladu na 3 z 5/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Uložit' }))
+
+    await waitFor(() => {
+      expect(submitLateArrivalMock).toHaveBeenCalledWith({ minutes: 15 })
+      expect(submitMoodMock).toHaveBeenCalledWith({ value: 3 })
+    })
+  })
+
+  it('Hodnotit: bez jakékoli změny se Uložit nic neodešle', async () => {
+    renderPage()
+
+    fireEvent.click(screen.getByText('Petr Svoboda'))
+    await switchTab('Hodnotit')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Uložit' }))
+
+    await waitFor(() => {
+      expect(screen.getByText('Nic se nezměnilo — uprav zpoždění nebo náladu.')).toBeTruthy()
+    })
+    expect(submitLateArrivalMock).not.toHaveBeenCalled()
+    expect(submitMoodMock).not.toHaveBeenCalled()
   })
 
   it('Hodnotit: custom 0 minut projde validací Zod a neodešle se', async () => {
     renderPage()
 
     fireEvent.click(screen.getByText('Petr Svoboda'))
-    fireEvent.click(screen.getByRole('radio', { name: 'Hodnotit' }))
+    await switchTab('Hodnotit')
 
     fireEvent.change(screen.getByLabelText('Vlastní zpoždění (minuty)'), {
       target: { value: '0' },
     })
-    fireEvent.click(screen.getByRole('button', { name: 'Uložit zpoždění' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Uložit' }))
 
     await waitFor(() => {
       expect(screen.getByText('Zpoždění musí být alespoň 1 minuta.')).toBeTruthy()
     })
     expect(submitLateArrivalMock).not.toHaveBeenCalled()
+    expect(submitMoodMock).not.toHaveBeenCalled()
   })
 
   it('mobil: řádek se rozklikne s detailem (varianta z mobilního návrhu)', async () => {
