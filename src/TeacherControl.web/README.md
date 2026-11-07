@@ -29,7 +29,7 @@ Pak v rootu repa:
 
 ```bash
 cp .env.example .env
-docker compose -f db-only.compose.yaml up -d
+docker compose -f docker/db-only.docker-compose.yaml --env-file .env up -d
 dotnet run --project src/TeacherControl.Api
 ```
 
@@ -38,7 +38,7 @@ A znovu `pnpm dev`.
 Před každým PR musí projít:
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm test && pnpm build
+pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
 ## Pět pravidel

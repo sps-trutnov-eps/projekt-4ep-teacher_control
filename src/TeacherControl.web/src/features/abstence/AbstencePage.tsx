@@ -15,10 +15,7 @@ export function AbstencePage() {
 
   return (
     <Stack gap="md">
-      <PageHeader
-        title="Abstence"
-        description="Zpoždění učitelů po zvonění a jejich nálada."
-      />
+      <PageHeader title="Abstence" description="Zpoždění učitelů po zvonění a jejich nálada." />
 
       <TextInput
         label="Vyhledat učitele"

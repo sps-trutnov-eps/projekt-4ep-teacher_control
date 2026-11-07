@@ -98,7 +98,9 @@ export const abstenceHandlers = [
   http.get('*/api/abstence/:teacherId', ({ params }) => {
     const teacher = teachers.find((candidate) => candidate.teacherId === Number(params.teacherId))
 
-    return teacher === undefined ? new HttpResponse(null, { status: 404 }) : HttpResponse.json(toDto(teacher))
+    return teacher === undefined
+      ? new HttpResponse(null, { status: 404 })
+      : HttpResponse.json(toDto(teacher))
   }),
 
   http.post('*/api/abstence/:teacherId/late-arrival', async ({ request, params }) => {

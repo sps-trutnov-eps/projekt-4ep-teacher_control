@@ -1,4 +1,5 @@
 # Struktura controller-based API
+
 Toto je pouze příklad struktury, ne každá složka/soubor tam nutně bude. Příklad: Common/Extensions/ tam nejspíš nebude. Spíše jde o vaše porozumění, že máte zůstat ve své složce v Features/ a pokud budete chtít upravovat schéma databáze, tak se na mě obraťte, jelikož nelze mergovat migrace. Udržujte layered strukturu.
 
 Pro testování můžete migrace vytvořit u sebe, ale v žádném případě je nesmíte commitovat. Jakýkoliv PR s upravenými migracemi bude odmítnut.

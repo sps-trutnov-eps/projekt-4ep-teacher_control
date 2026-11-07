@@ -14,9 +14,30 @@ import type { Teacher } from './types'
  */
 
 const TEACHERS: Teacher[] = [
-  { teacherId: 1, name: 'Jana Nováková', photoUrl: null, rating: 4.5, mood: 1, lateArrivalMinutesToday: 0 },
-  { teacherId: 2, name: 'Petr Svoboda', photoUrl: null, rating: 3, mood: 4, lateArrivalMinutesToday: 15 },
-  { teacherId: 4, name: 'Martin Černý', photoUrl: null, rating: 2, mood: 5, lateArrivalMinutesToday: 25 },
+  {
+    teacherId: 1,
+    name: 'Jana Nováková',
+    photoUrl: null,
+    rating: 4.5,
+    mood: 1,
+    lateArrivalMinutesToday: 0,
+  },
+  {
+    teacherId: 2,
+    name: 'Petr Svoboda',
+    photoUrl: null,
+    rating: 3,
+    mood: 4,
+    lateArrivalMinutesToday: 15,
+  },
+  {
+    teacherId: 4,
+    name: 'Martin Černý',
+    photoUrl: null,
+    rating: 2,
+    mood: 5,
+    lateArrivalMinutesToday: 25,
+  },
 ]
 
 const useTeachers = vi.fn().mockReturnValue({ data: TEACHERS, isPending: false, isError: false })

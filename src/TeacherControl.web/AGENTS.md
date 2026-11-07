@@ -28,6 +28,7 @@ konvence najednou. Kopíruj tvar, ne obsah.
 - ruční psaní typů pro API odpovědi, generují se z OpenAPI
 - `useEffect` na načítání dat, od toho je TanStack Query
 - vlastní CSS framework nebo vlastní komponenta tam, kde Mantine něco má
+- vlastní `theme.ts`, hex barvy a `font-family` ve featuře, vzhled je v `src/shared/theme`
 - Redux, Zustand, Jotai a další state managery
 - třídové komponenty
 - nová npm závislost bez schválení frontend mastera
@@ -123,7 +124,7 @@ Aspoň jeden test na featuru. Nehoň se za pokrytím.
 ## Před PR
 
 ```bash
-pnpm lint && pnpm typecheck && pnpm test && pnpm build
+pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
 Musí projít všechno. Jeden PR = jedna featura. Neupravuj při tom konfiguraci ani cizí featury.
