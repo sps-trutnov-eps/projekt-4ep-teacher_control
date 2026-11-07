@@ -1,0 +1,1 @@
+export { PololetiPage } from './PololetiPage'

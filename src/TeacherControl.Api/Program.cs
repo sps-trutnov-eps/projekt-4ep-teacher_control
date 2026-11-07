@@ -6,8 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using TeacherControl.Api.Features.Abstence.Services;
-using TeacherControl.Api.Features.Rating.Services;
 using TeacherControl.Api.Features.Pololeti.Services;
+using TeacherControl.Api.Features.Rating.Services;
+using TeacherControl.Api.Features.TeacherBingo.Services;
+using TeacherControl.Api.Features.Versioning.Services;
 
 namespace TeacherControl.Api;
 
@@ -57,6 +59,7 @@ public class Program
         builder.Services.AddScoped<AbstenceService>();
         builder.Services.AddScoped<TeacherBingoService>();
         builder.Services.AddScoped<RatingService>();
+        builder.Services.AddScoped<VersionService>();
         builder.Services.AddScoped<PololetiService>();
 
         var app = builder.Build();

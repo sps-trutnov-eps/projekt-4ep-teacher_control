@@ -245,6 +245,127 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/pololeti/teachers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["PololetiTeacherDto"][];
+                        "application/json": components["schemas"]["PololetiTeacherDto"][];
+                        "text/json": components["schemas"]["PololetiTeacherDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pololeti/teachers/{teacherId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    teacherId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["TeacherCardDto"];
+                        "application/json": components["schemas"]["TeacherCardDto"];
+                        "text/json": components["schemas"]["TeacherCardDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pololeti/teachers/{teacherId}/votes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    teacherId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CastVoteRequest"];
+                    "text/json": components["schemas"]["CastVoteRequest"];
+                    "application/*+json": components["schemas"]["CastVoteRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["TeacherCardDto"];
+                        "application/json": components["schemas"]["TeacherCardDto"];
+                        "text/json": components["schemas"]["TeacherCardDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/abstence": {
         parameters: {
             query?: never;
@@ -415,6 +536,10 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CastVoteRequest: {
+            /** Format: int32 */
+            teacherTitleId: number | string;
+        };
         CreateReviewRequest: {
             /** Format: int32 */
             teacherId: number | string;
@@ -422,6 +547,12 @@ export interface components {
             content: string;
             /** Format: float */
             rating: number | string;
+        };
+        PololetiTeacherDto: {
+            /** Format: int32 */
+            teacherId: number | string;
+            name: string;
+            photoUrl: null | string;
         };
         SubmitLateArrivalRequest: {
             /** Format: int32 */
@@ -442,6 +573,26 @@ export interface components {
             mood: number | string;
             /** Format: int32 */
             lateArrivalMinutesToday: number | string;
+        };
+        TeacherCardDto: {
+            /** Format: int32 */
+            teacherId: number | string;
+            name: string;
+            photoUrl: null | string;
+            description: string;
+            /** Format: int32 */
+            pololeti: number | string;
+            pololetiText: string;
+            titles: components["schemas"]["TitleVotesDto"][];
+        };
+        TitleVotesDto: {
+            /** Format: int32 */
+            teacherTitleId: number | string;
+            title: string;
+            /** Format: int32 */
+            votes: number | string;
+            /** Format: int32 */
+            myVoteTeacherId: null | number | string;
         };
         UpdateReviewRequest: {
             title: string;

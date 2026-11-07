@@ -5,6 +5,35 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/version": {
+      "get": {
+        "tags": [
+          "Version"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/rating": {
       "post": {
         "tags": [
@@ -262,18 +291,6 @@
         "parameters": [
           {
             "name": "teacherId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "parameters": [
-          {
-            "name": "reviewId",
             "in": "path",
             "required": true,
             "schema": {
@@ -571,6 +588,8 @@
             "type": "string"
           },
           "rating": {
+            "maximum": 5,
+            "minimum": 1,
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
             "type": [
               "number",
@@ -784,6 +803,32 @@
           }
         }
       },
+      "UpdateReviewRequest": {
+        "required": [
+          "title",
+          "content",
+          "rating"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "rating": {
+            "maximum": 5,
+            "minimum": 1,
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "float"
+          }
+        }
+      },
       "VersionDto": {
         "type": "object",
         "properties": {
@@ -822,6 +867,9 @@
     }
   },
   "tags": [
+    {
+      "name": "Version"
+    },
     {
       "name": "Rating"
     },

@@ -2,6 +2,7 @@
 // Přes barrel by se MSW protáhl do produkčního bundlu.
 import { vzorHandlers } from '@/features/vzor/mocks'
 import { abstenceHandlers } from '@/features/abstence/mocks'
+import { pololetiHandlers } from '@/features/pololeti/mocks'
 import { ratingHandlers } from '@/features/rating/mocks'
 import { versionHandlers } from './version'
 
@@ -11,4 +12,5 @@ export const handlers = [
   ...vzorHandlers,
   ...abstenceHandlers,
   ...ratingHandlers,
+  ...pololetiHandlers,
 ]
