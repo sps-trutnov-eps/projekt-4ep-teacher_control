@@ -1,0 +1,11 @@
+services:
+  web:
+    profiles:
+      - production
+
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=${POSTGRES_DB:-teacher_control};Username=${POSTGRES_USER:-control};Password=${POSTGRES_PASSWORD:-TeacherControl123!}
+    ports:
+      - "5229:8080"
