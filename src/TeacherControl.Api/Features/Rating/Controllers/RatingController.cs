@@ -1,6 +1,8 @@
 using System.Security.Claims;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using TeacherControl.Api.Features.Rating.DTOs;
 using TeacherControl.Api.Features.Rating.Services;
 
@@ -21,6 +23,10 @@ public class RatingController : ControllerBase
 
     [HttpPost]
     [Authorize]
+    [ProducesResponseType(typeof(ReviewResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CreateReview([FromBody] CreateReviewRequest request)
     {
         var studentId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -30,7 +36,7 @@ public class RatingController : ControllerBase
         try
         {
             var result = await _ratingService.CreateReviewAsync(studentId, request);
-            return CreatedAtAction(nameof(GetReviewsForTeacher), new { teacherId = result.TeacherId }, result);
+            return CreatedAtAction(nameof(GetTeacherProfile), new { teacherId = result.TeacherId }, result);
         }
         catch (KeyNotFoundException ex)
         {
@@ -39,21 +45,19 @@ public class RatingController : ControllerBase
         }
     }
 
+    /// <summary>Seznam všech učitelů (id, jméno, fotka, průměr recenzí).</summary>
+    [HttpGet("teachers")]
+    [ProducesResponseType(typeof(List<TeacherListItemResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetTeachers()
+    {
+        var teachers = await _ratingService.GetTeachersAsync();
+        return Ok(teachers);
+    }
+
+    /// <summary>Doplňující údaje o učiteli (bio, abstence, bingovost, ocenění).</summary>
     [HttpGet("teacher/{teacherId:int}")]
-    public async Task<IActionResult> GetReviewsForTeacher(int teacherId)
-    {
-        var reviews = await _ratingService.GetReviewsForTeacherAsync(teacherId);
-        return Ok(reviews);
-    }
-
-    [HttpGet("teacher/{teacherId:int}/average")]
-    public async Task<IActionResult> GetAverageRating(int teacherId)
-    {
-        var average = await _ratingService.GetAverageRatingAsync(teacherId);
-        return Ok(average);
-    }
-
-    [HttpGet("teacher/{teacherId:int}/profile")]
+    [ProducesResponseType(typeof(TeacherProfileResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetTeacherProfile(int teacherId)
     {
         try
@@ -68,8 +72,21 @@ public class RatingController : ControllerBase
         }
     }
 
+    [HttpGet("teacher/{teacherId:int}/average")]
+    [ProducesResponseType(typeof(float), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAverageRating(int teacherId)
+    {
+        var average = await _ratingService.GetAverageRatingAsync(teacherId);
+        return Ok(average);
+    }
+
     [HttpPut("{reviewId:int}")]
     [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(ReviewResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateReview(int reviewId, [FromBody] UpdateReviewRequest request)
     {
         try
@@ -86,6 +103,10 @@ public class RatingController : ControllerBase
 
     [HttpDelete("{reviewId:int}")]
     [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteReview(int reviewId)
     {
         try

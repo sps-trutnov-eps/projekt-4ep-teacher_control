@@ -1,104 +1,102 @@
-import { Box, Title, Text, Stack, Group, Rating, Center, Alert, Button } from '@mantine/core'
-import type { Teacher } from '../types'
+import { Box, Title, Text, Stack, Group, Rating, Button, Image, Card } from '@mantine/core'
+import { DEFAULT_TEACHER_IMAGE, type TeacherDetails, type TeacherListItem } from '../types'
 
 interface TeacherDetailProps {
-  teacher: Teacher
+  teacher: TeacherListItem
+  details: TeacherDetails
   onBack: () => void
 }
 
-export function TeacherDetail({ teacher, onBack }: TeacherDetailProps) {
+export function TeacherDetail({ teacher, details, onBack }: TeacherDetailProps) {
+  const imageUrl = teacher.image_url || DEFAULT_TEACHER_IMAGE
+
   return (
-    <Box bg="white" style={{ flex: 1, minHeight: '100%' }}>
-      {/* Top photo placeholder */}
-      <Box h={{ base: 120, sm: 200 }} bg="gray.3" pos="relative">
+    <Card h="100%" p={0} style={{ overflow: 'hidden' }}>
+      {/* Fotografie učitele nebo náhradní obrázek při null */}
+      <Box h={{ base: 140, sm: 200 }} bg="gray.1" pos="relative" style={{ overflow: 'hidden' }}>
         <Button
-          variant="default"
+          variant="outline"
           size="xs"
           pos="absolute"
           top={10}
           left={10}
+          style={{ zIndex: 2 }}
           onClick={onBack}
           display={{ base: 'block', sm: 'none' }}
         >
           ← Zpět
         </Button>
-        <Center h="100%">
-          <Text c="gray.6" fw={700} size="xl">
-            FOTO
-          </Text>
-        </Center>
+        <Image
+          src={imageUrl}
+          fallbackSrc={DEFAULT_TEACHER_IMAGE}
+          alt={teacher.full_name}
+          h="100%"
+          w="100%"
+          fit="cover"
+        />
       </Box>
 
-      <Box p={{ base: 'md', sm: 'xl' }}>
-        <Stack gap="xl">
-          <Title order={2} ta="center" fw={400}>
-            {teacher.firstName} {teacher.lastName}
+      <Box p="lg">
+        <Stack gap="lg">
+          <Title order={2} ta="center">
+            {teacher.full_name}
           </Title>
 
-          <Text c="dimmed" size="sm" ta="justify">
-            {teacher.description}
+          <Text size="md" ta="justify" style={{ lineHeight: 1.6 }}>
+            {details.bio}
           </Text>
 
-          <Stack gap="md">
-            <Group align="flex-start" wrap="wrap">
-              <Box w={{ base: '100%', sm: 250 }}>
-                <Title order={3} size="h4" fw={500} mb="sm">
-                  Hodnocení:
-                </Title>
-                <Group justify="space-between" mb="xs">
-                  <Text size="sm">Celkové:</Text>
-                  <Rating value={teacher.ratings.overall} readOnly color="yellow" />
-                </Group>
-                <Group justify="space-between" mb="xs">
-                  <Text size="sm">Abstence:</Text>
-                  <Rating value={teacher.ratings.absence} readOnly color="yellow" />
-                </Group>
-                <Group justify="space-between">
-                  <Text size="sm">Bingovanost:</Text>
-                  <Rating value={teacher.ratings.bingo} readOnly color="yellow" />
-                </Group>
-              </Box>
-
-              <Alert
-                color="blue"
-                variant="filled"
-                style={{ flex: 1, borderRadius: 0, width: '100%' }}
-              >
-                Kliknutí na hodnocení Vás pošle na informace o učitely v dané funkci.
-              </Alert>
+          <Box maw={320}>
+            <Title order={3} mb="sm">
+              Hodnocení:
+            </Title>
+            <Group justify="space-between" mb="xs">
+              <Text size="sm" c="dimmed">
+                Recenze:
+              </Text>
+              <Rating value={Number(teacher.review) || 0} readOnly fractions={2} />
             </Group>
-          </Stack>
+            <Group justify="space-between" mb="xs">
+              <Text size="sm" c="dimmed">
+                Abstence:
+              </Text>
+              <Rating value={Number(details.abstention) || 0} readOnly fractions={2} />
+            </Group>
+            <Group justify="space-between">
+              <Text size="sm" c="dimmed">
+                Bingovost:
+              </Text>
+              <Rating value={Number(details.binginess) || 0} readOnly fractions={2} />
+            </Group>
+          </Box>
 
-          <Stack gap="md">
-            <Group align="flex-start" wrap="wrap">
-              <Box w={{ base: '100%', sm: 250 }}>
-                <Title order={3} size="h4" fw={500} mb="sm">
-                  Ocenění:
-                </Title>
-                {teacher.awards.length > 0 ? (
-                  teacher.awards.map((award) => (
-                    <Text key={award.id} size="sm" mb="xs">
-                      {award.name}
-                    </Text>
-                  ))
-                ) : (
-                  <Text size="sm" c="dimmed">
-                    Žádná ocenění
+          <Box maw={320}>
+            <Title order={3} mb="sm">
+              Ocenění:
+            </Title>
+            {details.awards.length > 0 ? (
+              details.awards.map((item, idx) => {
+                const yearNum = Number(item.year)
+                const displayYear = !isNaN(yearNum)
+                  ? yearNum < 1000
+                    ? 2026 + yearNum
+                    : yearNum
+                  : null
+                return (
+                  <Text key={idx} size="md" mb="xs">
+                    {item.award}
+                    {displayYear !== null ? ` (${displayYear})` : ''}
                   </Text>
-                )}
-              </Box>
-
-              <Alert
-                color="blue"
-                variant="filled"
-                style={{ flex: 1, borderRadius: 0, width: '100%' }}
-              >
-                Kliknutí na dané ocenění Vás pošle na informace o daném ocenění.
-              </Alert>
-            </Group>
-          </Stack>
+                )
+              })
+            ) : (
+              <Text size="sm" c="dimmed">
+                Žádná ocenění
+              </Text>
+            )}
+          </Box>
         </Stack>
       </Box>
-    </Box>
+    </Card>
   )
 }

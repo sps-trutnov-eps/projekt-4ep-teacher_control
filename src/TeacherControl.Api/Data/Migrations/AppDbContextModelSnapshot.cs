@@ -18,7 +18,7 @@ namespace TeacherControl.Api.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -322,7 +322,10 @@ namespace TeacherControl.Api.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("LastSubmissionAt")
+                    b.Property<DateTime?>("LastLateArrivalSubmissionAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LastMoodSubmissionAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LoginName")

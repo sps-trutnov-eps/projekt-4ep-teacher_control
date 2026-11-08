@@ -1,5 +1,7 @@
 using System.Linq.Expressions;
+
 using Microsoft.EntityFrameworkCore;
+
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using TeacherControl.Api.Features.Abstence.Models;
@@ -48,7 +50,7 @@ public class AbstenceService
         if (teacher is null)
             return new AbstenceWriteResult(AbstenceWriteOutcome.TeacherNotFound);
 
-        if (TryGetCooldownRemaining(teacher, now, out var remaining))
+        if (TryGetCooldownRemaining(teacher.LastLateArrivalSubmissionAt, now, out var remaining))
             return new AbstenceWriteResult(AbstenceWriteOutcome.TooSoon, RetryAfter: remaining);
 
         var student = await _context.Users.FindAsync(studentId);
@@ -66,7 +68,7 @@ public class AbstenceService
             Student = student,
             TimeSpan = TimeSpan.FromMinutes(minutes)
         });
-        teacher.LastSubmissionAt = now;
+        teacher.LastLateArrivalSubmissionAt = now;
 
         await _context.SaveChangesAsync();
 
@@ -85,7 +87,7 @@ public class AbstenceService
         if (teacher is null)
             return new AbstenceWriteResult(AbstenceWriteOutcome.TeacherNotFound);
 
-        if (TryGetCooldownRemaining(teacher, now, out var remaining))
+        if (TryGetCooldownRemaining(teacher.LastMoodSubmissionAt, now, out var remaining))
             return new AbstenceWriteResult(AbstenceWriteOutcome.TooSoon, RetryAfter: remaining);
 
         var student = await _context.Users.FindAsync(studentId);
@@ -93,18 +95,18 @@ public class AbstenceService
             return new AbstenceWriteResult(AbstenceWriteOutcome.InternalError);
 
         teacher.Mood = value;
-        teacher.LastSubmissionAt = now;
+        teacher.LastMoodSubmissionAt = now;
 
         await _context.SaveChangesAsync();
 
         return new AbstenceWriteResult(AbstenceWriteOutcome.Success, ToDto(teacher));
     }
 
-    // Cooldown je sdílený mezi pozdním příchodem a náladou — odeslání jednoho z nich
-    // resetuje časovač pro oba typy u daného učitele.
-    private static bool TryGetCooldownRemaining(TeacherEntity teacher, DateTime now, out TimeSpan remaining)
+    // Pozdní příchod a nálada mají od sebe nezávislé cooldowny — volá se zvlášť pro
+    // LastLateArrivalSubmissionAt a zvlášť pro LastMoodSubmissionAt.
+    private static bool TryGetCooldownRemaining(DateTime? lastSubmission, DateTime now, out TimeSpan remaining)
     {
-        if (teacher.LastSubmissionAt is { } last && now - last < SubmissionCooldown)
+        if (lastSubmission is { } last && now - last < SubmissionCooldown)
         {
             remaining = SubmissionCooldown - (now - last);
             return true;

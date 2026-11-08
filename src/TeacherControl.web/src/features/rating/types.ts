@@ -1,21 +1,9 @@
-export interface TeacherAward {
-  id: string
-  name: string
-  description: string
-}
+import type { components } from '@/shared/api'
 
-export interface TeacherRating {
-  overall: number
-  absence: number
-  bingo: number
-}
+export const DEFAULT_TEACHER_IMAGE = 'https://images.unsplash.com/photo-1591880765528-4f5630af786c'
 
-export interface Teacher {
-  id: string
-  firstName: string
-  lastName: string
-  photoUrl: string | null
-  description: string
-  ratings: TeacherRating
-  awards: TeacherAward[]
-}
+export type TeacherAward = components['schemas']['TeacherAwardResponse']
+export type TeacherListItem = components['schemas']['TeacherListItemResponse']
+export type TeacherDetails = components['schemas']['TeacherProfileResponse']
+
+export interface TeacherProfile extends TeacherListItem, TeacherDetails {}

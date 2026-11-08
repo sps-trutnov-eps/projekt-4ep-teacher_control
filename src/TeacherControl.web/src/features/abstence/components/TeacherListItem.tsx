@@ -26,8 +26,9 @@ export function TeacherListItem({ teacher, isExpanded, onToggle, children }: Tea
         borderColor: isExpanded ? theme.colors[MOOD_COLORS[moodLevel]][6] : undefined,
       })}
     >
-      <UnstyledButton onClick={onToggle} w="100%">
-        <Stack gap="xs">
+      <Stack gap="xs">
+        {/* Rozbalený detail je mimo klikací řádek — jinak by v něm vznikala tlačítka v tlačítku. */}
+        <UnstyledButton onClick={onToggle} w="100%">
           <Group justify="space-between" wrap="nowrap">
             <Group gap="md" wrap="nowrap">
               <TeacherAvatar
@@ -54,10 +55,10 @@ export function TeacherListItem({ teacher, isExpanded, onToggle, children }: Tea
               {isExpanded ? '▲' : '▼'}
             </Text>
           </Group>
+        </UnstyledButton>
 
-          {isExpanded && children ? <Stack gap="sm">{children}</Stack> : null}
-        </Stack>
-      </UnstyledButton>
+        {isExpanded && children ? <Stack gap="sm">{children}</Stack> : null}
+      </Stack>
     </Paper>
   )
 }
