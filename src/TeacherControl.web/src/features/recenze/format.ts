@@ -1,5 +1,3 @@
-import type { ReviewTeacher } from './types'
-
 const ratingFormatter = new Intl.NumberFormat('cs-CZ', {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
@@ -10,12 +8,6 @@ const dateFormatter = new Intl.DateTimeFormat('cs-CZ', {
   month: 'numeric',
   year: 'numeric',
 })
-
-export function formatTeacherName(
-  teacher: Pick<ReviewTeacher, 'degree' | 'firstName' | 'lastName'>,
-) {
-  return [teacher.degree, teacher.firstName, teacher.lastName].filter(Boolean).join(' ')
-}
 
 /** 4.2 → „4,2“ */
 export function formatRating(value: number) {

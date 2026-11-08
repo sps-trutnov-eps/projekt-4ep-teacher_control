@@ -5,10 +5,9 @@ import { IconSearch } from './components/icons'
 import { ReviewForm } from './components/ReviewForm'
 import { TeacherDetail } from './components/TeacherDetail'
 import { TeacherList, TeacherListSkeleton } from './components/TeacherList'
-import { ALL_SUBJECTS, TeacherSearch } from './components/TeacherSearch'
-import { formatTeacherName } from './format'
+import { TeacherSearch } from './components/TeacherSearch'
 import classes from './Recenze.module.css'
-import type { ReviewTeacher, TeacherSort } from './types'
+import type { Review, ReviewTeacher, TeacherSort } from './types'
 
 const PAGE_SIZE = 8
 
@@ -20,7 +19,7 @@ type DetailMode = 'profile' | 'write'
 const TEACHER_SORTERS: Record<TeacherSort, (a: ReviewTeacher, b: ReviewTeacher) => number> = {
   reviews: (a, b) => b.reviewCount - a.reviewCount,
   rating: (a, b) => (b.averageRating ?? 0) - (a.averageRating ?? 0),
-  name: (a, b) => a.lastName.localeCompare(b.lastName, 'cs'),
+  name: (a, b) => a.name.localeCompare(b.name, 'cs'),
 }
 
 /**
@@ -31,10 +30,11 @@ export function RecenzePage() {
   const teachersQuery = useReviewTeachers()
 
   const [search, setSearch] = useState('')
-  const [subject, setSubject] = useState(ALL_SUBJECTS)
   const [sort, setSort] = useState<TeacherSort>('reviews')
   const [page, setPage] = useState(1)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [selectedId, setSelectedId] = useState<number | null>(null)
+  /** Recenze, kterou formulář upravuje; bez ní se píše nová. */
+  const [editing, setEditing] = useState<Review | null>(null)
   const [mode, setMode] = useState<DetailMode>('profile')
 
   const scrollTopOnMobile = () => {
@@ -43,8 +43,9 @@ export function RecenzePage() {
     }
   }
 
-  const selectTeacher = (teacherId: string) => {
+  const selectTeacher = (teacherId: number) => {
     setSelectedId(teacherId)
+    setEditing(null)
     setMode('profile')
     scrollTopOnMobile()
   }
@@ -54,9 +55,18 @@ export function RecenzePage() {
     scrollTopOnMobile()
   }
 
+  const startWriting = () => {
+    setEditing(null)
+    changeMode('write')
+  }
+
+  const startEditing = (review: Review) => {
+    setEditing(review)
+    changeMode('write')
+  }
+
   const allTeachers = teachersQuery.data ?? []
-  const subjects = subjectsByCount(allTeachers)
-  const filtered = filterTeachers(allTeachers, search, subject).sort(TEACHER_SORTERS[sort])
+  const filtered = filterTeachers(allTeachers, search).sort(TEACHER_SORTERS[sort])
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const currentPage = Math.min(page, totalPages)
   const pageItems = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
@@ -78,12 +88,6 @@ export function RecenzePage() {
                 search={search}
                 onSearchChange={(value) => {
                   setSearch(value)
-                  setPage(1)
-                }}
-                subjects={subjects}
-                subject={subject}
-                onSubjectChange={(value) => {
-                  setSubject(value)
                   setPage(1)
                 }}
                 sort={sort}
@@ -117,8 +121,9 @@ export function RecenzePage() {
               <EmptyDetail />
             ) : mode === 'write' ? (
               <ReviewForm
-                key={selectedId}
+                key={`${selectedId}-${editing?.id ?? 'new'}`}
                 teacherId={selectedId}
+                review={editing ?? undefined}
                 onBack={() => changeMode('profile')}
                 onSubmitted={() => changeMode('profile')}
               />
@@ -126,7 +131,8 @@ export function RecenzePage() {
               <TeacherDetail
                 teacherId={selectedId}
                 onBack={() => setSelectedId(null)}
-                onWrite={() => changeMode('write')}
+                onWrite={startWriting}
+                onEdit={startEditing}
               />
             )}
           </section>
@@ -147,32 +153,18 @@ function EmptyDetail() {
           Vyber učitele ze seznamu
         </Text>
         <Text className={classes.muted} maw={320}>
-          Zobrazí se jeho profil, hodnocení v kategoriích a recenze od studentů.
+          Zobrazí se jeho profil, hodnocení a recenze od studentů.
         </Text>
       </Stack>
     </div>
   )
 }
 
-function subjectsByCount(teachers: ReviewTeacher[]) {
-  const counts = new Map<string, number>()
-  for (const teacher of teachers) {
-    counts.set(teacher.subject, (counts.get(teacher.subject) ?? 0) + 1)
-  }
-  return [...counts.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'cs'))
-    .map(([name]) => name)
-}
-
-/** Backend zatím filtrování nemá, filtruje se ze staženého seznamu (bez ohledu na diakritiku). */
-function filterTeachers(teachers: ReviewTeacher[], search: string, subject: string) {
+/** Filtruje se ze staženého seznamu, aby hledání fungovalo bez ohledu na diakritiku. */
+function filterTeachers(teachers: ReviewTeacher[], search: string) {
   const query = normalize(search.trim())
 
-  return teachers.filter((teacher) => {
-    if (subject !== ALL_SUBJECTS && teacher.subject !== subject) return false
-    if (!query) return true
-    return normalize(`${formatTeacherName(teacher)} ${teacher.subject}`).includes(query)
-  })
+  return teachers.filter((teacher) => !query || normalize(teacher.name).includes(query))
 }
 
 function normalize(value: string) {

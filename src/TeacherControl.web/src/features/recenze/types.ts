@@ -1,56 +1,51 @@
+import type { components } from '@/shared/api'
+
 /**
- * Dokud endpointy recenzí nejsou v OpenAPI, popisuje si featura tvar odpovědí sama.
- * Až tam budou, tenhle soubor zmizí a typy se vezmou z `components['schemas']['…']`.
+ * Tvary z API se neopisují ručně — mapují se ze schématu generovaného `pnpm gen:api`
+ * (zdroj: docs/api/TeacherControl.Api.json, featura Recenze, backend `/api/reviews`).
  */
 
-/** Řádek v seznamu učitelů (GET /recenze/teachers). */
-export interface ReviewTeacher {
-  id: string
-  /** Titul před jménem, např. „Mgr.“. */
-  degree: string | null
-  firstName: string
-  lastName: string
-  subject: string
-  photoUrl: string | null
-  /** Průměr 1–5, null když učitel ještě nemá žádnou recenzi. */
-  averageRating: number | null
-  reviewCount: number
-}
+type TeacherResponse = components['schemas']['ReviewsTeacherResponse']
+type TeacherProfileResponse = components['schemas']['ReviewsTeacherProfileResponse']
+type ReviewResponse = components['schemas']['ReviewsReviewResponse']
 
-export interface ReviewCategory {
-  key: string
-  label: string
-  /** Průměr 1–5. */
-  value: number
-}
+/** Backend serializuje čísla jako JSON number; ve schématu mají kvůli strict OpenAPI i string tvar. */
+type AsNumber<T> = T extends string | number ? number : T
 
-/** Detail učitele (GET /recenze/teachers/{id}). */
-export interface ReviewTeacherDetail extends ReviewTeacher {
-  classes: string[]
-  school: string
-  categories: ReviewCategory[]
-}
-
-export type ReviewVote = 'like' | 'dislike'
-
-/** Recenze (GET /recenze/teachers/{id}/reviews). */
+/** Textová recenze. Autor se do odpovědi neposílá, `isMine` značí vlastní recenzi. */
 export interface Review {
-  id: string
-  teacherId: string
-  /** null = anonymní recenze. */
-  authorName: string | null
-  /** null = autor třídu nezveřejnil. */
-  className: string | null
-  rating: number
-  title: string | null
-  text: string
-  createdAt: string
-  likes: number
-  dislikes: number
+  id: AsNumber<ReviewResponse['id']>
+  teacherId: AsNumber<ReviewResponse['teacherId']>
+  content: ReviewResponse['content']
+  createdAt: ReviewResponse['createdAt']
+  updatedAt: ReviewResponse['updatedAt']
+  isMine: ReviewResponse['isMine']
+}
+
+/** Hlas pro učitele: 1 = like, -1 = dislike. */
+export type ReactionValue = 1 | -1
+
+/** Učitel v seznamu (GET /api/reviews/teachers). `averageRating` je null bez hodnocení. */
+export interface ReviewTeacher {
+  id: AsNumber<TeacherResponse['id']>
+  name: TeacherResponse['name']
+  photoUrl: TeacherResponse['photoUrl']
+  description: TeacherResponse['description']
+  averageRating: AsNumber<TeacherResponse['averageRating']>
+  reviewCount: AsNumber<TeacherResponse['reviewCount']>
+  likes: AsNumber<TeacherResponse['likes']>
+  dislikes: AsNumber<TeacherResponse['dislikes']>
   /** Jak hlasoval přihlášený uživatel, null = nehlasoval. */
-  myVote: ReviewVote | null
+  myReaction: AsNumber<TeacherResponse['myReaction']>
+}
+
+/** Profil učitele včetně recenzí (GET /api/reviews/teachers/{teacherId}). */
+export interface ReviewTeacherDetail extends ReviewTeacher {
+  nickname: TeacherProfileResponse['nickname']
+  reviews: Review[]
 }
 
 export type TeacherSort = 'reviews' | 'rating' | 'name'
 
-export type ReviewSort = 'newest' | 'oldest' | 'best' | 'helpful'
+/** Recenze řadí frontend, backend je vrací od nejnovější. */
+export type ReviewSort = 'newest' | 'oldest'

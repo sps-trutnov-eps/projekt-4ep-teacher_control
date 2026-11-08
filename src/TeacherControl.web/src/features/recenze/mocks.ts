@@ -1,196 +1,174 @@
 import { HttpResponse, http } from 'msw'
-import type { Review, ReviewSort, ReviewTeacher, ReviewTeacherDetail, ReviewVote } from './types'
+import type { ReactionValue, Review, ReviewTeacher, ReviewTeacherDetail } from './types'
 
-type TeacherSeed = [degree: string, firstName: string, lastName: string, subject: string]
+type TeacherSeed = [name: string, nickname: string | null, description: string]
 
 const TEACHER_SEEDS: TeacherSeed[] = [
-  ['Mgr.', 'Jan', 'Novák', 'Matematika'],
-  ['Bc.', 'Eva', 'Svobodová', 'Čeština'],
-  ['Ing.', 'Petr', 'Král', 'Programování'],
-  ['Mgr.', 'Lucie', 'Malá', 'Angličtina'],
-  ['Mgr.', 'Tomáš', 'Dvořák', 'Počítačové sítě'],
-  ['Ing.', 'Hana', 'Veselá', 'Elektronika'],
-  ['Mgr.', 'Karel', 'Černý', 'Fyzika'],
-  ['Bc.', 'Martin', 'Hola', 'Tělesná výchova'],
-  ['Mgr.', 'Jana', 'Procházková', 'Informatika'],
-  ['Ing.', 'David', 'Marek', 'Hardware'],
-  ['Mgr.', 'Kateřina', 'Vávrová', 'Biologie'],
-  ['Bc.', 'Filip', 'Novotný', 'Dějepis'],
-  ['Mgr.', 'Petra', 'Zajícová', 'Chemie'],
-  ['Ing.', 'Marek', 'Vorlíček', 'Databáze'],
-  ['Mgr.', 'Veronika', 'Pospíšilová', 'ZSV'],
-  ['Ing.', 'Ondřej', 'Bárta', 'Programování'],
+  ['Mgr. Jan Novák', 'Novi', 'Matematika. Vysvětluje na příkladech z praxe.'],
+  ['Bc. Eva Svobodová', null, 'Čeština a literatura.'],
+  ['Ing. Petr Král', 'Kráťa', 'Programování, webové aplikace.'],
+  ['Mgr. Lucie Malá', null, 'Angličtina, příprava na maturitu.'],
+  ['Mgr. Tomáš Dvořák', null, 'Počítačové sítě.'],
+  ['Ing. Hana Veselá', null, 'Elektronika a měření.'],
+  ['Mgr. Karel Černý', null, 'Fyzika.'],
+  ['Bc. Martin Hola', null, 'Tělesná výchova.'],
+  ['Mgr. Jana Procházková', null, 'Informatika.'],
+  ['Ing. David Marek', null, 'Hardware a servis počítačů.'],
+  ['Mgr. Kateřina Vávrová', null, 'Biologie.'],
+  ['Bc. Filip Novotný', null, 'Dějepis.'],
+  ['Mgr. Petra Zajícová', null, 'Chemie.'],
+  ['Ing. Marek Vorlíček', null, 'Databáze.'],
+  ['Mgr. Veronika Pospíšilová', null, 'Základy společenských věd.'],
+  ['Ing. Ondřej Bárta', null, 'Programování.'],
 ]
 
-const CATEGORY_LABELS: [key: string, label: string][] = [
-  ['explanation', 'Výklad'],
-  ['fairness', 'Spravedlnost'],
-  ['approach', 'Přístup k žákům'],
-  ['difficulty', 'Náročnost'],
-  ['atmosphere', 'Atmosféra'],
+const REVIEW_TEXTS = [
+  'Super výklad, všechno dobře vysvětlí a dává smysl. Někdy je náročnější na domácí úkoly, ale jinak férový a ochotný pomoct.',
+  'Nejlepší hodiny za celý týden. Když něco nechápu, vysvětlí to klidně třikrát a nikdy se nenaštve.',
+  'Látku umí, ale hodiny jsou dost jednotvárné. Písemky bývají těžší, než co se probíralo.',
+  'Má přehled o praxi a dává příklady ze skutečných projektů. Známkuje spravedlivě.',
+  'Přísnější, ale když se člověk snaží, ocení to. Dobře připravené materiály v Teams.',
+  'Termíny odevzdání se často mění na poslední chvíli a není jasné, co přesně bude v testu.',
 ]
 
-const CLASSES = ['1.EP', '2.EP', '3.EP', '4.EP', '2.IT', '3.IT']
-
-const REVIEW_TEXTS: [rating: number, title: string | null, text: string][] = [
-  [
-    4,
-    'Skvělý výklad',
-    'Super výklad, všechno dobře vysvětlí a dává smysl. Někdy je náročnější na domácí úkoly, ale jinak férový a ochotný pomoct.',
-  ],
-  [
-    5,
-    null,
-    'Nejlepší hodiny za celý týden. Když něco nechápu, vysvětlí to klidně třikrát a nikdy se nenaštve.',
-  ],
-  [
-    3,
-    'Průměr',
-    'Látku umí, ale hodiny jsou dost jednotvárné. Písemky bývají těžší, než co se probíralo.',
-  ],
-  [
-    5,
-    'Doporučuji',
-    'Má přehled o praxi a dává příklady ze skutečných projektů. Známkuje spravedlivě.',
-  ],
-  [4, null, 'Přísnější, ale když se člověk snaží, ocení to. Dobře připravené materiály v Teams.'],
-  [
-    2,
-    'Chaos v termínech',
-    'Termíny odevzdání se často mění na poslední chvíli a není jasné, co přesně bude v testu.',
-  ],
-]
-
-function hashOf(value: string) {
-  return [...value].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) % 997, 7)
+function hashOf(value: number) {
+  return [...String(value)].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) % 997, 7)
 }
 
 function roundToTenth(value: number) {
   return Math.round(value * 10) / 10
 }
 
-function buildReviews(teacherId: string, count: number): Review[] {
+function buildReviews(teacherId: number, count: number): Review[] {
   const seed = hashOf(teacherId)
 
-  return Array.from({ length: count }, (_, index) => {
-    const [rating, title, text] = REVIEW_TEXTS[(seed + index) % REVIEW_TEXTS.length]
-    const day = new Date(Date.UTC(2026, 9, 15) - (index * 4 + (seed % 3)) * 86_400_000)
-
-    return {
-      id: `${teacherId}-r${index + 1}`,
-      teacherId,
-      authorName: index % 4 === 3 ? 'Student Novák' : null,
-      className: index % 3 === 2 ? null : CLASSES[(seed + index) % CLASSES.length],
-      rating,
-      title,
-      text,
-      createdAt: day.toISOString(),
-      likes: (seed + index * 7) % 14,
-      dislikes: (seed + index * 3) % 4,
-      myVote: null,
-    }
-  })
+  return Array.from({ length: count }, (_, index) => ({
+    id: teacherId * 100 + index + 1,
+    teacherId,
+    content: REVIEW_TEXTS[(seed + index) % REVIEW_TEXTS.length],
+    createdAt: new Date(
+      Date.UTC(2026, 9, 15) - (index * 4 + (seed % 3)) * 86_400_000,
+    ).toISOString(),
+    updatedAt: null,
+    isMine: false,
+  }))
 }
 
-const teachers: ReviewTeacherDetail[] = TEACHER_SEEDS.map(
-  ([degree, firstName, lastName, subject], index) => {
-    const id = `t-${index + 1}`
-    const seed = hashOf(id)
+interface MockTeacher {
+  id: number
+  name: string
+  nickname: string | null
+  description: string
+  /** Hvězdičkové hodnocení z featury Rating, tady jen pro čtení. */
+  averageRating: number | null
+}
 
-    return {
-      id,
-      degree,
-      firstName,
-      lastName,
-      subject,
-      photoUrl: null,
-      averageRating: null,
-      reviewCount: 0,
-      school: 'SPŠ Trutnov',
-      classes: [CLASSES[seed % 3], CLASSES[(seed % 3) + 1], CLASSES[(seed % 3) + 2]],
-      categories: CATEGORY_LABELS.map(([key, label], categoryIndex) => ({
-        key,
-        label,
-        value: roundToTenth(3.2 + ((seed + categoryIndex * 13) % 18) / 10),
-      })),
-    }
-  },
-)
+const teachers: MockTeacher[] = TEACHER_SEEDS.map(([name, nickname, description], index) => {
+  const id = index + 1
+  // Poslední učitel nemá žádné hodnocení ani recenzi, ať je vidět prázdný stav.
+  const isLast = index === TEACHER_SEEDS.length - 1
 
-// Poslední učitel nemá žádnou recenzi, ať je vidět i prázdný stav.
+  return {
+    id,
+    name,
+    nickname,
+    description,
+    averageRating: isLast ? null : roundToTenth(3.2 + (hashOf(id) % 18) / 10),
+  }
+})
+
 let reviews: Review[] = teachers.flatMap((teacher, index) =>
   index === teachers.length - 1 ? [] : buildReviews(teacher.id, Math.max(3, 14 - index)),
 )
 
-function withStats(teacher: ReviewTeacherDetail): ReviewTeacherDetail {
-  const own = reviews.filter((review) => review.teacherId === teacher.id)
-  const average = own.length
-    ? roundToTenth(own.reduce((sum, review) => sum + review.rating, 0) / own.length)
-    : null
+/** Hlasy ostatních uživatelů (pevné) a hlas přihlášeného (mění se přes PUT .../reaction). */
+const otherReactions = new Map<number, { likes: number; dislikes: number }>(
+  teachers.map((teacher) => [
+    teacher.id,
+    { likes: (hashOf(teacher.id) * 3) % 40, dislikes: hashOf(teacher.id) % 9 },
+  ]),
+)
+const myReactions = new Map<number, ReactionValue>()
 
-  return { ...teacher, averageRating: average, reviewCount: own.length }
+function reactionStats(teacherId: number) {
+  const others = otherReactions.get(teacherId) ?? { likes: 0, dislikes: 0 }
+  const mine = myReactions.get(teacherId) ?? null
+
+  return {
+    likes: others.likes + (mine === 1 ? 1 : 0),
+    dislikes: others.dislikes + (mine === -1 ? 1 : 0),
+    myReaction: mine,
+  }
 }
 
-function toSummary(teacher: ReviewTeacherDetail): ReviewTeacher {
-  const { id, degree, firstName, lastName, subject, photoUrl, averageRating, reviewCount } =
-    withStats(teacher)
-  return { id, degree, firstName, lastName, subject, photoUrl, averageRating, reviewCount }
+function toSummary(teacher: MockTeacher): ReviewTeacher {
+  return {
+    id: teacher.id,
+    name: teacher.name,
+    photoUrl: null,
+    description: teacher.description,
+    averageRating: teacher.averageRating,
+    reviewCount: reviews.filter((review) => review.teacherId === teacher.id).length,
+    ...reactionStats(teacher.id),
+  }
 }
 
-const REVIEW_SORTERS: Record<ReviewSort, (a: Review, b: Review) => number> = {
-  newest: (a, b) => b.createdAt.localeCompare(a.createdAt),
-  oldest: (a, b) => a.createdAt.localeCompare(b.createdAt),
-  best: (a, b) => b.rating - a.rating,
-  helpful: (a, b) => b.likes - b.dislikes - (a.likes - a.dislikes),
+function reviewsOf(teacherId: number) {
+  return reviews
+    .filter((review) => review.teacherId === teacherId)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
 
-interface CreateReviewBody {
-  rating: number
-  title: string | null
-  text: string
-  anonymous: boolean
-  showClass: boolean
+function toDetail(teacher: MockTeacher): ReviewTeacherDetail {
+  return { ...toSummary(teacher), nickname: teacher.nickname, reviews: reviewsOf(teacher.id) }
 }
+
+const notFound = () => HttpResponse.json({ message: 'Nenalezeno.' }, { status: 404 })
 
 /**
- * MSW handlery featury Recenze — backend recenze zatím nemá.
+ * MSW handlery featury Recenze — kopírují chování backendu (`/api/reviews`, docs/api/reviews.md):
+ * jedna recenze na učitele (409), cizí recenzi nejde upravit (403), hlas 1 / -1 / 0.
  * Hvězdička na začátku cesty je potřeba kvůli testům v Node.
  */
 export const recenzeHandlers = [
-  http.get('*/api/recenze/teachers', () => HttpResponse.json(teachers.map(toSummary))),
-
-  http.get('*/api/recenze/teachers/:teacherId', ({ params }) => {
-    const teacher = teachers.find((item) => item.id === params.teacherId)
-    return teacher
-      ? HttpResponse.json(withStats(teacher))
-      : HttpResponse.json({ message: 'Učitel neexistuje.' }, { status: 404 })
-  }),
-
-  http.get('*/api/recenze/teachers/:teacherId/reviews', ({ params, request }) => {
-    const sortParam = new URL(request.url).searchParams.get('sort')
-    const sort: ReviewSort =
-      sortParam && sortParam in REVIEW_SORTERS ? (sortParam as ReviewSort) : 'newest'
+  http.get('*/api/reviews/teachers', ({ request }) => {
+    const search = new URL(request.url).searchParams.get('search')?.trim().toLowerCase()
 
     return HttpResponse.json(
-      reviews.filter((review) => review.teacherId === params.teacherId).sort(REVIEW_SORTERS[sort]),
+      teachers
+        .filter((teacher) => !search || teacher.name.toLowerCase().includes(search))
+        .map(toSummary),
     )
   }),
 
-  http.post('*/api/recenze/teachers/:teacherId/reviews', async ({ params, request }) => {
-    const body = (await request.json()) as CreateReviewBody
+  http.get('*/api/reviews/teachers/:teacherId', ({ params }) => {
+    const teacher = teachers.find((item) => item.id === Number(params.teacherId))
+    return teacher ? HttpResponse.json(toDetail(teacher)) : notFound()
+  }),
+
+  http.get('*/api/reviews/teachers/:teacherId/reviews', ({ params }) => {
+    const teacher = teachers.find((item) => item.id === Number(params.teacherId))
+    return teacher ? HttpResponse.json(reviewsOf(teacher.id)) : notFound()
+  }),
+
+  http.post('*/api/reviews/teachers/:teacherId/reviews', async ({ params, request }) => {
+    const teacherId = Number(params.teacherId)
+    const { content } = (await request.json()) as { content: string }
+    const text = content.trim()
+
+    if (!teachers.some((item) => item.id === teacherId)) return notFound()
+    if (!text || text.length > 5000) return HttpResponse.json('Neplatný text.', { status: 400 })
+    if (reviews.some((review) => review.teacherId === teacherId && review.isMine)) {
+      return HttpResponse.json('Tomuto učiteli už jste recenzi napsali.', { status: 409 })
+    }
 
     const created: Review = {
-      id: crypto.randomUUID(),
-      teacherId: String(params.teacherId),
-      authorName: body.anonymous ? null : 'Přihlášený uživatel',
-      className: body.showClass ? '2.EP' : null,
-      rating: body.rating,
-      title: body.title,
-      text: body.text,
+      id: Math.max(0, ...reviews.map((review) => review.id)) + 1,
+      teacherId,
+      content: text,
       createdAt: new Date().toISOString(),
-      likes: 0,
-      dislikes: 0,
-      myVote: null,
+      updatedAt: null,
+      isMine: true,
     }
 
     reviews = [created, ...reviews]
@@ -198,24 +176,47 @@ export const recenzeHandlers = [
     return HttpResponse.json(created, { status: 201 })
   }),
 
-  http.put('*/api/recenze/reviews/:reviewId/vote', async ({ params, request }) => {
-    const { vote } = (await request.json()) as { vote: ReviewVote | null }
-    const review = reviews.find((item) => item.id === params.reviewId)
+  http.put('*/api/reviews/:reviewId', async ({ params, request }) => {
+    const review = reviews.find((item) => item.id === Number(params.reviewId))
+    const { content } = (await request.json()) as { content: string }
+    const text = content.trim()
 
-    if (!review) {
-      return HttpResponse.json({ message: 'Recenze neexistuje.' }, { status: 404 })
-    }
+    if (!review) return notFound()
+    if (!review.isMine) return new HttpResponse(null, { status: 403 })
+    if (!text || text.length > 5000) return HttpResponse.json('Neplatný text.', { status: 400 })
 
-    const updated: Review = {
-      ...review,
-      likes: review.likes - (review.myVote === 'like' ? 1 : 0) + (vote === 'like' ? 1 : 0),
-      dislikes:
-        review.dislikes - (review.myVote === 'dislike' ? 1 : 0) + (vote === 'dislike' ? 1 : 0),
-      myVote: vote,
-    }
-
+    const updated: Review = { ...review, content: text, updatedAt: new Date().toISOString() }
     reviews = reviews.map((item) => (item.id === updated.id ? updated : item))
 
     return HttpResponse.json(updated)
+  }),
+
+  http.delete('*/api/reviews/:reviewId', ({ params }) => {
+    const review = reviews.find((item) => item.id === Number(params.reviewId))
+
+    if (!review) return notFound()
+    if (!review.isMine) return new HttpResponse(null, { status: 403 })
+
+    reviews = reviews.filter((item) => item.id !== review.id)
+
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  http.put('*/api/reviews/teachers/:teacherId/reaction', async ({ params, request }) => {
+    const teacherId = Number(params.teacherId)
+    const { value } = (await request.json()) as { value: number }
+
+    if (!teachers.some((item) => item.id === teacherId)) return notFound()
+    if (value !== 1 && value !== -1 && value !== 0) {
+      return HttpResponse.json('Neplatná hodnota.', { status: 400 })
+    }
+
+    if (value === 0) {
+      myReactions.delete(teacherId)
+    } else {
+      myReactions.set(teacherId, value)
+    }
+
+    return HttpResponse.json(reactionStats(teacherId))
   }),
 ]

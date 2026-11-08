@@ -1,22 +1,24 @@
-import { Alert, Avatar, Badge, Button, Group, Progress, Skeleton, Stack, Text } from '@mantine/core'
+import { Alert, Avatar, Button, Group, Skeleton, Stack, Text } from '@mantine/core'
 import { useAuth } from '@/shared/auth'
 import { useReviewTeacher } from '../api'
 import classes from '../Recenze.module.css'
-import { formatRating, formatReviewCount, formatTeacherName } from '../format'
+import { formatRating, formatReviewCount } from '../format'
 import { BRAND } from '../theme'
-import type { ReviewTeacherDetail } from '../types'
-import { IconArrowLeft, IconBook, IconPencil, IconSchool, IconUsers } from './icons'
+import type { Review, ReviewTeacherDetail } from '../types'
+import { IconArrowLeft, IconPencil } from './icons'
+import { ReactionButtons } from './ReactionButtons'
 import { ReviewList } from './ReviewList'
 import { StarRating } from './StarRating'
 
 interface TeacherDetailProps {
-  teacherId: string
+  teacherId: number
   onBack: () => void
   onWrite: () => void
+  onEdit: (review: Review) => void
 }
 
-/** Pravá část stránky: profil učitele, hodnocení v kategoriích a recenze. */
-export function TeacherDetail({ teacherId, onBack, onWrite }: TeacherDetailProps) {
+/** Pravá část stránky: profil učitele, Like/Dislike a recenze. */
+export function TeacherDetail({ teacherId, onBack, onWrite, onEdit }: TeacherDetailProps) {
   const { data: teacher, isPending, isError } = useReviewTeacher(teacherId)
 
   return (
@@ -32,9 +34,11 @@ export function TeacherDetail({ teacherId, onBack, onWrite }: TeacherDetailProps
       ) : (
         <>
           <ProfileCard teacher={teacher} />
-          <CategoryBars teacher={teacher} />
-          <WriteReviewAction onWrite={onWrite} />
-          <ReviewList key={teacher.id} teacherId={teacher.id} total={teacher.reviewCount} />
+          <WriteReviewAction
+            hasOwnReview={teacher.reviews.some((review) => review.isMine)}
+            onWrite={onWrite}
+          />
+          <ReviewList key={teacher.id} reviews={teacher.reviews} onEdit={onEdit} />
         </>
       )}
     </Stack>
@@ -51,15 +55,13 @@ export function BackButton({ onClick, label }: { onClick: () => void; label: str
 }
 
 function ProfileCard({ teacher }: { teacher: ReviewTeacherDetail }) {
-  const name = formatTeacherName(teacher)
-
   return (
     <section className={classes.panel} aria-label="Profil učitele">
       <Stack gap="lg">
         <Group gap="lg" wrap="nowrap" align="center">
           <Avatar
             src={teacher.photoUrl}
-            name={`${teacher.firstName} ${teacher.lastName}`}
+            name={teacher.name}
             size={112}
             radius={999}
             classNames={{ placeholder: classes.avatar }}
@@ -67,17 +69,15 @@ function ProfileCard({ teacher }: { teacher: ReviewTeacherDetail }) {
           />
           <Avatar
             src={teacher.photoUrl}
-            name={`${teacher.firstName} ${teacher.lastName}`}
+            name={teacher.name}
             size={72}
             radius={999}
             classNames={{ placeholder: classes.avatar }}
             hiddenFrom="xs"
           />
           <Stack gap={8} miw={0}>
-            <h2 className={classes.profileName}>{name}</h2>
-            <Badge className={classes.subjectBadge} radius="sm" size="lg" w="fit-content">
-              {teacher.subject}
-            </Badge>
+            <h2 className={classes.profileName}>{teacher.name}</h2>
+            {teacher.nickname ? <Text className={classes.muted}>„{teacher.nickname}“</Text> : null}
             {teacher.averageRating !== null ? (
               <Group gap="sm" align="center">
                 <StarRating value={teacher.averageRating} size="lg" />
@@ -85,61 +85,33 @@ function ProfileCard({ teacher }: { teacher: ReviewTeacherDetail }) {
                 <Text className={classes.muted}>({formatReviewCount(teacher.reviewCount)})</Text>
               </Group>
             ) : (
-              <Text className={classes.muted}>Zatím bez recenzí</Text>
+              <Text className={classes.muted}>Zatím bez hodnocení</Text>
             )}
           </Stack>
         </Group>
 
-        <dl className={classes.infoList}>
-          <InfoRow icon={<IconBook />} label="Předmět" value={teacher.subject} />
-          <InfoRow icon={<IconUsers />} label="Třídy" value={teacher.classes.join(', ')} />
-          <InfoRow icon={<IconSchool />} label="Škola" value={teacher.school} />
-        </dl>
+        {teacher.description ? <Text>{teacher.description}</Text> : null}
+
+        <Group justify="flex-end">
+          <ReactionButtons teacher={teacher} />
+        </Group>
       </Stack>
     </section>
   )
 }
 
-function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <>
-      <span className={classes.infoIcon}>{icon}</span>
-      <dt className={classes.infoLabel}>{label}</dt>
-      <dd className={classes.infoValue}>{value}</dd>
-    </>
-  )
+interface WriteReviewActionProps {
+  hasOwnReview: boolean
+  onWrite: () => void
 }
 
-function CategoryBars({ teacher }: { teacher: ReviewTeacherDetail }) {
-  return (
-    <section className={classes.panel} aria-labelledby="recenze-categories-title">
-      <h2 id="recenze-categories-title" className={classes.sectionTitle}>
-        Hodnocení v kategoriích
-      </h2>
-      <Stack gap={12} mt="md">
-        {teacher.categories.map((category) => (
-          <div key={category.key} className={classes.categoryRow}>
-            <Text size="md">{category.label}</Text>
-            <Progress
-              value={(category.value / 5) * 100}
-              size={12}
-              radius="xl"
-              classNames={{ root: classes.progressRoot, section: classes.progressSection }}
-              aria-label={`${category.label}: ${formatRating(category.value)} z 5`}
-            />
-            <Text className={classes.categoryValue}>{formatRating(category.value)}</Text>
-          </div>
-        ))}
-      </Stack>
-    </section>
-  )
-}
-
-function WriteReviewAction({ onWrite }: { onWrite: () => void }) {
+function WriteReviewAction({ hasOwnReview, onWrite }: WriteReviewActionProps) {
   const { hasRole } = useAuth()
 
   // Recenze píšou studenti — oprávnění podle role, ne podle jména.
-  const canWrite = hasRole('student')
+  const isStudent = hasRole('student')
+  // Backend povolí jednu textovou recenzi na učitele; další jde až po smazání.
+  const canWrite = isStudent && !hasOwnReview
 
   return (
     <Stack gap={8}>
@@ -154,11 +126,15 @@ function WriteReviewAction({ onWrite }: { onWrite: () => void }) {
       >
         Napsat recenzi
       </Button>
-      {canWrite ? null : (
+      {!isStudent ? (
         <Text className={classes.muted} ta="center">
           Recenze můžou psát jen studenti. Ve vývoji si uživatele přepneš vpravo nahoře.
         </Text>
-      )}
+      ) : hasOwnReview ? (
+        <Text className={classes.muted} ta="center">
+          Tomuhle učiteli už jsi recenzi napsal(a). Můžeš ji upravit nebo smazat níže.
+        </Text>
+      ) : null}
     </Stack>
   )
 }
@@ -167,8 +143,8 @@ function DetailSkeleton() {
   return (
     <Stack gap="md" aria-label="Načítám profil učitele">
       <Skeleton height={260} radius={12} />
-      <Skeleton height={220} radius={12} />
       <Skeleton height={50} radius={8} />
+      <Skeleton height={220} radius={12} />
     </Stack>
   )
 }

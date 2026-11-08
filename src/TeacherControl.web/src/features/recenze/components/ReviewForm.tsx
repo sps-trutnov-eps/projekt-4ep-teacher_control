@@ -1,10 +1,9 @@
-import { Alert, Button, Checkbox, Rating, Stack, Text, TextInput, Textarea } from '@mantine/core'
+import { Alert, Button, Stack, Text, Textarea } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Controller, useForm, useWatch } from 'react-hook-form'
-import { useCreateReview, useReviewTeacher } from '../api'
+import { useForm, useWatch } from 'react-hook-form'
+import { RecenzeApiError, useCreateReview, useReviewTeacher, useUpdateReview } from '../api'
 import classes from '../Recenze.module.css'
-import { formatTeacherName } from '../format'
 import {
   REVIEW_TEXT_MAX,
   reviewFormDefaults,
@@ -12,17 +11,31 @@ import {
   type ReviewFormValues,
 } from '../schema'
 import { BRAND } from '../theme'
+import type { Review } from '../types'
 import { BackButton } from './TeacherDetail'
 
 interface ReviewFormProps {
-  teacherId: string
+  teacherId: number
+  /** Když je vyplněná, formulář recenzi upravuje, jinak vytváří novou. */
+  review?: Review
   onBack: () => void
   onSubmitted: () => void
 }
 
-export function ReviewForm({ teacherId, onBack, onSubmitted }: ReviewFormProps) {
+function errorMessage(error: Error | null) {
+  if (!(error instanceof RecenzeApiError))
+    return 'Recenzi se nepodařilo odeslat. Zkus to prosím znovu.'
+  if (error.status === 409) return 'Tomuhle učiteli už jsi recenzi napsal(a). Uprav ji v profilu.'
+  if (error.status === 403) return 'Cizí recenzi upravovat nemůžeš.'
+  if (error.status === 401) return 'Pro psaní recenzí se musíš přihlásit.'
+  return 'Recenzi se nepodařilo odeslat. Zkus to prosím znovu.'
+}
+
+export function ReviewForm({ teacherId, review, onBack, onSubmitted }: ReviewFormProps) {
   const { data: teacher } = useReviewTeacher(teacherId)
   const createReview = useCreateReview(teacherId)
+  const updateReview = useUpdateReview(review?.id ?? 0)
+  const mutation = review ? updateReview : createReview
 
   const {
     control,
@@ -31,14 +44,17 @@ export function ReviewForm({ teacherId, onBack, onSubmitted }: ReviewFormProps) 
     formState: { errors },
   } = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewFormSchema),
-    defaultValues: reviewFormDefaults,
+    defaultValues: review ? { content: review.content } : reviewFormDefaults,
   })
 
-  const textLength = useWatch({ control, name: 'text' }).length
+  const textLength = useWatch({ control, name: 'content' }).length
 
   const onSubmit = handleSubmit(async (values) => {
-    await createReview.mutateAsync(values)
-    notifications.show({ color: BRAND.success, message: 'Recenze byla odeslána. Díky!' })
+    await mutation.mutateAsync(values)
+    notifications.show({
+      color: BRAND.success,
+      message: review ? 'Recenze byla upravena.' : 'Recenze byla odeslána. Díky!',
+    })
     onSubmitted()
   })
 
@@ -47,61 +63,24 @@ export function ReviewForm({ teacherId, onBack, onSubmitted }: ReviewFormProps) 
       <BackButton onClick={onBack} label="Zpět na profil učitele" />
 
       <div>
-        <h2 className={classes.title}>Napsat recenzi</h2>
-        {teacher ? (
-          <p className={classes.subtitle}>
-            {formatTeacherName(teacher)} – {teacher.subject}
-          </p>
-        ) : null}
+        <h2 className={classes.title}>{review ? 'Upravit recenzi' : 'Napsat recenzi'}</h2>
+        {teacher ? <p className={classes.subtitle}>{teacher.name}</p> : null}
       </div>
 
       <form onSubmit={onSubmit} noValidate className={classes.panel}>
         <Stack gap="lg">
-          <Controller
-            control={control}
-            name="rating"
-            render={({ field }) => (
-              <div role="group" aria-labelledby="recenze-rating-label">
-                <Text id="recenze-rating-label" className={classes.formLabel}>
-                  Vaše hodnocení
-                </Text>
-                <Rating
-                  value={field.value}
-                  onChange={field.onChange}
-                  size="xl"
-                  color={BRAND.star}
-                  classNames={{ starSymbol: classes.star }}
-                  aria-label="Počet hvězdiček"
-                />
-                {errors.rating ? (
-                  <Text c="red" size="sm" mt={6}>
-                    {errors.rating.message}
-                  </Text>
-                ) : null}
-              </div>
-            )}
-          />
-
-          <TextInput
-            label="Nadpis recenze (nepovinné)"
-            placeholder="Např. Skvělý výklad, ale…"
-            size="md"
-            classNames={{ input: classes.formInput, label: classes.formLabel }}
-            error={errors.title?.message}
-            {...register('title')}
-          />
-
           <Stack gap={6}>
             <Textarea
               label="Vaše recenze"
+              description="Recenze je anonymní, ostatní studenti tvoje jméno neuvidí."
               placeholder="Napište svůj názor na učitele…"
               size="md"
               autosize
               minRows={5}
               maxRows={12}
               classNames={{ input: classes.formInput, label: classes.formLabel }}
-              error={errors.text?.message}
-              {...register('text')}
+              error={errors.content?.message}
+              {...register('content')}
             />
             <Text
               className={classes.counter}
@@ -112,24 +91,9 @@ export function ReviewForm({ teacherId, onBack, onSubmitted }: ReviewFormProps) 
             </Text>
           </Stack>
 
-          <Stack gap="sm">
-            <Checkbox
-              label="Zůstat v anonymitě"
-              color={BRAND.primary}
-              size="md"
-              {...register('anonymous')}
-            />
-            <Checkbox
-              label="Zobrazit třídu (např. 2.EP)"
-              color={BRAND.primary}
-              size="md"
-              {...register('showClass')}
-            />
-          </Stack>
-
-          {createReview.isError ? (
+          {mutation.isError ? (
             <Alert color="red" title="Chyba">
-              Recenzi se nepodařilo odeslat. Zkus to prosím znovu.
+              {errorMessage(mutation.error)}
             </Alert>
           ) : null}
 
@@ -139,9 +103,9 @@ export function ReviewForm({ teacherId, onBack, onSubmitted }: ReviewFormProps) 
             size="lg"
             radius="md"
             fullWidth
-            loading={createReview.isPending}
+            loading={mutation.isPending}
           >
-            Odeslat recenzi
+            {review ? 'Uložit změny' : 'Odeslat recenzi'}
           </Button>
         </Stack>
       </form>

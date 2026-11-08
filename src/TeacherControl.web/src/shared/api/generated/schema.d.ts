@@ -550,6 +550,401 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/reviews/teachers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Vyhledání učitelů podle jména */
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReviewsTeacherResponse"][];
+                        "application/json": components["schemas"]["ReviewsTeacherResponse"][];
+                        "text/json": components["schemas"]["ReviewsTeacherResponse"][];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews/teachers/{teacherId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Profil učitele */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    teacherId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReviewsTeacherProfileResponse"];
+                        "application/json": components["schemas"]["ReviewsTeacherProfileResponse"];
+                        "text/json": components["schemas"]["ReviewsTeacherProfileResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews/teachers/{teacherId}/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Anonymní recenze učitele, nejnovější první */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    teacherId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReviewsReviewResponse"][];
+                        "application/json": components["schemas"]["ReviewsReviewResponse"][];
+                        "text/json": components["schemas"]["ReviewsReviewResponse"][];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        /** Vytvoření vlastní recenze */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    teacherId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReviewRequest"];
+                    "text/json": components["schemas"]["ReviewRequest"];
+                    "application/*+json": components["schemas"]["ReviewRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReviewsReviewResponse"];
+                        "application/json": components["schemas"]["ReviewsReviewResponse"];
+                        "text/json": components["schemas"]["ReviewsReviewResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews/{reviewId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Úprava vlastní recenze */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    reviewId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReviewRequest"];
+                    "text/json": components["schemas"]["ReviewRequest"];
+                    "application/*+json": components["schemas"]["ReviewRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReviewsReviewResponse"];
+                        "application/json": components["schemas"]["ReviewsReviewResponse"];
+                        "text/json": components["schemas"]["ReviewsReviewResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        /** Smazání vlastní recenze */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    reviewId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews/teachers/{teacherId}/reaction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Like (1), dislike (-1) nebo zrušení hlasu (0) učitele */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    teacherId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReactionRequest"];
+                    "text/json": components["schemas"]["ReactionRequest"];
+                    "application/*+json": components["schemas"]["ReactionRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReactionResponse"];
+                        "application/json": components["schemas"]["ReactionResponse"];
+                        "text/json": components["schemas"]["ReactionResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -634,6 +1029,71 @@ export interface components {
             author?: null | string;
             date?: null | string;
             url?: null | string;
+        };
+        ReactionRequest: {
+            /** Format: int32 */
+            value?: number | string;
+        };
+        ReactionResponse: {
+            /** Format: int32 */
+            likes: number | string;
+            /** Format: int32 */
+            dislikes: number | string;
+            /** Format: int32 */
+            myReaction: null | number | string;
+        };
+        ReviewRequest: {
+            content: string;
+        };
+        ReviewsReviewResponse: {
+            /** Format: int32 */
+            id: number | string;
+            /** Format: int32 */
+            teacherId: number | string;
+            content: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: null | string;
+            isMine: boolean;
+        };
+        ReviewsTeacherResponse: {
+            /** Format: int32 */
+            id: number | string;
+            name: string;
+            photoUrl: null | string;
+            description: string;
+            /** Format: double */
+            averageRating: null | number | string;
+            /** Format: int32 */
+            reviewCount: number | string;
+            /** Format: int32 */
+            likes: number | string;
+            /** Format: int32 */
+            dislikes: number | string;
+            /** Format: int32 */
+            myReaction: null | number | string;
+        };
+        ReviewsTeacherProfileResponse: {
+            /** Format: int32 */
+            id: number | string;
+            name: string;
+            nickname: null | string;
+            photoUrl: null | string;
+            description: string;
+            /** Format: float */
+            mood: number | string;
+            /** Format: double */
+            averageRating: null | number | string;
+            /** Format: int32 */
+            reviewCount: number | string;
+            /** Format: int32 */
+            likes: number | string;
+            /** Format: int32 */
+            dislikes: number | string;
+            /** Format: int32 */
+            myReaction: null | number | string;
+            reviews: components["schemas"]["ReviewsReviewResponse"][];
         };
     };
     responses: never;

@@ -1,9 +1,23 @@
 import { MantineProvider } from '@mantine/core'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { fireEvent, render, screen, within } from '@testing-library/react'
-import { expect, test } from 'vitest'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { afterEach, expect, test, vi } from 'vitest'
 import { MockAuthProvider } from '@/shared/auth'
 import { RecenzePage } from './RecenzePage'
+
+// jsdom nemá document.fonts (potřebuje ho autosize Textarea) ani window.scrollTo (volá ho stránka).
+Object.defineProperty(document, 'fonts', {
+  configurable: true,
+  value: { addEventListener: vi.fn(), removeEventListener: vi.fn() },
+})
+window.scrollTo = vi.fn()
+
+afterEach(() => sessionStorage.clear())
+
+/** Výchozí mock uživatel je učitel, ten recenze psát nemůže. */
+function loginAsStudent() {
+  sessionStorage.setItem('teacher-control.mock-user-id', 'u-student')
+}
 
 function renderPage() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -43,9 +57,55 @@ test('po výběru učitele ukáže detail s recenzemi a Like/Dislike', async () 
   fireEvent.click(await screen.findByRole('button', { name: /Mgr\. Jan Novák/ }))
 
   const detail = screen.getByRole('region', { name: 'Detail učitele' })
-  expect(await within(detail).findByText('Hodnocení v kategoriích')).toBeDefined()
-  expect(
-    (await within(detail).findAllByRole('button', { name: /Líbí se mi/ })).length,
-  ).toBeGreaterThan(0)
+  expect(await within(detail).findByRole('heading', { name: /^Recenze \(/ })).toBeDefined()
+  expect(within(detail).getByRole('button', { name: /Líbí se mi/ })).toBeDefined()
   expect(within(detail).getByRole('button', { name: 'Zpět na seznam' })).toBeDefined()
+})
+
+test('Like se po kliknutí započítá a druhým kliknutím zruší', async () => {
+  renderPage()
+
+  fireEvent.click(await screen.findByRole('button', { name: /Bc\. Eva Svobodová/ }))
+  const detail = screen.getByRole('region', { name: 'Detail učitele' })
+
+  const like = await within(detail).findByRole('button', { name: /Líbí se mi/ })
+  expect(like.getAttribute('aria-pressed')).toBe('false')
+
+  fireEvent.click(like)
+  await waitFor(() =>
+    expect(
+      within(detail)
+        .getByRole('button', { name: /Líbí se mi/ })
+        .getAttribute('aria-pressed'),
+    ).toBe('true'),
+  )
+
+  fireEvent.click(within(detail).getByRole('button', { name: /Líbí se mi/ }))
+  await waitFor(() =>
+    expect(
+      within(detail)
+        .getByRole('button', { name: /Líbí se mi/ })
+        .getAttribute('aria-pressed'),
+    ).toBe('false'),
+  )
+})
+
+test('napsaná recenze se objeví v seznamu a další už psát nejde', async () => {
+  loginAsStudent()
+  renderPage()
+
+  fireEvent.click(await screen.findByRole('button', { name: /Ing\. Petr Král/ }))
+  const detail = screen.getByRole('region', { name: 'Detail učitele' })
+
+  fireEvent.click(await within(detail).findByRole('button', { name: 'Napsat recenzi' }))
+  fireEvent.change(await within(detail).findByRole('textbox', { name: /Vaše recenze/ }), {
+    target: { value: 'Výborně vysvětluje webové aplikace.' },
+  })
+  fireEvent.click(within(detail).getByRole('button', { name: 'Odeslat recenzi' }))
+
+  expect(await within(detail).findByText('Výborně vysvětluje webové aplikace.')).toBeDefined()
+  expect(within(detail).getByText('Moje recenze')).toBeDefined()
+  expect(
+    (within(detail).getByRole('button', { name: 'Napsat recenzi' }) as HTMLButtonElement).disabled,
+  ).toBe(true)
 })

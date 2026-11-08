@@ -6,8 +6,8 @@ import { TeacherCard } from './TeacherCard'
 
 interface TeacherListProps {
   teachers: ReviewTeacher[]
-  selectedId: string | null
-  onSelect: (teacherId: string) => void
+  selectedId: number | null
+  onSelect: (teacherId: number) => void
   page: number
   totalPages: number
   onPageChange: (page: number) => void

@@ -7,29 +7,33 @@ podle `docs/design/design_rules.md`.
 
 ## Co stránka umí
 
-- **Levý sloupec** – vyhledávání (jméno i předmět, bez ohledu na diakritiku), filtr předmětů
-  (Všichni / 3 nejčastější / menu Více), řazení a stránkovaný seznam karet učitelů.
-- **Pravý sloupec** – profil učitele (fotka, předmět, průměr, třídy, škola), hodnocení v kategoriích,
-  tlačítko Napsat recenzi, seznam recenzí s řazením a přepínačem Like/Dislike, tlačítko Zpět.
-- **Formulář recenze** – hvězdičky, nadpis, text s počítadlem 0/500, anonymita, zobrazení třídy.
-  Validace v `schema.ts` (Zod). Psát můžou jen uživatelé s rolí `student`.
+- **Levý sloupec** – vyhledávání podle jména (bez ohledu na diakritiku), řazení a stránkovaný seznam
+  karet učitelů s průměrným hodnocením.
+- **Pravý sloupec** – profil učitele (fotka, jméno, přezdívka, popis, průměr), Like/Dislike učitele,
+  tlačítko Napsat recenzi, seznam recenzí s řazením (nejnovější / nejstarší), tlačítko Zpět.
+- **Formulář recenze** – jen text s počítadlem 0/5000. Recenze jsou anonymní, autor se z backendu
+  neposílá. Validace v `schema.ts` (Zod). Psát můžou jen uživatelé s rolí `student`, na učitele
+  jedna recenze (druhá až po smazání). Vlastní recenzi jde upravit i smazat.
 - **Responzivita** – od 1200 px dva sloupce vedle sebe (detail je sticky). Pod tím seznam → detail →
   formulář jako v mobilním návrhu, mezi nimi tlačítko Zpět.
-- **Stavy** – hover / active / focus u karet, filtrů, vyhledávání, Like/Dislike a tlačítek; skeletony
+- **Stavy** – hover / active / focus u karet, vyhledávání, Like/Dislike a tlačítek; skeletony
   při načítání, chybové a prázdné stavy.
 
 ## Napojení na data
 
-Backend recenze zatím nemá, takže `api.ts` volá `fetchJson()` a odpovědi dodává MSW z `mocks.ts`.
-Tvary odpovědí jsou v `types.ts`:
+Featura volá backend `/api/reviews` (Synáč, `docs/api/reviews.md`) přes `api.GET()` / `api.POST()` /
+`api.PUT()` / `api.DELETE()`. Typy se berou z `docs/api/TeacherControl.Api.json`
+(`pnpm gen:api`), mapování je v `types.ts`. Ve vývoji odpovídá MSW z `mocks.ts`, které kopíruje
+chování backendu (409 na druhou recenzi, 403 na cizí).
 
-| Hook                          | Endpoint                                                                             |
-| ----------------------------- | ------------------------------------------------------------------------------------ |
-| `useReviewTeachers()`         | `GET /api/recenze/teachers`                                                          |
-| `useReviewTeacher(id)`        | `GET /api/recenze/teachers/{id}`                                                     |
-| `useTeacherReviews(id, sort)` | `GET /api/recenze/teachers/{id}/reviews?sort=newest\|oldest\|best\|helpful`          |
-| `useCreateReview(id)`         | `POST /api/recenze/teachers/{id}/reviews`                                            |
-| `useVoteReview()`             | `PUT /api/recenze/reviews/{reviewId}/vote` s `{ vote: 'like' \| 'dislike' \| null }` |
+| Hook                   | Endpoint                                                              |
+| ---------------------- | --------------------------------------------------------------------- |
+| `useReviewTeachers()`  | `GET /api/reviews/teachers`                                           |
+| `useReviewTeacher(id)` | `GET /api/reviews/teachers/{id}` (profil včetně recenzí)              |
+| `useCreateReview(id)`  | `POST /api/reviews/teachers/{id}/reviews` s `{ content }`             |
+| `useUpdateReview(id)`  | `PUT /api/reviews/{reviewId}` s `{ content }`                         |
+| `useDeleteReview()`    | `DELETE /api/reviews/{reviewId}`                                      |
+| `useSetReaction()`     | `PUT /api/reviews/teachers/{id}/reaction` s `{ value: 1 \| -1 \| 0 }` |
 
-Až backend endpointy dodá: `pnpm gen:api`, přepsat `fetchJson()` na `api.GET()` / `api.POST()`
-a smazat ruční typy z `types.ts`. Komponenty se měnit nemusí.
+Hvězdičkové hodnocení (`averageRating`) se jen čte z featury Rating. Předměty, třídy, kategorie
+ani hodnocení u recenze backend nemá, proto je stránka nezobrazuje.
