@@ -1,4 +1,4 @@
-name: Frontend
+name: frontend
 
 on:
   push:
@@ -13,8 +13,8 @@ on:
       - '.github/workflows/frontend.yml'
 
 jobs:
-  check:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-slim
     defaults:
       run:
         working-directory: src/TeacherControl.web
@@ -22,22 +22,54 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 11
 
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version-file: src/TeacherControl.web/.nvmrc
           cache: pnpm
           cache-dependency-path: src/TeacherControl.web/pnpm-lock.yaml
 
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - run: pnpm lint
+      - name: Run typecheck
+        run: pnpm typecheck
 
-      - run: pnpm typecheck
+      - name: Run tests
+        run: pnpm test
 
-      - run: pnpm test
+      - name: Build project
+        run: pnpm build
 
-      - run: pnpm build
+  format:
+    runs-on: ubuntu-slim
+    defaults:
+      run:
+        working-directory: src/TeacherControl.web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: src/TeacherControl.web/.nvmrc
+          cache: pnpm
+          cache-dependency-path: src/TeacherControl.web/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run format check
+        id: format
+        run: pnpm lint
