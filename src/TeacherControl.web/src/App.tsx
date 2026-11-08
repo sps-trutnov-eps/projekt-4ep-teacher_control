@@ -62,6 +62,10 @@ export function App() {
 
               <Menu.Dropdown>
                 <Menu.Label>{user.displayName}</Menu.Label>
+                <Menu.Item component={Link} to="/user">
+                  Můj profil
+                </Menu.Item>
+                <Menu.Divider />
                 <Menu.Item
                   color="red"
                   onClick={() => {
