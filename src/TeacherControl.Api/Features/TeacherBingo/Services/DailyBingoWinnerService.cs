@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
+using TeacherControl.Api.Features.TeacherBingo.Models;
 
 namespace TeacherControl.Api.Features.TeacherBingo.Services;
 
@@ -11,7 +12,7 @@ public sealed class DailyBingoWinnerService(AppDbContext db) : IDailyBingoWinner
 
     public async Task<DailyBingoWinnerDto?> GetTodayAsync(CancellationToken cancellationToken)
     {
-        var today = GetPragueDate();
+        var today = BingoDate.GetPragueDate();
         var winner = await db.DailyBingoWinners
             .AsNoTracking()
             .FirstOrDefaultAsync(item => item.Date == today, cancellationToken);
@@ -27,7 +28,7 @@ public sealed class DailyBingoWinnerService(AppDbContext db) : IDailyBingoWinner
         if (!int.TryParse(request.BoardId, out var boardId) || string.IsNullOrWhiteSpace(request.DisplayName))
             return null;
 
-        var today = GetPragueDate();
+        var today = BingoDate.GetPragueDate();
         var existingWinner = await db.DailyBingoWinners
             .AsNoTracking()
             .FirstOrDefaultAsync(item => item.Date == today, cancellationToken);
@@ -39,7 +40,7 @@ public sealed class DailyBingoWinnerService(AppDbContext db) : IDailyBingoWinner
             .Include(item => item.Quotes)
                 .ThenInclude(item => item.Marks.Where(mark => mark.StudentId == studentId))
             .FirstOrDefaultAsync(item => item.Id == boardId && item.Date == today, cancellationToken);
-        if (board is null || TeacherBingoService.CalculateBingoCount(board.Quotes, studentId) == 0)
+        if (board is null || BingoBoardMapper.CalculateBingoCount(board.Quotes, studentId) == 0)
             return null;
 
         var winner = new DailyBingoWinnerEntity
@@ -82,31 +83,4 @@ public sealed class DailyBingoWinnerService(AppDbContext db) : IDailyBingoWinner
             winner.Date,
             winner.CompletedAt);
 
-    private static DateOnly GetPragueDate() => DateOnly.FromDateTime(
-        TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Europe/Prague"));
 }
-
-/// <summary>Request to claim the daily bingo winner title.</summary>
-public sealed record ClaimDailyBingoWinnerRequest
-{
-    /// <summary>ID of the bingo board completed by the authenticated student.</summary>
-    [System.ComponentModel.DataAnnotations.Required]
-    [System.ComponentModel.DataAnnotations.StringLength(12)]
-    [System.ComponentModel.DataAnnotations.RegularExpression("^[1-9][0-9]*$")]
-    public required string BoardId { get; init; }
-
-    /// <summary>Display name shown for the daily winner.</summary>
-    [System.ComponentModel.DataAnnotations.Required]
-    [System.ComponentModel.DataAnnotations.StringLength(50, MinimumLength = 1)]
-    public required string DisplayName { get; init; }
-}
-
-/// <summary>Daily winner information returned by the bingo API.</summary>
-public sealed record DailyBingoWinnerDto(
-    string UserId,
-    string DisplayName,
-    string BoardId,
-    DateOnly Date,
-    DateTimeOffset CompletedAt);
-
-public sealed record ClaimDailyBingoWinnerResult(DailyBingoWinnerDto Winner, bool IsNew);

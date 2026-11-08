@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TeacherControl.Api.Features.TeacherBingo.Models;
 using TeacherControl.Api.Features.TeacherBingo.Services;
 
 namespace TeacherControl.Api.Features.TeacherBingo.Controllers;
@@ -149,6 +150,3 @@ public class TeacherBingoController : ControllerBase
         return Ok(await _teacherBingoService.ResetStatsAsync(studentId, cancellationToken));
     }
 }
-
-public sealed record CreateBingoBoardRequest(int Size = 3, IReadOnlyCollection<string>? TeacherIds = null);
-public sealed record CreateTeacherQuoteRequest(string TeacherId, string TeacherName, string Quote);
