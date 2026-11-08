@@ -14,7 +14,7 @@ import {
   TextInput,
   Title,
 } from '@mantine/core'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useAuth } from '@/shared/auth'
 import {
   useBingoTeachers,
@@ -25,6 +25,7 @@ import {
   useToggleBingoCell,
 } from './api'
 import coconutPng from './assets/coconut.png'
+import coconutPngSource from './assets/coconut.png?raw'
 import SPSchan from './assets/SPS-chan.png'
 import webPageUrl from './assets/coconut.png?url'
 import { TeacherQuoteForm } from './TeacherQuoteForm'
@@ -35,12 +36,24 @@ const ERROR_COLOR = '#DC2626'
 const PRIMARY_BUTTON_COLOR = '#1655A3'
 const HEADING_COLOR = '#173B70'
 
+function extractEmbeddedHtml(source: string) {
+  const start = source.indexOf('<html')
+  const end = source.indexOf('</html>', start)
+  return start === -1 || end === -1 ? null : source.slice(start, end + '</html>'.length)
+}
+
+function getStableHash(value: string) {
+  let hash = 0
+  for (let index = 0; index < value.length; index += 1) {
+    hash = Math.imul(hash, 31) + value.charCodeAt(index)
+  }
+  return hash >>> 0
+}
+
 export function BingoPage() {
   const [selectedTeacherIds, setSelectedTeacherIds] = useState<string[] | null>(null)
   const [teacherSearch, setTeacherSearch] = useState('')
   const [gridSize, setGridSize] = useState('4')
-  const [webPageHtml, setWebPageHtml] = useState<string | null>(null)
-  const [webPageLoadError, setWebPageLoadError] = useState(false)
   const { user } = useAuth()
   const teachersQuery = useBingoTeachers()
   const boardQuery = useBingoBoard()
@@ -49,40 +62,22 @@ export function BingoPage() {
   const toggleCell = useToggleBingoCell()
   const claimDailyWinner = useClaimDailyBingoWinner()
 
-  useEffect(() => {
-    let isMounted = true
-
-    fetch(webPageUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Could not load the HTML page (${response.status}).`)
-        }
-        return response.text()
-      })
-      .then((html) => {
-        if (isMounted) {
-          setWebPageHtml(html)
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setWebPageLoadError(true)
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
+  const webPageHtml = useMemo(() => extractEmbeddedHtml(coconutPngSource), [])
   const teachers = useMemo(() => teachersQuery.data ?? [], [teachersQuery.data])
   const teacherImages = useMemo(() => {
-    const iframeTeacherId = teachers[Math.floor(Math.random() * teachers.length)]?.id
+    const teacherIds = teachers.map((teacher) => teacher.id).join(':')
+    const iframeTeacherIndex =
+      teachers.length > 0 ? getStableHash(teacherIds) % teachers.length : -1
     return new Map(
-      teachers.map((teacher) => [
-        teacher.id,
-        teacher.id === iframeTeacherId ? 'iframe' : Math.random() < 0.5 ? SPSchan : coconutPng,
-      ]),
+      teachers.map((teacher, index) => {
+        const image =
+          index === iframeTeacherIndex
+            ? 'iframe'
+            : getStableHash(teacher.id) % 2 === 0
+              ? SPSchan
+              : coconutPng
+        return [teacher.id, image]
+      }),
     )
   }, [teachers])
   const activeTeacherIds = selectedTeacherIds ?? teachers.map((teacher) => teacher.id)
@@ -302,7 +297,7 @@ export function BingoPage() {
         </Stack>
 
         <Stack gap="md">
-          {webPageLoadError ? (
+          {webPageHtml === null ? (
             <Alert color={ERROR_COLOR} radius={12} title="Interaktivní hru se nepodařilo načíst">
               Obnovte stránku a zkuste to znovu.
             </Alert>
