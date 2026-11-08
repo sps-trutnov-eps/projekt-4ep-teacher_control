@@ -20,13 +20,14 @@ public class TeacherEntity
     /// <summary>
     ///     Prozatimní nápad je takový, že se bude ukládat číslo, které bude každý jedním nějakým submittem ovlivňovat
     ///     o třeba max 1 hvězdu. Jak ale v tu chvíli zajistit, že každý nebude moct furt a furt posílat POST?
-        /// <remarks>
-        /// Výchozí hodnota je střední, idk co používat jako výchozí, jestli nechat jako 5/5, nebo používat střed. — Matěj K
-        /// </remarks>
+    ///     <remarks>
+    ///     Výchozí hodnota je střední, idk co používat jako výchozí, jestli nechat jako 5/5, nebo používat střed. — Matěj K
+    ///     </remarks>
     /// </summary>
     public required float Mood { get; set; } = 3;
 
-    // Čas posledního odeslání (pozdní příchod nebo nálada) pro tohoto učitele — Abstence tím
-    // vynucuje 30minutovou prodlevu mezi odesláními, sdílenou pro oba typy.
-    public DateTime? LastSubmissionAt { get; set; }
+    // Čas posledního odeslání pozdního příchodu / nálady pro tohoto učitele — zvlášť pro
+    // každý typ, Abstence tím vynucuje 30minutovou prodlevu mezi odesláními téhož typu.
+    public DateTime? LastLateArrivalSubmissionAt { get; set; }
+    public DateTime? LastMoodSubmissionAt { get; set; }
 }

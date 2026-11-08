@@ -2,9 +2,11 @@
   <Folder Name="/Solution Items/">
     <File Path="../.env" />
     <File Path="../.env.example" />
-    <File Path="../db-only.compose.yaml" />
-    <File Path="../docker-compose.yaml" />
+    <File Path="../docker/db-only.docker-compose.yaml" />
+    <File Path="../docker/docker-compose.yaml" />
+    <File Path="../docker/app.docker-compose.yaml" />
     <File Path="../README.md" />
+    <File Path="TeacherControl.Api/README.md" />
   </Folder>
   <Project Path="TeacherControl.Api/TeacherControl.Api.csproj" />
 </Solution>

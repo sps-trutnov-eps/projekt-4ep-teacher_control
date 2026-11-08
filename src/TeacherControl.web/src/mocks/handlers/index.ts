@@ -4,6 +4,13 @@ import { vzorHandlers } from '@/features/vzor/mocks'
 import { bingoHandlers } from '@/features/bingo/mocks'
 import { abstenceHandlers } from '@/features/abstence/mocks'
 import { ratingHandlers } from '@/features/rating/mocks'
+import { versionHandlers } from './version'
 
 /** Skládá MSW handlery z featur. Svoje handlery si každá featura drží ve svém mocks.ts. */
-export const handlers = [...vzorHandlers, ...bingoHandlers, ...abstenceHandlers, ...ratingHandlers]
+export const handlers = [
+  ...versionHandlers,
+  ...vzorHandlers,
+  ...bingoHandlers,
+  ...abstenceHandlers,
+  ...ratingHandlers,
+]

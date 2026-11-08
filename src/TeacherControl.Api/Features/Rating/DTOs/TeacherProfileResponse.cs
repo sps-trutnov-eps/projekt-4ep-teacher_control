@@ -1,40 +1,29 @@
-using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations;
 
 namespace TeacherControl.Api.Features.Rating.DTOs;
 
+/// <summary>
+/// DoplÅˆujÃ­cÃ­ Ãºdaje o uÄiteli. JmÃ©no, fotka a prÅ¯mÄ›r recenzÃ­ jsou v seznamu (<see cref="TeacherListItemResponse"/>).
+/// </summary>
 public class TeacherProfileResponse
 {
-    [JsonPropertyName("full_name")]
-    public required string FullName { get; set; }
-
-    [JsonPropertyName("image_url")]
-    public string? ImageUrl { get; set; }
-
-    [JsonPropertyName("bio")]
     public required string Bio { get; set; }
 
-    /// <summary>Prùmìr hodnocení z recenzí (1-5), 0 pokud ádné nejsou.</summary>
-    [JsonPropertyName("review")]
-    public required float Review { get; set; }
+    /// <summary>0-5, kde 5 = uÄitel s nejmenÅ¡Ã­ absencÃ­, 0 = uÄitel s nejvÄ›tÅ¡Ã­ absencÃ­ (zaokrouhleno).</summary>
+    public required int Abstention { get; set; }
 
-    /// <summary>0-5, kde 5 = uèitel s nejmenší absencí, 0 = uèitel s nejvìtší absencí.</summary>
-    [JsonPropertyName("abstention")]
-    public required float Abstention { get; set; }
+    /// <summary>0-5, relativnÄ› k uÄiteli s nejvÃ­ce odÅ¡krtnutÃ½mi hlÃ¡Å¡kami (zaokrouhleno).</summary>
+    public required int Binginess { get; set; }
 
-    /// <summary>0-5, relativnì k uèiteli s nejvíce odškrtnutımi hláškami.</summary>
-    [JsonPropertyName("binginess")]
-    public required float Binginess { get; set; }
-
-    /// <summary>Ocenìní, která uèitel získal (nejvíc hlasù v dané kategorii a pololetí).</summary>
-    [JsonPropertyName("awards")]
+    /// <summary>OcenÄ›nÃ­, kterÃ¡ uÄitel zÃ­skal (nejvÃ­c hlasÅ¯ v danÃ© kategorii a pololetÃ­).</summary>
     public required List<TeacherAwardResponse> Awards { get; set; }
 }
 
 public class TeacherAwardResponse
 {
-    [JsonPropertyName("award")]
     public required string Award { get; set; }
 
-    [JsonPropertyName("year")]
-    public required int Year { get; set; } // TitleVoteEntity.Pololeti
+    /// <summary>NezÃ¡pornÃ© ÄÃ­slo pololetÃ­ (TitleVoteEntity.Pololeti), 0 odpovÃ­dÃ¡ roku 2026.</summary>
+    [Range(0, int.MaxValue)]
+    public required int Year { get; set; }
 }

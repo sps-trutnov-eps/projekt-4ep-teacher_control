@@ -21,112 +21,96 @@ const defaultTeacherQuotes: TeacherQuote[] = [
     teacherId: 't-novak',
     teacherName: 'Mgr. Jan Novák',
     quote: 'Zvoní pro učitele, ne pro vás!',
-    createdAt: '2026-09-01T08:00:00.000Z',
   },
   {
     id: 'q-2',
     teacherId: 't-dvorak',
     teacherName: 'Ing. Petr Dvořák',
     quote: 'Tohle byste měli znát už ze základní školy.',
-    createdAt: '2026-09-01T08:05:00.000Z',
   },
   {
     id: 'q-3',
     teacherId: 't-svoboda',
     teacherName: 'RNDr. Pavel Svoboda',
     quote: 'Vyndejte si papíry, dáme si rychlou pětiminutovku.',
-    createdAt: '2026-09-01T08:10:00.000Z',
   },
   {
     id: 'q-4',
     teacherId: 't-cerna',
     teacherName: 'Mgr. Eva Černá',
     quote: 'Tady se někdo baví a já to nejsem.',
-    createdAt: '2026-09-01T08:15:00.000Z',
   },
   {
     id: 'q-5',
     teacherId: 't-vesely',
     teacherName: 'Ing. Martin Veselý',
     quote: 'Kdo to nemá odevzdané včas, má automaticky za 5.',
-    createdAt: '2026-09-01T08:20:00.000Z',
   },
   {
     id: 'q-6',
     teacherId: 't-kral',
     teacherName: 'Mgr. Tomáš Král',
     quote: 'Ticho vzadu!',
-    createdAt: '2026-09-01T08:25:00.000Z',
   },
   {
     id: 'q-7',
     teacherId: 't-prochazka',
     teacherName: 'Ing. Aleš Procházka',
     quote: 'Příště už zkouším u tabule bez nápovědy.',
-    createdAt: '2026-09-01T08:30:00.000Z',
   },
   {
     id: 'q-8',
     teacherId: 't-kucera',
     teacherName: 'Mgr. Jiří Kučera',
     quote: 'Já mám času dost, my to v klidu doženeme o prázdninách.',
-    createdAt: '2026-09-01T08:35:00.000Z',
   },
   {
     id: 'q-9',
     teacherId: 't-moravec',
     teacherName: 'Ing. Roman Moravec',
     quote: 'Tohle je přesně ta otázka, která bude u maturity.',
-    createdAt: '2026-09-01T08:40:00.000Z',
   },
   {
     id: 'q-10',
     teacherId: 't-horak',
     teacherName: 'Mgr. Libor Horák',
     quote: 'Nezajímá mě, že vám nefunguje počítač.',
-    createdAt: '2026-09-01T08:45:00.000Z',
   },
   {
     id: 'q-11',
     teacherId: 't-sedlacek',
     teacherName: 'Ing. David Sedláček',
     quote: 'Smažte někdo tu tabuli, ať můžeme psát.',
-    createdAt: '2026-09-01T08:50:00.000Z',
   },
   {
     id: 'q-12',
     teacherId: 't-urban',
     teacherName: 'Mgr. Ondřej Urban',
     quote: 'Dneska jste nějak podezřele potichu, co se děje?',
-    createdAt: '2026-09-01T08:55:00.000Z',
   },
   {
     id: 'q-13',
     teacherId: 't-pokorny',
     teacherName: 'Ing. Milan Pokorný',
     quote: 'Kdo nedává pozor, ten to teď vysvětlí celé třídě.',
-    createdAt: '2026-09-01T09:00:00.000Z',
   },
   {
     id: 'q-14',
     teacherId: 't-kovar',
     teacherName: 'Mgr. Michal Kovář',
     quote: 'Mě nezajímá, co bylo včera, zajímá mě dnešek.',
-    createdAt: '2026-09-01T09:05:00.000Z',
   },
   {
     id: 'q-15',
     teacherId: 't-blaha',
     teacherName: 'Ing. Stanislav Bláha',
     quote: 'Tohle je naprosto triviální úloha na dvě minuty.',
-    createdAt: '2026-09-01T09:10:00.000Z',
   },
   {
     id: 'q-16',
     teacherId: 't-valenta',
     teacherName: 'Mgr. Václav Valenta',
     quote: 'Mobil schovej do batohu, nebo ti ho do konce hodiny zabavím.',
-    createdAt: '2026-09-01T09:15:00.000Z',
   },
 ]
 
@@ -218,7 +202,7 @@ function calculateBingoCount(cells: BingoCell[], size: number): number {
 
   // Kontrola řad
   for (let r = 0; r < size; r++) {
-    const rowCells = cells.filter((c) => c.row === r)
+    const rowCells = cells.filter((c) => Number(c.row) === r)
     if (rowCells.length === size && rowCells.every((c) => c.isMarked)) {
       bingos++
     }
@@ -226,20 +210,20 @@ function calculateBingoCount(cells: BingoCell[], size: number): number {
 
   // Kontrola sloupců
   for (let col = 0; col < size; col++) {
-    const colCells = cells.filter((c) => c.col === col)
+    const colCells = cells.filter((c) => Number(c.col) === col)
     if (colCells.length === size && colCells.every((c) => c.isMarked)) {
       bingos++
     }
   }
 
   // Hlavní diagonála (0,0), (1,1), (2,2)...
-  const mainDiag = cells.filter((c) => c.row === c.col)
+  const mainDiag = cells.filter((c) => Number(c.row) === Number(c.col))
   if (mainDiag.length === size && mainDiag.every((c) => c.isMarked)) {
     bingos++
   }
 
   // Vedlejší diagonála (0, size-1), (1, size-2)...
-  const antiDiag = cells.filter((c) => c.row + c.col === size - 1)
+  const antiDiag = cells.filter((c) => Number(c.row) + Number(c.col) === size - 1)
   if (antiDiag.length === size && antiDiag.every((c) => c.isMarked)) {
     bingos++
   }
@@ -283,7 +267,6 @@ function createNewBoard(
               teacherId: 't-unknown',
               teacherName: 'Učitel',
               quote: `Běžná hláška #${quoteIndex + 1}`,
-              createdAt: new Date().toISOString(),
             }
 
       const randomSuffix = Math.random().toString(36).substring(2, 8)
@@ -320,6 +303,13 @@ function createNewBoard(
  * - Počítadlo bingo výher (Bingo counter)
  */
 export const bingoHandlers = [
+  http.get('*/api/bingo/teachers', () => {
+    const teachers = new Map(
+      teacherQuotes.map((quote) => [quote.teacherId, quote.teacherName] as const),
+    )
+    return HttpResponse.json(Array.from(teachers, ([id, name]) => ({ id, name })))
+  }),
+
   // 1. Získání aktuální aktivní desky přihlášeného uživatele (pokud nemá, vytvoří se nová)
   http.get('*/api/bingo/board', () => {
     const userId = getActiveUserId()
@@ -393,8 +383,8 @@ export const bingoHandlers = [
     // Přepnutí stavu označení
     cell.isMarked = !cell.isMarked
 
-    const previousCount = board.bingoCount
-    const newCount = calculateBingoCount(board.cells, board.gridSize)
+    const previousCount = Number(board.bingoCount)
+    const newCount = calculateBingoCount(board.cells, Number(board.gridSize))
     board.bingoCount = newCount
 
     const stats = getOrCreateUserStats(userId)
@@ -402,22 +392,22 @@ export const bingoHandlers = [
 
     if (newCount > previousCount) {
       const difference = newCount - previousCount
-      stats.totalBingos += difference
+      stats.totalBingos = Number(stats.totalBingos) + difference
       newBingoAchieved = true
     } else if (newCount < previousCount) {
       const difference = previousCount - newCount
-      stats.totalBingos = Math.max(0, stats.totalBingos - difference)
+      stats.totalBingos = Math.max(0, Number(stats.totalBingos) - difference)
     }
 
     if (board.cells.length > 0 && board.cells.every((c) => c.isMarked)) {
       if (!board.isCompleted) {
         board.isCompleted = true
-        stats.completedBoards++
+        stats.completedBoards = Number(stats.completedBoards) + 1
       }
     } else {
       if (board.isCompleted) {
         board.isCompleted = false
-        stats.completedBoards = Math.max(0, stats.completedBoards - 1)
+        stats.completedBoards = Math.max(0, Number(stats.completedBoards) - 1)
       }
     }
 
@@ -464,7 +454,6 @@ export const bingoHandlers = [
       teacherId: body.teacherId.trim(),
       teacherName: body.teacherName.trim(),
       quote: body.quote.trim(),
-      createdAt: new Date().toISOString(),
     }
 
     teacherQuotes = [...teacherQuotes, newQuote]

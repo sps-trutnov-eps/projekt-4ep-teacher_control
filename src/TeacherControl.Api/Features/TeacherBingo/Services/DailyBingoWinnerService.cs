@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+
 using Npgsql;
+
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using TeacherControl.Api.Features.TeacherBingo.Models;
