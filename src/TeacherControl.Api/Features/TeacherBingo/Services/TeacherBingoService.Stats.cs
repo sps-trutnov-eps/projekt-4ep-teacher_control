@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+
 using TeacherControl.Api.Features.TeacherBingo.Models;
 
 namespace TeacherControl.Api.Features.TeacherBingo.Services;
