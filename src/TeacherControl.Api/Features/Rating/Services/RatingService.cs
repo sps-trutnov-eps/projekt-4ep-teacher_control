@@ -8,6 +8,8 @@ namespace TeacherControl.Api.Features.Rating.Services;
 
 public class RatingService
 {
+    private const string PlaceholderImageUrl = "https://placeholder.img";
+
     private readonly AppDbContext _db;
 
     public RatingService(AppDbContext db)
@@ -64,25 +66,45 @@ public class RatingService
         return ratings.Count == 0 ? 0f : ratings.Average();
     }
 
+    public async Task<List<TeacherListItemResponse>> GetTeachersAsync()
+    {
+        var teachers = await _db.Teachers
+            .OrderBy(t => t.Name)
+            .Select(t => new
+            {
+                t.Id,
+                t.Name,
+                t.PhotoUrl,
+                Average = t.Reviews.Average(r => (double?)r.Rating) ?? 0
+            })
+            .ToListAsync();
+
+        return teachers
+            .Select(t => new TeacherListItemResponse
+            {
+                Id = t.Id,
+                FullName = t.Name,
+                ImageUrl = string.IsNullOrWhiteSpace(t.PhotoUrl) ? PlaceholderImageUrl : t.PhotoUrl,
+                Review = RoundToInt(t.Average)
+            })
+            .ToList();
+    }
+
     public async Task<TeacherProfileResponse> GetTeacherProfileAsync(int teacherId)
     {
         var teacher = await _db.Teachers.FindAsync(teacherId);
         if (teacher is null)
             throw new KeyNotFoundException($"Teacher with id {teacherId} was not found.");
 
-        var review = await GetAverageRatingAsync(teacherId);
         var abstention = await CalculateAbstentionAsync(teacherId);
         var binginess = await CalculateBinginessAsync(teacherId);
         var awards = await GetAwardsAsync(teacherId);
 
         return new TeacherProfileResponse
         {
-            FullName = teacher.Name,
-            ImageUrl = teacher.PhotoUrl,
             Bio = teacher.Description,
-            Review = review,
-            Abstention = abstention,
-            Binginess = binginess,
+            Abstention = RoundToInt(abstention),
+            Binginess = RoundToInt(binginess),
             Awards = awards
         };
     }
@@ -159,7 +181,7 @@ public class RatingService
             .Select(w => new TeacherAwardResponse
             {
                 Award = titles[w.TeacherTitleId],
-                Year = w.Pololeti
+                Year = w.Pololeti // 0 = rok 2026
             })
             .ToList();
     }
@@ -188,6 +210,8 @@ public class RatingService
         _db.Reviews.Remove(review);
         await _db.SaveChangesAsync();
     }
+
+    private static int RoundToInt(double value) => (int)Math.Round(value, MidpointRounding.AwayFromZero);
 
     private static ReviewResponse MapToResponse(ReviewEntity review) => new()
     {
