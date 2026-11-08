@@ -38,14 +38,10 @@ function getVoteButtonLabel(title: TitleVotes, teacherId: number): string {
   return title.myVoteTeacherId === null ? 'Hlasovat' : 'Přesunout hlas sem'
 }
 
-export function TeacherCard({ teacherId }: TeacherCardProps) {
+function TeacherCardContent({ teacherId }: { teacherId: number }) {
   const { isAuthenticated } = useAuth()
   const { data, isPending, isError } = usePololetiTeacher(teacherId)
-  const vote = useCastVote(teacherId ?? 0)
-
-  if (teacherId === null) {
-    return <Text c="dimmed">Vyber učitele ze seznamu.</Text>
-  }
+  const vote = useCastVote(teacherId)
 
   if (isPending) {
     return <Loader size="sm" />
@@ -109,4 +105,12 @@ export function TeacherCard({ teacherId }: TeacherCardProps) {
       </Stack>
     </Card>
   )
+}
+
+export function TeacherCard({ teacherId }: TeacherCardProps) {
+  if (teacherId === null) {
+    return <Text c="dimmed">Vyber učitele ze seznamu.</Text>
+  }
+
+  return <TeacherCardContent teacherId={teacherId} />
 }

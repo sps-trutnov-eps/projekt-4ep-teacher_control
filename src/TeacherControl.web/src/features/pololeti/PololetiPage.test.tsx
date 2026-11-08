@@ -32,7 +32,7 @@ const CARD: TeacherCard = {
   ],
 }
 
-const castVote = vi.fn()
+const { castVote, loadCard } = vi.hoisted(() => ({ castVote: vi.fn(), loadCard: vi.fn() }))
 
 vi.mock('./api', () => ({
   ApiError: class ApiError extends Error {
@@ -44,11 +44,10 @@ vi.mock('./api', () => ({
     }
   },
   usePololetiTeachers: () => ({ data: TEACHERS, isPending: false, isError: false }),
-  usePololetiTeacher: (teacherId: number | null) => ({
-    data: teacherId === null ? undefined : CARD,
-    isPending: teacherId === null,
-    isError: false,
-  }),
+  usePololetiTeacher: (teacherId: number) => {
+    loadCard(teacherId)
+    return { data: CARD, isPending: false, isError: false }
+  },
   useCastVote: () => ({
     mutate: castVote,
     isPending: false,
@@ -80,6 +79,18 @@ describe('PololetiPage', () => {
     expect(within(list).getByText('Jana Nováková')).toBeDefined()
     expect(within(list).getByText('Petr Svoboda')).toBeDefined()
     expect(screen.getByText('Vyber učitele ze seznamu.')).toBeDefined()
+  })
+
+  it('bez vybraného učitele nenačítá kartu, do API se nikdy neposílá null ani 0', () => {
+    loadCard.mockClear()
+    renderPage()
+
+    expect(loadCard).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByText('Petr Svoboda'))
+
+    expect(loadCard).toHaveBeenCalledWith(2)
+    expect(loadCard).not.toHaveBeenCalledWith(0)
   })
 
   it('po výběru učitele ukáže kartu s tituly a počty hlasů', () => {

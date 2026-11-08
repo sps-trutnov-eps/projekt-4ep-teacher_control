@@ -44,12 +44,13 @@ export function usePololetiTeachers() {
   })
 }
 
-export function usePololetiTeacher(teacherId: number | null) {
+/** `teacherId` je vždy platné číslo: komponenta ho volá až po výběru učitele, null se do API nikdy nedostane. */
+export function usePololetiTeacher(teacherId: number) {
   return useQuery({
-    queryKey: pololetiKeys.teacher(teacherId ?? 0),
+    queryKey: pololetiKeys.teacher(teacherId),
     queryFn: async ({ signal }) => {
       const { data, response } = await api.GET('/api/pololeti/teachers/{teacherId}', {
-        params: { path: { teacherId: teacherId ?? 0 } },
+        params: { path: { teacherId } },
         signal,
       })
 
@@ -59,7 +60,6 @@ export function usePololetiTeacher(teacherId: number | null) {
 
       return data as TeacherCard
     },
-    enabled: teacherId !== null,
   })
 }
 
