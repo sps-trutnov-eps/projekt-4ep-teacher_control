@@ -32,7 +32,7 @@ export function TeacherSearch({ search, onSearchChange, sort, onSortChange }: Te
         <Group gap={8} wrap="nowrap" className={classes.searchWrap}>
           <TextInput
             aria-label="Hledat učitele"
-            placeholder="Hledat učitele"
+            placeholder="Hledat učitele (jméno)"
             value={search}
             onChange={(event) => onSearchChange(event.currentTarget.value)}
             leftSection={<IconSearch className={classes.searchIcon} />}

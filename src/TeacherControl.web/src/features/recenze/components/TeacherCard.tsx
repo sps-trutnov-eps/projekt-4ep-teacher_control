@@ -1,6 +1,6 @@
 import { Avatar, Stack, Text, UnstyledButton } from '@mantine/core'
 import classes from '../Recenze.module.css'
-import { formatReviewCount, formatTeacherName } from '../format'
+import { formatReviewCount } from '../format'
 import type { ReviewTeacher } from '../types'
 import { IconChevronRight } from './icons'
 import { StarRating } from './StarRating'
@@ -12,14 +12,12 @@ interface TeacherCardProps {
 }
 
 export function TeacherCard({ teacher, isActive, onSelect }: TeacherCardProps) {
-  const name = formatTeacherName(teacher)
-
   return (
     <UnstyledButton
       className={classes.teacherCard}
       data-active={isActive || undefined}
       aria-current={isActive ? 'true' : undefined}
-      aria-label={`${name}. Zobrazit recenze`}
+      aria-label={`${teacher.name}. Zobrazit recenze`}
       onClick={() => onSelect(teacher.id)}
     >
       <Avatar
@@ -32,11 +30,13 @@ export function TeacherCard({ teacher, isActive, onSelect }: TeacherCardProps) {
 
       <Stack gap={6} style={{ flex: 1, minWidth: 0 }}>
         <Text className={classes.teacherName} truncate>
-          {name}
+          {teacher.name}
         </Text>
-        <Text className={classes.muted} lineClamp={2}>
-          {teacher.description}
-        </Text>
+        {teacher.description ? (
+          <Text className={classes.muted} lineClamp={1}>
+            {teacher.description}
+          </Text>
+        ) : null}
         {teacher.averageRating !== null ? (
           <StarRating
             value={teacher.averageRating}

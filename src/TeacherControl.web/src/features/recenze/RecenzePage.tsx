@@ -6,9 +6,8 @@ import { ReviewForm } from './components/ReviewForm'
 import { TeacherDetail } from './components/TeacherDetail'
 import { TeacherList, TeacherListSkeleton } from './components/TeacherList'
 import { TeacherSearch } from './components/TeacherSearch'
-import { formatTeacherName } from './format'
 import classes from './Recenze.module.css'
-import type { ReviewTeacher, TeacherSort } from './types'
+import type { Review, ReviewTeacher, TeacherSort } from './types'
 
 const PAGE_SIZE = 8
 
@@ -34,6 +33,8 @@ export function RecenzePage() {
   const [sort, setSort] = useState<TeacherSort>('reviews')
   const [page, setPage] = useState(1)
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  /** Recenze, kterou formulář upravuje; bez ní se píše nová. */
+  const [editing, setEditing] = useState<Review | null>(null)
   const [mode, setMode] = useState<DetailMode>('profile')
 
   const scrollTopOnMobile = () => {
@@ -44,6 +45,7 @@ export function RecenzePage() {
 
   const selectTeacher = (teacherId: number) => {
     setSelectedId(teacherId)
+    setEditing(null)
     setMode('profile')
     scrollTopOnMobile()
   }
@@ -51,6 +53,16 @@ export function RecenzePage() {
   const changeMode = (next: DetailMode) => {
     setMode(next)
     scrollTopOnMobile()
+  }
+
+  const startWriting = () => {
+    setEditing(null)
+    changeMode('write')
+  }
+
+  const startEditing = (review: Review) => {
+    setEditing(review)
+    changeMode('write')
   }
 
   const allTeachers = teachersQuery.data ?? []
@@ -109,8 +121,9 @@ export function RecenzePage() {
               <EmptyDetail />
             ) : mode === 'write' ? (
               <ReviewForm
-                key={selectedId}
+                key={`${selectedId}-${editing?.id ?? 'new'}`}
                 teacherId={selectedId}
+                review={editing ?? undefined}
                 onBack={() => changeMode('profile')}
                 onSubmitted={() => changeMode('profile')}
               />
@@ -118,7 +131,8 @@ export function RecenzePage() {
               <TeacherDetail
                 teacherId={selectedId}
                 onBack={() => setSelectedId(null)}
-                onWrite={() => changeMode('write')}
+                onWrite={startWriting}
+                onEdit={startEditing}
               />
             )}
           </section>
@@ -139,20 +153,18 @@ function EmptyDetail() {
           Vyber učitele ze seznamu
         </Text>
         <Text className={classes.muted} maw={320}>
-          Zobrazí se jeho profil, reakce studentů a recenze.
+          Zobrazí se jeho profil, hodnocení a recenze od studentů.
         </Text>
       </Stack>
     </div>
   )
 }
 
+/** Filtruje se ze staženého seznamu, aby hledání fungovalo bez ohledu na diakritiku. */
 function filterTeachers(teachers: ReviewTeacher[], search: string) {
   const query = normalize(search.trim())
 
-  return teachers.filter((teacher) => {
-    if (!query) return true
-    return normalize(`${formatTeacherName(teacher)} ${teacher.description}`).includes(query)
-  })
+  return teachers.filter((teacher) => !query || normalize(teacher.name).includes(query))
 }
 
 function normalize(value: string) {
