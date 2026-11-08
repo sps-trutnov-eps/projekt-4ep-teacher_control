@@ -1,14 +1,9 @@
-import { Button, Group, Menu, Select, Stack, Text, TextInput, UnstyledButton } from '@mantine/core'
+import { Button, Group, Select, Stack, Text, TextInput } from '@mantine/core'
 import type { FormEvent } from 'react'
 import classes from '../Recenze.module.css'
 import { BRAND } from '../theme'
 import type { TeacherSort } from '../types'
-import { IconChevronDown, IconSearch } from './icons'
-
-/** Kolik předmětů je vidět jako tlačítko, zbytek je v menu „Více“. */
-const VISIBLE_SUBJECTS = 3
-
-export const ALL_SUBJECTS = 'all'
+import { IconSearch } from './icons'
 
 const SORT_OPTIONS: { value: TeacherSort; label: string }[] = [
   { value: 'reviews', label: 'Nejvíce recenzí' },
@@ -19,27 +14,11 @@ const SORT_OPTIONS: { value: TeacherSort; label: string }[] = [
 interface TeacherSearchProps {
   search: string
   onSearchChange: (value: string) => void
-  /** Předměty seřazené podle počtu učitelů. */
-  subjects: string[]
-  subject: string
-  onSubjectChange: (value: string) => void
   sort: TeacherSort
   onSortChange: (value: TeacherSort) => void
 }
 
-export function TeacherSearch({
-  search,
-  onSearchChange,
-  subjects,
-  subject,
-  onSubjectChange,
-  sort,
-  onSortChange,
-}: TeacherSearchProps) {
-  const visible = subjects.slice(0, VISIBLE_SUBJECTS)
-  const overflow = subjects.slice(VISIBLE_SUBJECTS)
-  const overflowSelected = overflow.includes(subject)
-
+export function TeacherSearch({ search, onSearchChange, sort, onSortChange }: TeacherSearchProps) {
   // Filtruje se už při psaní; tlačítko je tu pro Enter a pro zavření klávesnice na mobilu.
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -53,7 +32,7 @@ export function TeacherSearch({
         <Group gap={8} wrap="nowrap" className={classes.searchWrap}>
           <TextInput
             aria-label="Hledat učitele"
-            placeholder="Hledat učitele (jméno, předmět)"
+            placeholder="Hledat učitele"
             value={search}
             onChange={(event) => onSearchChange(event.currentTarget.value)}
             leftSection={<IconSearch className={classes.searchIcon} />}
@@ -67,56 +46,6 @@ export function TeacherSearch({
           </Button>
         </Group>
       </form>
-
-      <Group gap={8} role="group" aria-label="Filtrovat podle předmětu">
-        <UnstyledButton
-          className={classes.pill}
-          data-active={subject === ALL_SUBJECTS || undefined}
-          aria-pressed={subject === ALL_SUBJECTS}
-          onClick={() => onSubjectChange(ALL_SUBJECTS)}
-        >
-          Všichni
-        </UnstyledButton>
-
-        {visible.map((item) => (
-          <UnstyledButton
-            key={item}
-            className={classes.pill}
-            data-active={subject === item || undefined}
-            aria-pressed={subject === item}
-            onClick={() => onSubjectChange(item)}
-          >
-            {item}
-          </UnstyledButton>
-        ))}
-
-        {overflow.length > 0 ? (
-          <Menu position="bottom-start" shadow="md" radius="md" withinPortal>
-            <Menu.Target>
-              <UnstyledButton
-                className={classes.pill}
-                data-active={overflowSelected || undefined}
-                aria-pressed={overflowSelected}
-              >
-                {overflowSelected ? subject : 'Více'}
-                <IconChevronDown size={16} />
-              </UnstyledButton>
-            </Menu.Target>
-            <Menu.Dropdown mah={320} style={{ overflowY: 'auto' }}>
-              {overflow.map((item) => (
-                <Menu.Item
-                  key={item}
-                  onClick={() => onSubjectChange(item)}
-                  fw={item === subject ? 600 : undefined}
-                  c={item === subject ? BRAND.primary : undefined}
-                >
-                  {item}
-                </Menu.Item>
-              ))}
-            </Menu.Dropdown>
-          </Menu>
-        ) : null}
-      </Group>
 
       <Group gap={8} justify="flex-end" wrap="nowrap">
         <Text component="label" htmlFor="recenze-sort" className={classes.sortLabel}>

@@ -1,21 +1,22 @@
-import { Alert, Avatar, Badge, Button, Group, Progress, Skeleton, Stack, Text } from '@mantine/core'
+import { Alert, Avatar, Button, Group, Skeleton, Stack, Text } from '@mantine/core'
 import { useAuth } from '@/shared/auth'
 import { useReviewTeacher } from '../api'
 import classes from '../Recenze.module.css'
 import { formatRating, formatReviewCount, formatTeacherName } from '../format'
 import { BRAND } from '../theme'
 import type { ReviewTeacherDetail } from '../types'
-import { IconArrowLeft, IconBook, IconPencil, IconSchool, IconUsers } from './icons'
+import { IconArrowLeft, IconPencil } from './icons'
 import { ReviewList } from './ReviewList'
+import { TeacherReactionButtons } from './TeacherReactionButtons'
 import { StarRating } from './StarRating'
 
 interface TeacherDetailProps {
-  teacherId: string
+  teacherId: number
   onBack: () => void
   onWrite: () => void
 }
 
-/** Pravá část stránky: profil učitele, hodnocení v kategoriích a recenze. */
+/** Teacher profile, reactions, and reviews. */
 export function TeacherDetail({ teacherId, onBack, onWrite }: TeacherDetailProps) {
   const { data: teacher, isPending, isError } = useReviewTeacher(teacherId)
 
@@ -32,7 +33,21 @@ export function TeacherDetail({ teacherId, onBack, onWrite }: TeacherDetailProps
       ) : (
         <>
           <ProfileCard teacher={teacher} />
-          <CategoryBars teacher={teacher} />
+          <section className={classes.panel} aria-label="Popis učitele">
+            <h2 className={classes.sectionTitle}>O učiteli</h2>
+            {teacher.nickname ? (
+              <Text fw={600} mt="sm">
+                {teacher.nickname}
+              </Text>
+            ) : null}
+            <Text className={classes.reviewText} mt="sm">
+              {teacher.description}
+            </Text>
+            <Text className={classes.muted} mt="sm">
+              Nálada: {formatRating(teacher.mood)}
+            </Text>
+            <TeacherReactionButtons teacher={teacher} />
+          </section>
           <WriteReviewAction onWrite={onWrite} />
           <ReviewList key={teacher.id} teacherId={teacher.id} total={teacher.reviewCount} />
         </>
@@ -59,7 +74,7 @@ function ProfileCard({ teacher }: { teacher: ReviewTeacherDetail }) {
         <Group gap="lg" wrap="nowrap" align="center">
           <Avatar
             src={teacher.photoUrl}
-            name={`${teacher.firstName} ${teacher.lastName}`}
+            name={teacher.name}
             size={112}
             radius={999}
             classNames={{ placeholder: classes.avatar }}
@@ -67,7 +82,7 @@ function ProfileCard({ teacher }: { teacher: ReviewTeacherDetail }) {
           />
           <Avatar
             src={teacher.photoUrl}
-            name={`${teacher.firstName} ${teacher.lastName}`}
+            name={teacher.name}
             size={72}
             radius={999}
             classNames={{ placeholder: classes.avatar }}
@@ -75,9 +90,6 @@ function ProfileCard({ teacher }: { teacher: ReviewTeacherDetail }) {
           />
           <Stack gap={8} miw={0}>
             <h2 className={classes.profileName}>{name}</h2>
-            <Badge className={classes.subjectBadge} radius="sm" size="lg" w="fit-content">
-              {teacher.subject}
-            </Badge>
             {teacher.averageRating !== null ? (
               <Group gap="sm" align="center">
                 <StarRating value={teacher.averageRating} size="lg" />
@@ -89,47 +101,6 @@ function ProfileCard({ teacher }: { teacher: ReviewTeacherDetail }) {
             )}
           </Stack>
         </Group>
-
-        <dl className={classes.infoList}>
-          <InfoRow icon={<IconBook />} label="Předmět" value={teacher.subject} />
-          <InfoRow icon={<IconUsers />} label="Třídy" value={teacher.classes.join(', ')} />
-          <InfoRow icon={<IconSchool />} label="Škola" value={teacher.school} />
-        </dl>
-      </Stack>
-    </section>
-  )
-}
-
-function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <>
-      <span className={classes.infoIcon}>{icon}</span>
-      <dt className={classes.infoLabel}>{label}</dt>
-      <dd className={classes.infoValue}>{value}</dd>
-    </>
-  )
-}
-
-function CategoryBars({ teacher }: { teacher: ReviewTeacherDetail }) {
-  return (
-    <section className={classes.panel} aria-labelledby="recenze-categories-title">
-      <h2 id="recenze-categories-title" className={classes.sectionTitle}>
-        Hodnocení v kategoriích
-      </h2>
-      <Stack gap={12} mt="md">
-        {teacher.categories.map((category) => (
-          <div key={category.key} className={classes.categoryRow}>
-            <Text size="md">{category.label}</Text>
-            <Progress
-              value={(category.value / 5) * 100}
-              size={12}
-              radius="xl"
-              classNames={{ root: classes.progressRoot, section: classes.progressSection }}
-              aria-label={`${category.label}: ${formatRating(category.value)} z 5`}
-            />
-            <Text className={classes.categoryValue}>{formatRating(category.value)}</Text>
-          </div>
-        ))}
       </Stack>
     </section>
   )

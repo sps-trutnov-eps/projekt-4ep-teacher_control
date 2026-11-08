@@ -11,10 +11,8 @@ const dateFormatter = new Intl.DateTimeFormat('cs-CZ', {
   year: 'numeric',
 })
 
-export function formatTeacherName(
-  teacher: Pick<ReviewTeacher, 'degree' | 'firstName' | 'lastName'>,
-) {
-  return [teacher.degree, teacher.firstName, teacher.lastName].filter(Boolean).join(' ')
+export function formatTeacherName(teacher: Pick<ReviewTeacher, 'name'>) {
+  return teacher.name
 }
 
 /** 4.2 → „4,2“ */

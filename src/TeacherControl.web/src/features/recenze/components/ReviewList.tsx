@@ -1,30 +1,20 @@
-import { Alert, Avatar, Button, Group, Select, Skeleton, Stack, Text } from '@mantine/core'
+import { Alert, Avatar, Button, Group, Skeleton, Stack, Text } from '@mantine/core'
 import { useState } from 'react'
 import { useTeacherReviews } from '../api'
 import classes from '../Recenze.module.css'
 import { formatReviewDate } from '../format'
-import type { Review, ReviewSort } from '../types'
-import { StarRating } from './StarRating'
-import { VoteButtons } from './VoteButtons'
+import type { Review } from '../types'
 
 const PAGE_SIZE = 5
 
-const SORT_OPTIONS: { value: ReviewSort; label: string }[] = [
-  { value: 'newest', label: 'Nejnovější' },
-  { value: 'oldest', label: 'Nejstarší' },
-  { value: 'best', label: 'Nejlépe hodnocené' },
-  { value: 'helpful', label: 'Nejužitečnější' },
-]
-
 interface ReviewListProps {
-  teacherId: string
+  teacherId: number
   total: number
 }
 
 export function ReviewList({ teacherId, total }: ReviewListProps) {
-  const [sort, setSort] = useState<ReviewSort>('newest')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
-  const reviewsQuery = useTeacherReviews(teacherId, sort)
+  const reviewsQuery = useTeacherReviews(teacherId)
 
   return (
     <section className={classes.panel} aria-labelledby="recenze-list-title">
@@ -32,19 +22,6 @@ export function ReviewList({ teacherId, total }: ReviewListProps) {
         <h2 id="recenze-list-title" className={classes.sectionTitle}>
           Recenze ({total})
         </h2>
-        <Select
-          aria-label="Řadit recenze"
-          data={SORT_OPTIONS}
-          value={sort}
-          onChange={(value) => {
-            if (!value) return
-            setSort(value as ReviewSort)
-            setVisibleCount(PAGE_SIZE)
-          }}
-          allowDeselect={false}
-          w={190}
-          radius="md"
-        />
       </Group>
 
       {reviewsQuery.isPending ? (
@@ -81,8 +58,7 @@ export function ReviewList({ teacherId, total }: ReviewListProps) {
 }
 
 function ReviewItem({ review }: { review: Review }) {
-  const author = review.authorName ?? 'Student (anonymně)'
-  const meta = [review.className, formatReviewDate(review.createdAt)].filter(Boolean).join(' • ')
+  const author = review.isMine ? 'Tvoje recenze' : 'Student'
 
   return (
     <article className={classes.reviewCard}>
@@ -94,18 +70,12 @@ function ReviewItem({ review }: { review: Review }) {
               <Text className={classes.reviewAuthor} truncate>
                 {author}
               </Text>
-              <Text className={classes.muted}>{meta}</Text>
+              <Text className={classes.muted}>{formatReviewDate(review.createdAt)}</Text>
             </Stack>
           </Group>
-          <StarRating value={review.rating} suffix={`${review.rating}/5`} />
         </Group>
 
-        {review.title ? <h3 className={classes.reviewTitle}>{review.title}</h3> : null}
-        <p className={classes.reviewText}>{review.text}</p>
-
-        <Group justify="flex-end">
-          <VoteButtons review={review} />
-        </Group>
+        <p className={classes.reviewText}>{review.content}</p>
       </Stack>
     </article>
   )
