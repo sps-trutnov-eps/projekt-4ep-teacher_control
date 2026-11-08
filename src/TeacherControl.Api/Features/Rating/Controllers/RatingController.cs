@@ -1,8 +1,6 @@
 using System.Security.Claims;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 using TeacherControl.Api.Features.Rating.DTOs;
 using TeacherControl.Api.Features.Rating.Services;
 
@@ -36,7 +34,7 @@ public class RatingController : ControllerBase
         try
         {
             var result = await _ratingService.CreateReviewAsync(studentId, request);
-            return CreatedAtAction(nameof(GetReviewsForTeacher), new { teacherId = result.TeacherId }, result);
+            return CreatedAtAction(nameof(GetTeacherProfile), new { teacherId = result.TeacherId }, result);
         }
         catch (KeyNotFoundException ex)
         {
@@ -70,14 +68,6 @@ public class RatingController : ControllerBase
             _logger.LogWarning(ex, "Attempted to view profile of a non-existent teacher");
             return NotFound(ex.Message);
         }
-    }
-
-    [HttpGet("teacher/{teacherId:int}/reviews")]
-    [ProducesResponseType(typeof(List<ReviewResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetReviewsForTeacher(int teacherId)
-    {
-        var reviews = await _ratingService.GetReviewsForTeacherAsync(teacherId);
-        return Ok(reviews);
     }
 
     [HttpGet("teacher/{teacherId:int}/average")]

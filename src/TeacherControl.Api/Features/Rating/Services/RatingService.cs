@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using TeacherControl.Api.Features.Rating.DTOs;
@@ -38,22 +37,6 @@ public class RatingService
         await _db.SaveChangesAsync();
 
         return MapToResponse(review);
-    }
-
-    public async Task<List<ReviewResponse>> GetReviewsForTeacherAsync(int teacherId)
-    {
-        return await _db.Reviews
-            .Where(r => r.TeacherId == teacherId)
-            .Select(r => new ReviewResponse
-            {
-                Id = r.Id,
-                Title = r.Title,
-                Content = r.Content,
-                Rating = r.Rating,
-                TeacherId = r.TeacherId,
-                StudentId = r.StudentId
-            })
-            .ToListAsync();
     }
 
     public async Task<float> GetAverageRatingAsync(int teacherId)
