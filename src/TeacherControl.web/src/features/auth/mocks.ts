@@ -18,11 +18,34 @@ interface PendingRegistration {
 const pendingRegistrations = new Map<string, PendingRegistration>()
 const registeredUsers = new Map<string, User>()
 
+const SESSION_USER_KEY = 'teacher-control.mock-session-user'
+
+function getSessionUser(): User | null {
+  try {
+    const raw = sessionStorage.getItem(SESSION_USER_KEY)
+    return raw ? (JSON.parse(raw) as User) : null
+  } catch {
+    return null
+  }
+}
+
+function setSessionUser(user: User | null): void {
+  try {
+    if (user) {
+      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user))
+    } else {
+      sessionStorage.removeItem(SESSION_USER_KEY)
+    }
+  } catch {
+    // sessionStorage nedostupné
+  }
+}
+
 // Výchozí demo kód pro testování ve vývoji
 export const MOCK_CONFIRMATION_CODE = '123456'
 
 export const authHandlers = [
-  http.post('/api/auth/register', async ({ request }) => {
+  http.post('*/api/auth/register', async ({ request }) => {
     const body = (await request.json()) as RegisterRequest
 
     const email = body.email?.trim().toLowerCase()
@@ -59,7 +82,7 @@ export const authHandlers = [
     })
   }),
 
-  http.post('/api/auth/confirm-code', async ({ request }) => {
+  http.post('*/api/auth/confirm-code', async ({ request }) => {
     const body = (await request.json()) as ConfirmCodeRequest
     const email = body.email?.trim().toLowerCase()
     const code = body.code?.trim()
@@ -103,13 +126,15 @@ export const authHandlers = [
       pendingRegistrations.delete(email)
     }
 
+    setSessionUser(user)
+
     return HttpResponse.json({
       message: 'E-mail byl úspěšně ověřen a váš účet byl aktivován.',
       user,
     })
   }),
 
-  http.post('/api/auth/resend-code', async ({ request }) => {
+  http.post('*/api/auth/resend-code', async ({ request }) => {
     const body = (await request.json()) as ResendCodeRequest
     const email = body.email?.trim().toLowerCase()
 
@@ -136,7 +161,7 @@ export const authHandlers = [
     })
   }),
 
-  http.post('/api/auth/login', async ({ request }) => {
+  http.post('*/api/auth/login', async ({ request }) => {
     const body = (await request.json()) as LoginRequest
     const email = body.email?.trim().toLowerCase()
 
@@ -162,22 +187,24 @@ export const authHandlers = [
       roles: ['student'],
     }
 
+    setSessionUser(user)
+
     return HttpResponse.json({
       message: 'Přihlášení proběhlo úspěšně.',
       user,
     })
   }),
 
-  http.post('/api/auth/logout', () => {
+  http.post('*/api/auth/logout', () => {
+    setSessionUser(null)
     return HttpResponse.json({ success: true })
   }),
 
-  http.get('/api/auth/me', () => {
-    const defaultUser: User = {
-      id: 'usr-current',
-      displayName: 'Jan Novák',
-      roles: ['student'],
+  http.get('*/api/auth/me', () => {
+    const user = getSessionUser()
+    if (!user) {
+      return new HttpResponse(null, { status: 401 })
     }
-    return HttpResponse.json(defaultUser)
+    return HttpResponse.json(user)
   }),
 ]

@@ -1,4 +1,5 @@
 export { useAuth } from './AuthContext'
+export { AuthProvider } from './AuthProvider'
 export { MockAuthProvider } from './MockAuthProvider'
 export { DevUserSwitcher } from './DevUserSwitcher'
 export { RequireAuth } from './RequireAuth'

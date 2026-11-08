@@ -31,8 +31,7 @@ function storeUserId(id: string | null): void {
 }
 
 /**
- * Dočasná implementace auth pro vývoj. Nahradí ji featura F6 Login.
- * Přepínání uživatele obsluhuje `DevUserSwitcher`.
+ * Dočasná implementace auth pro testy komponent, kde je potřeba předpřipravený uživatel.
  */
 export function MockAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(
@@ -45,10 +44,17 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     setUser(next)
   }, [])
 
-  const login = useCallback(async (user: User) => {
-    storeUserId(user.id)
-    setUser(user)
-  }, [])
+  const login = useCallback(
+    async (u?: User) => {
+      if (u) {
+        storeUserId(u.id)
+        setUser(u)
+      } else {
+        switchUser(DEFAULT_MOCK_USER_ID)
+      }
+    },
+    [switchUser],
+  )
 
   const logout = useCallback(async () => {
     storeUserId(null)

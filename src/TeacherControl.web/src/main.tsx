@@ -9,7 +9,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import { App } from './App'
 import { queryClient } from '@/shared/api'
-import { MockAuthProvider } from '@/shared/auth'
+import { AuthProvider } from '@/shared/auth'
 
 /** MSW jede ve vývoji defaultně. Vypneš ho v .env.local přes VITE_USE_MOCKS=false. */
 async function startMocks() {
@@ -33,11 +33,11 @@ const render = () => {
       <MantineProvider>
         <Notifications />
         <QueryClientProvider client={queryClient}>
-          <MockAuthProvider>
+          <AuthProvider>
             <BrowserRouter>
               <App />
             </BrowserRouter>
-          </MockAuthProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </MantineProvider>
     </StrictMode>,
