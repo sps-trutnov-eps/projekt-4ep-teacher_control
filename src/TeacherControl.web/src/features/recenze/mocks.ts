@@ -188,7 +188,7 @@ export const recenzeHandlers = [
     const updated: Review = { ...review, content: text, updatedAt: new Date().toISOString() }
     reviews = reviews.map((item) => (item.id === updated.id ? updated : item))
 
-    return HttpResponse.json(updated)
+    return HttpResponse.json(reaction)
   }),
 
   http.delete('*/api/reviews/:reviewId', ({ params }) => {

@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 import { MockAuthProvider } from '@/shared/auth'
+import { useCreateReview } from './api'
 import { RecenzePage } from './RecenzePage'
 
 // jsdom nemá document.fonts (potřebuje ho autosize Textarea) ani window.scrollTo (volá ho stránka).
@@ -36,25 +37,25 @@ function renderPage() {
 test('vykreslí seznam učitelů z API', async () => {
   renderPage()
 
-  expect(await screen.findByText('Mgr. Jan Novák')).toBeDefined()
+  expect(await screen.findByText('Jan Novák')).toBeDefined()
 })
 
 test('vyhledávání filtruje učitele bez ohledu na diakritiku', async () => {
   renderPage()
-  await screen.findByText('Mgr. Jan Novák')
+  await screen.findByText('Jan Novák')
 
   fireEvent.change(screen.getByRole('searchbox', { name: 'Hledat učitele' }), {
     target: { value: 'svobodova' },
   })
 
-  expect(screen.getByText('Bc. Eva Svobodová')).toBeDefined()
-  expect(screen.queryByText('Mgr. Jan Novák')).toBeNull()
+  expect(screen.getByText('Eva Svobodová')).toBeDefined()
+  expect(screen.queryByText('Jan Novák')).toBeNull()
 })
 
-test('po výběru učitele ukáže detail s recenzemi a Like/Dislike', async () => {
+test('po výběru učitele ukáže profil, recenze a reakce na učitele', async () => {
   renderPage()
 
-  fireEvent.click(await screen.findByRole('button', { name: /Mgr\. Jan Novák/ }))
+  fireEvent.click(await screen.findByRole('button', { name: /Jan Novák/ }))
 
   const detail = screen.getByRole('region', { name: 'Detail učitele' })
   expect(await within(detail).findByRole('heading', { name: /^Recenze \(/ })).toBeDefined()

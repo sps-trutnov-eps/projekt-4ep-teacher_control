@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+
 using Npgsql;
+
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using TeacherControl.Api.Features.Reviews.Models;
@@ -35,7 +37,12 @@ public sealed class ReviewsService
         var teacher = await _db.Teachers.AsNoTracking().Where(t => t.Id == teacherId)
             .Select(t => new
             {
-                t.Id, t.Name, t.LoginName, t.PhotoUrl, t.Description, t.Mood,
+                t.Id,
+                t.Name,
+                t.LoginName,
+                t.PhotoUrl,
+                t.Description,
+                t.Mood,
                 AverageRating = _db.Reviews.Where(r => r.TeacherId == t.Id)
                     .Select(r => (double?)r.Rating).Average(),
                 ReviewCount = _db.TextReviews.Count(r => r.TeacherId == t.Id),

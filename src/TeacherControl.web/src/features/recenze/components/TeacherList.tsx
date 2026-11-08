@@ -25,7 +25,7 @@ export function TeacherList({
     return (
       <div className={classes.panel}>
         <Text fw={600}>Nikoho jsem nenašel.</Text>
-        <Text className={classes.muted}>Zkus jiné jméno nebo zruš filtr předmětu.</Text>
+        <Text className={classes.muted}>Zkus upravit hledaný výraz.</Text>
       </div>
     )
   }

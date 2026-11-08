@@ -34,19 +34,6 @@ export function ReviewList({ reviews, onEdit }: ReviewListProps) {
         <h2 id="recenze-list-title" className={classes.sectionTitle}>
           Recenze ({reviews.length})
         </h2>
-        <Select
-          aria-label="Řadit recenze"
-          data={SORT_OPTIONS}
-          value={sort}
-          onChange={(value) => {
-            if (!value) return
-            setSort(value as ReviewSort)
-            setVisibleCount(PAGE_SIZE)
-          }}
-          allowDeselect={false}
-          w={190}
-          radius="md"
-        />
       </Group>
 
       {sorted.length === 0 ? (
