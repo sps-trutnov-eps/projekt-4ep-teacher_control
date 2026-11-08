@@ -25,9 +25,6 @@ import {
   useToggleBingoCell,
 } from './api'
 import coconutPng from './assets/coconut.png'
-import coconutPngSource from './assets/coconut.png?raw'
-import SPSchan from './assets/SPS-chan.png'
-import webPageUrl from './assets/coconut.png?url'
 import { TeacherQuoteForm } from './TeacherQuoteForm'
 
 const GRID_SIZES = [3, 4, 5, 6].map((size) => ({ value: String(size), label: `${size} × ${size}` }))
@@ -35,20 +32,6 @@ const MUTED_TEXT_COLOR = '#64748B'
 const ERROR_COLOR = '#DC2626'
 const PRIMARY_BUTTON_COLOR = '#1655A3'
 const HEADING_COLOR = '#173B70'
-
-function extractEmbeddedHtml(source: string) {
-  const start = source.indexOf('<html')
-  const end = source.indexOf('</html>', start)
-  return start === -1 || end === -1 ? null : source.slice(start, end + '</html>'.length)
-}
-
-function getStableHash(value: string) {
-  let hash = 0
-  for (let index = 0; index < value.length; index += 1) {
-    hash = Math.imul(hash, 31) + value.charCodeAt(index)
-  }
-  return hash >>> 0
-}
 
 export function BingoPage() {
   const [selectedTeacherIds, setSelectedTeacherIds] = useState<string[] | null>(null)
@@ -62,41 +45,10 @@ export function BingoPage() {
   const toggleCell = useToggleBingoCell()
   const claimDailyWinner = useClaimDailyBingoWinner()
 
-  const webPageHtml = useMemo(() => extractEmbeddedHtml(coconutPngSource), [])
   const teachers = useMemo(() => teachersQuery.data ?? [], [teachersQuery.data])
-  const teacherImages = useMemo(() => {
-    const teacherIds = teachers.map((teacher) => teacher.id).join(':')
-    const iframeTeacherIndex =
-      teachers.length > 0 ? getStableHash(teacherIds) % teachers.length : -1
-    return new Map(
-      teachers.map((teacher, index) => {
-        const image =
-          index === iframeTeacherIndex
-            ? 'iframe'
-            : getStableHash(teacher.id) % 2 === 0
-              ? SPSchan
-              : coconutPng
-        return [teacher.id, image]
-      }),
-    )
-  }, [teachers])
   const activeTeacherIds = selectedTeacherIds ?? teachers.map((teacher) => teacher.id)
   const selectedTeachers = teachers.filter((teacher) => activeTeacherIds.includes(teacher.id))
   const normalizedSearch = teacherSearch.trim().toLocaleLowerCase('cs')
-  const doomFrameUrl = new URL(webPageUrl, window.location.href)
-  doomFrameUrl.searchParams.set('archive', SPSchan)
-  doomFrameUrl.searchParams.set('trigger', SPSchan)
-  const iframeHtml = useMemo(() => {
-    if (webPageHtml === null) {
-      return ''
-    }
-
-    const htmlWithBase = webPageHtml.replace(
-      /<head(\s[^>]*)?>/i,
-      (headTag) => `${headTag}<base href="${new URL(webPageUrl, window.location.href)}">`,
-    )
-    return htmlWithBase.replaceAll('window.location.search', JSON.stringify(doomFrameUrl.search))
-  }, [doomFrameUrl.search, webPageHtml])
   const visibleTeachers = teachers.filter((teacher) =>
     teacher.name.toLocaleLowerCase('cs').includes(normalizedSearch),
   )
@@ -297,11 +249,6 @@ export function BingoPage() {
         </Stack>
 
         <Stack gap="md">
-          {webPageHtml === null ? (
-            <Alert color={ERROR_COLOR} radius={12} title="Interaktivní hru se nepodařilo načíst">
-              Obnovte stránku a zkuste to znovu.
-            </Alert>
-          ) : null}
           <Paper withBorder p="md" radius={12}>
             <Stack gap="md">
               <Group justify="space-between" align="baseline">
@@ -341,30 +288,15 @@ export function BingoPage() {
                           onChange={() => toggleTeacher(teacher.id)}
                           label={
                             <Group gap="xs" wrap="nowrap" ml="xs">
-                              {teacherImages.get(teacher.id) === 'iframe' ? (
-                                <iframe
-                                  src={doomFrameUrl.toString()}
-                                  srcDoc={iframeHtml}
-                                  title="DOOM"
-                                  allowFullScreen
-                                  width={32}
-                                  height={32}
-                                  style={{
-                                    border: 0,
-                                    flex: '0 0 auto',
-                                  }}
-                                />
-                              ) : (
-                                <Image
-                                  src={teacherImages.get(teacher.id)}
-                                  alt=""
-                                  w={32}
-                                  h={32}
-                                  fit="cover"
-                                  radius="xl"
-                                  flex="0 0 auto"
-                                />
-                              )}
+                              <Image
+                                src={coconutPng}
+                                alt=""
+                                w={32}
+                                h={32}
+                                fit="cover"
+                                radius="xl"
+                                flex="0 0 auto"
+                              />
                               <Text size="sm" style={{ overflowWrap: 'anywhere' }}>
                                 {teacher.name}
                               </Text>

@@ -1,5 +1,4 @@
 export { BingoPage } from './BingoPage'
 export { default as coconut } from './assets/coconut.png'
-export { default as SPSchan } from './assets/SPS-chan.png'
 export * from './types'
 export * from './api'
