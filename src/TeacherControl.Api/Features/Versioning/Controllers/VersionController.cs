@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
+using TeacherControl.Api.Features.Versioning.Models;
 using TeacherControl.Api.Features.Versioning.Services;
 
 namespace TeacherControl.Api.Features.Versioning.Controllers;
@@ -16,6 +17,7 @@ public class VersionController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType<VersionDto>(StatusCodes.Status200OK)]
     public IActionResult Index()
     {
         return Ok(_versionService.GetVersion());

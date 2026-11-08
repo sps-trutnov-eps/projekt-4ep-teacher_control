@@ -25,7 +25,11 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "text/plain": components["schemas"]["VersionDto"];
+                        "application/json": components["schemas"]["VersionDto"];
+                        "text/json": components["schemas"]["VersionDto"];
+                    };
                 };
             };
         };
@@ -623,6 +627,13 @@ export interface components {
             content: string;
             /** Format: float */
             rating: number | string;
+        };
+        VersionDto: {
+            sha?: null | string;
+            message?: null | string;
+            author?: null | string;
+            date?: null | string;
+            url?: null | string;
         };
     };
     responses: never;
