@@ -1,4 +1,4 @@
-import { Avatar, Badge, Stack, Text, UnstyledButton } from '@mantine/core'
+import { Avatar, Stack, Text, UnstyledButton } from '@mantine/core'
 import classes from '../Recenze.module.css'
 import { formatReviewCount, formatTeacherName } from '../format'
 import type { ReviewTeacher } from '../types'
@@ -8,7 +8,7 @@ import { StarRating } from './StarRating'
 interface TeacherCardProps {
   teacher: ReviewTeacher
   isActive: boolean
-  onSelect: (teacherId: string) => void
+  onSelect: (teacherId: number) => void
 }
 
 export function TeacherCard({ teacher, isActive, onSelect }: TeacherCardProps) {
@@ -19,12 +19,12 @@ export function TeacherCard({ teacher, isActive, onSelect }: TeacherCardProps) {
       className={classes.teacherCard}
       data-active={isActive || undefined}
       aria-current={isActive ? 'true' : undefined}
-      aria-label={`${name}, ${teacher.subject}. Zobrazit recenze`}
+      aria-label={`${name}. Zobrazit recenze`}
       onClick={() => onSelect(teacher.id)}
     >
       <Avatar
         src={teacher.photoUrl}
-        name={`${teacher.firstName} ${teacher.lastName}`}
+        name={teacher.name}
         size={64}
         radius="xl"
         classNames={{ placeholder: classes.avatar }}
@@ -34,9 +34,9 @@ export function TeacherCard({ teacher, isActive, onSelect }: TeacherCardProps) {
         <Text className={classes.teacherName} truncate>
           {name}
         </Text>
-        <Badge className={classes.subjectBadge} radius="sm" size="lg" w="fit-content">
-          {teacher.subject}
-        </Badge>
+        <Text className={classes.muted} lineClamp={2}>
+          {teacher.description}
+        </Text>
         {teacher.averageRating !== null ? (
           <StarRating
             value={teacher.averageRating}
