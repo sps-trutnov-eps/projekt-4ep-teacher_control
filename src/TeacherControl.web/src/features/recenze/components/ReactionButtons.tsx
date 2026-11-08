@@ -10,14 +10,13 @@ interface ReactionButtonsProps {
   teacher: ReviewTeacher
 }
 
-/** Přepínač Like / Dislike u učitele. Druhé kliknutí na stejný hlas ho zruší. */
 export function ReactionButtons({ teacher }: ReactionButtonsProps) {
   const { isAuthenticated } = useAuth()
   const setReaction = useSetReaction()
 
   const handleReaction = (value: ReactionValue) => {
     setReaction.mutate(
-      { teacherId: teacher.id, value: teacher.myReaction === value ? 0 : value },
+      { teacherId: teacher.id, value },
       {
         onError: () =>
           notifications.show({
@@ -43,7 +42,7 @@ export function ReactionButtons({ teacher }: ReactionButtonsProps) {
             data-active={teacher.myReaction === 1 || undefined}
             aria-pressed={teacher.myReaction === 1}
             aria-label={`Líbí se mi (${teacher.likes})`}
-            disabled={disabled}
+            disabled={disabled || teacher.myReaction === 1}
             onClick={() => handleReaction(1)}
           >
             <IconThumbUp size={18} />
@@ -55,7 +54,7 @@ export function ReactionButtons({ teacher }: ReactionButtonsProps) {
             data-active={teacher.myReaction === -1 || undefined}
             aria-pressed={teacher.myReaction === -1}
             aria-label={`Nelíbí se mi (${teacher.dislikes})`}
-            disabled={disabled}
+            disabled={disabled || teacher.myReaction === -1}
             onClick={() => handleReaction(-1)}
           >
             <IconThumbDown size={18} />

@@ -10,7 +10,7 @@ import type { ReactionValue, ReviewTeacher, ReviewTeacherDetail } from './types'
  * - POST   /api/reviews/teachers/{teacherId}/reviews   { content } → 201, 409 když už recenzi mám
  * - PUT    /api/reviews/{reviewId}                     { content } → úprava vlastní recenze (403 cizí)
  * - DELETE /api/reviews/{reviewId}                     → smazání vlastní recenze (403 cizí)
- * - PUT    /api/reviews/teachers/{teacherId}/reaction  { value: 1 | -1 | 0 } like / dislike / zrušení
+ * - PUT    /api/reviews/teachers/{teacherId}/reaction  { value: 1 | -1 } like / dislike
  *
  * Schéma dokumentuje jen úspěšné odpovědi, proto se kontroluje `response.ok` místo `error`.
  */
@@ -121,8 +121,7 @@ export function useDeleteReview() {
 
 interface ReactionInput {
   teacherId: number
-  /** 0 = zrušit hlas. */
-  value: ReactionValue | 0
+  value: ReactionValue
 }
 
 export function useSetReaction() {

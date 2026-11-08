@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 import { MockAuthProvider } from '@/shared/auth'
-import { useCreateReview } from './api'
 import { RecenzePage } from './RecenzePage'
 
 // jsdom nemá document.fonts (potřebuje ho autosize Textarea) ani window.scrollTo (volá ho stránka).
@@ -37,19 +36,19 @@ function renderPage() {
 test('vykreslí seznam učitelů z API', async () => {
   renderPage()
 
-  expect(await screen.findByText('Jan Novák')).toBeDefined()
+  expect(await screen.findByText('Mgr. Jan Novák')).toBeDefined()
 })
 
 test('vyhledávání filtruje učitele bez ohledu na diakritiku', async () => {
   renderPage()
-  await screen.findByText('Jan Novák')
+  await screen.findByText('Mgr. Jan Novák')
 
   fireEvent.change(screen.getByRole('searchbox', { name: 'Hledat učitele' }), {
     target: { value: 'svobodova' },
   })
 
-  expect(screen.getByText('Eva Svobodová')).toBeDefined()
-  expect(screen.queryByText('Jan Novák')).toBeNull()
+  expect(screen.getByText('Bc. Eva Svobodová')).toBeDefined()
+  expect(screen.queryByText('Mgr. Jan Novák')).toBeNull()
 })
 
 test('po výběru učitele ukáže profil, recenze a reakce na učitele', async () => {
@@ -63,7 +62,7 @@ test('po výběru učitele ukáže profil, recenze a reakce na učitele', async 
   expect(within(detail).getByRole('button', { name: 'Zpět na seznam' })).toBeDefined()
 })
 
-test('Like se po kliknutí započítá a druhým kliknutím zruší', async () => {
+test('Like se po kliknutí započítá a jde změnit na Dislike', async () => {
   renderPage()
 
   fireEvent.click(await screen.findByRole('button', { name: /Bc\. Eva Svobodová/ }))
@@ -81,14 +80,24 @@ test('Like se po kliknutí započítá a druhým kliknutím zruší', async () =
     ).toBe('true'),
   )
 
-  fireEvent.click(within(detail).getByRole('button', { name: /Líbí se mi/ }))
+  expect(
+    (within(detail).getByRole('button', { name: /Líbí se mi/ }) as HTMLButtonElement).disabled,
+  ).toBe(true)
+  const dislike = within(detail).getByRole('button', { name: /Nelíbí se mi/ }) as HTMLButtonElement
+  await waitFor(() => expect(dislike.disabled).toBe(false))
+  fireEvent.click(dislike)
   await waitFor(() =>
     expect(
       within(detail)
-        .getByRole('button', { name: /Líbí se mi/ })
+        .getByRole('button', { name: /Nelíbí se mi/ })
         .getAttribute('aria-pressed'),
-    ).toBe('false'),
+    ).toBe('true'),
   )
+  expect(
+    within(detail)
+      .getByRole('button', { name: /Líbí se mi/ })
+      .getAttribute('aria-pressed'),
+  ).toBe('false')
 })
 
 test('napsaná recenze se objeví v seznamu a další už psát nejde', async () => {

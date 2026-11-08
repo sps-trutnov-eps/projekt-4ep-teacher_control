@@ -26,14 +26,14 @@ Featura volá backend `/api/reviews` (Synáč, `docs/api/reviews.md`) přes `api
 (`pnpm gen:api`), mapování je v `types.ts`. Ve vývoji odpovídá MSW z `mocks.ts`, které kopíruje
 chování backendu (409 na druhou recenzi, 403 na cizí).
 
-| Hook                   | Endpoint                                                              |
-| ---------------------- | --------------------------------------------------------------------- |
-| `useReviewTeachers()`  | `GET /api/reviews/teachers`                                           |
-| `useReviewTeacher(id)` | `GET /api/reviews/teachers/{id}` (profil včetně recenzí)              |
-| `useCreateReview(id)`  | `POST /api/reviews/teachers/{id}/reviews` s `{ content }`             |
-| `useUpdateReview(id)`  | `PUT /api/reviews/{reviewId}` s `{ content }`                         |
-| `useDeleteReview()`    | `DELETE /api/reviews/{reviewId}`                                      |
-| `useSetReaction()`     | `PUT /api/reviews/teachers/{id}/reaction` s `{ value: 1 \| -1 \| 0 }` |
+| Hook                   | Endpoint                                                         |
+| ---------------------- | ---------------------------------------------------------------- |
+| `useReviewTeachers()`  | `GET /api/reviews/teachers`                                      |
+| `useReviewTeacher(id)` | `GET /api/reviews/teachers/{id}` (profil včetně recenzí)         |
+| `useCreateReview(id)`  | `POST /api/reviews/teachers/{id}/reviews` s `{ content }`        |
+| `useUpdateReview(id)`  | `PUT /api/reviews/{reviewId}` s `{ content }`                    |
+| `useDeleteReview()`    | `DELETE /api/reviews/{reviewId}`                                 |
+| `useSetReaction()`     | `PUT /api/reviews/teachers/{id}/reaction` s `{ value: 1 \| -1 }` |
 
 Hvězdičkové hodnocení (`averageRating`) se jen čte z featury Rating. Předměty, třídy, kategorie
 ani hodnocení u recenze backend nemá, proto je stránka nezobrazuje.

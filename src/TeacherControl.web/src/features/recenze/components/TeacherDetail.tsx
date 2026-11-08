@@ -8,7 +8,6 @@ import type { Review, ReviewTeacherDetail } from '../types'
 import { IconArrowLeft, IconPencil } from './icons'
 import { ReactionButtons } from './ReactionButtons'
 import { ReviewList } from './ReviewList'
-import { TeacherReactionButtons } from './TeacherReactionButtons'
 import { StarRating } from './StarRating'
 
 interface TeacherDetailProps {

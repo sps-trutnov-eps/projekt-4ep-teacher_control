@@ -127,7 +127,7 @@ const notFound = () => HttpResponse.json({ message: 'Nenalezeno.' }, { status: 4
 
 /**
  * MSW handlery featury Recenze — kopírují chování backendu (`/api/reviews`, docs/api/reviews.md):
- * jedna recenze na učitele (409), cizí recenzi nejde upravit (403), hlas 1 / -1 / 0.
+ * jedna recenze na učitele (409), cizí recenzi nejde upravit (403), hlas 1 / -1.
  * Hvězdička na začátku cesty je potřeba kvůli testům v Node.
  */
 export const recenzeHandlers = [
@@ -188,7 +188,7 @@ export const recenzeHandlers = [
     const updated: Review = { ...review, content: text, updatedAt: new Date().toISOString() }
     reviews = reviews.map((item) => (item.id === updated.id ? updated : item))
 
-    return HttpResponse.json(reaction)
+    return HttpResponse.json(updated)
   }),
 
   http.delete('*/api/reviews/:reviewId', ({ params }) => {
@@ -207,15 +207,11 @@ export const recenzeHandlers = [
     const { value } = (await request.json()) as { value: number }
 
     if (!teachers.some((item) => item.id === teacherId)) return notFound()
-    if (value !== 1 && value !== -1 && value !== 0) {
+    if (value !== 1 && value !== -1) {
       return HttpResponse.json('Neplatná hodnota.', { status: 400 })
     }
 
-    if (value === 0) {
-      myReactions.delete(teacherId)
-    } else {
-      myReactions.set(teacherId, value)
-    }
+    myReactions.set(teacherId, value)
 
     return HttpResponse.json(reactionStats(teacherId))
   }),
