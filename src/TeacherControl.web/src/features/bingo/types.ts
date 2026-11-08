@@ -1,63 +1,15 @@
-export interface TeacherQuote {
-  id: string
-  teacherId: string
-  teacherName: string
-  quote: string
-  createdAt: string
-}
+import type { components } from '@/shared/api/generated/schema'
 
-export interface BingoCell {
-  id: string
-  row: number
-  col: number
-  quote: TeacherQuote
-  isMarked: boolean
-}
-
-export interface BingoBoard {
-  id: string
-  userId: string
-  gridSize: number
-  cells: BingoCell[]
-  /** Počet bing (dokončených řad, sloupců a diagonál) na této desce */
-  bingoCount: number
-  isCompleted: boolean
-  createdAt: string
-}
-
-export interface UserBingoStats {
-  userId: string
-  /** Celkový kumulativní bingo counter uživatele */
-  totalBingos: number
-  /** Počet odehraných/vyplněných desek */
-  completedBoards: number
-}
-
-export interface DailyBingoWinner {
-  userId: string
-  displayName: string
-  boardId: string
-  date: string
-  completedAt: string
-}
-
-export interface ClaimDailyBingoWinnerRequest {
-  boardId: string
-  displayName: string
-}
-
-export interface CreateQuoteRequest {
-  teacherId: string
-  teacherName: string
-  quote: string
-}
+export type TeacherQuote = components['schemas']['TeacherQuoteDto']
+export type BingoCell = components['schemas']['BingoCellDto']
+export type BingoBoard = components['schemas']['BingoBoardDto']
+export type UserBingoStats = components['schemas']['UserBingoStatsDto']
+export type DailyBingoWinner = components['schemas']['DailyBingoWinnerDto']
+export type ClaimDailyBingoWinnerRequest = components['schemas']['ClaimDailyBingoWinnerRequest']
+export type CreateQuoteRequest = components['schemas']['CreateTeacherQuoteRequest']
 
 export interface QuoteFilters {
   teacherId?: string
 }
 
-export interface ToggleCellResponse {
-  board: BingoBoard
-  newBingoAchieved: boolean
-  totalBingos: number
-}
+export type ToggleCellResponse = components['schemas']['ToggleBingoCellDto']

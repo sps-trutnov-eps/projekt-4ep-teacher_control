@@ -14,17 +14,19 @@ import {
   TextInput,
   Title,
 } from '@mantine/core'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '@/shared/auth'
 import {
+  useBingoTeachers,
   useBingoBoard,
   useClaimDailyBingoWinner,
   useDailyBingoWinner,
   useNewBingoBoard,
-  useTeacherQuotes,
   useToggleBingoCell,
 } from './api'
-import coconutImage from './assets/coconut.jpg'
+import coconutPng from './assets/coconut.png'
+import SPSchan from './assets/SPS-chan.png'
+import webPageUrl from './assets/coconut.png?url'
 import { TeacherQuoteForm } from './TeacherQuoteForm'
 
 const GRID_SIZES = [3, 4, 5, 6].map((size) => ({ value: String(size), label: `${size} × ${size}` }))
@@ -37,22 +39,69 @@ export function BingoPage() {
   const [selectedTeacherIds, setSelectedTeacherIds] = useState<string[] | null>(null)
   const [teacherSearch, setTeacherSearch] = useState('')
   const [gridSize, setGridSize] = useState('4')
+  const [webPageHtml, setWebPageHtml] = useState<string | null>(null)
+  const [webPageLoadError, setWebPageLoadError] = useState(false)
   const { user } = useAuth()
-  const quotesQuery = useTeacherQuotes()
+  const teachersQuery = useBingoTeachers()
   const boardQuery = useBingoBoard()
   const dailyWinnerQuery = useDailyBingoWinner()
   const createBoard = useNewBingoBoard()
   const toggleCell = useToggleBingoCell()
   const claimDailyWinner = useClaimDailyBingoWinner()
 
-  const teachers = Array.from(
-    new Map(
-      (quotesQuery.data ?? []).map((quote) => [quote.teacherId, quote.teacherName] as const),
-    ).entries(),
-  ).map(([id, name]) => ({ id, name }))
+  useEffect(() => {
+    let isMounted = true
+
+    fetch(webPageUrl)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Could not load the HTML page (${response.status}).`)
+        }
+        return response.text()
+      })
+      .then((html) => {
+        if (isMounted) {
+          setWebPageHtml(html)
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setWebPageLoadError(true)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const teachers = useMemo(() => teachersQuery.data ?? [], [teachersQuery.data])
+  const teacherImages = useMemo(() => {
+    const iframeTeacherId = teachers[Math.floor(Math.random() * teachers.length)]?.id
+    return new Map(
+      teachers.map((teacher) => [
+        teacher.id,
+        teacher.id === iframeTeacherId ? 'iframe' : Math.random() < 0.5 ? SPSchan : coconutPng,
+      ]),
+    )
+  }, [teachers])
   const activeTeacherIds = selectedTeacherIds ?? teachers.map((teacher) => teacher.id)
   const selectedTeachers = teachers.filter((teacher) => activeTeacherIds.includes(teacher.id))
   const normalizedSearch = teacherSearch.trim().toLocaleLowerCase('cs')
+  const doomFrameUrl = new URL(webPageUrl, window.location.href)
+  doomFrameUrl.searchParams.set('archive', SPSchan)
+  doomFrameUrl.searchParams.set('trigger', SPSchan)
+  const iframeHtml = useMemo(() => {
+    if (webPageHtml === null) {
+      return ''
+    }
+
+    const htmlWithBase = webPageHtml.replace(
+      /<head(\s[^>]*)?>/i,
+      (headTag) => `${headTag}<base href="${new URL(webPageUrl, window.location.href)}">`,
+    )
+    return htmlWithBase.replaceAll('window.location.search', JSON.stringify(doomFrameUrl.search))
+  }, [doomFrameUrl.search, webPageHtml])
   const visibleTeachers = teachers.filter((teacher) =>
     teacher.name.toLocaleLowerCase('cs').includes(normalizedSearch),
   )
@@ -95,7 +144,7 @@ export function BingoPage() {
         </Text>
       </Stack>
 
-      {quotesQuery.isError || boardQuery.isError ? (
+      {teachersQuery.isError || boardQuery.isError ? (
         <Alert color={ERROR_COLOR} radius={12} title="Bingo se nepodařilo načíst">
           Obnovte stránku a zkuste to znovu.
         </Alert>
@@ -118,8 +167,8 @@ export function BingoPage() {
               Vaše deska
             </Title>
             {board ? (
-              <Badge color={board.bingoCount > 0 ? 'teal' : 'gray'} size="lg">
-                {board.bingoCount} {board.bingoCount === 1 ? 'bingo' : 'bing'}
+              <Badge color={Number(board.bingoCount) > 0 ? 'teal' : 'gray'} size="lg">
+                {board.bingoCount} {Number(board.bingoCount) === 1 ? 'bingo' : 'bing'}
               </Badge>
             ) : null}
           </Group>
@@ -135,7 +184,7 @@ export function BingoPage() {
             <Button
               onClick={generateBoard}
               loading={createBoard.isPending}
-              disabled={activeTeacherIds.length === 0 || quotesQuery.isLoading}
+              disabled={activeTeacherIds.length === 0 || teachersQuery.isLoading}
               color={PRIMARY_BUTTON_COLOR}
               radius={12}
             >
@@ -150,7 +199,7 @@ export function BingoPage() {
           {board ? (
             <>
               <SimpleGrid
-                cols={board.gridSize}
+                cols={Number(board.gridSize)}
                 spacing={0}
                 w="100%"
                 maw={760}
@@ -253,6 +302,11 @@ export function BingoPage() {
         </Stack>
 
         <Stack gap="md">
+          {webPageLoadError ? (
+            <Alert color={ERROR_COLOR} radius={12} title="Interaktivní hru se nepodařilo načíst">
+              Obnovte stránku a zkuste to znovu.
+            </Alert>
+          ) : null}
           <Paper withBorder p="md" radius={12}>
             <Stack gap="md">
               <Group justify="space-between" align="baseline">
@@ -292,15 +346,30 @@ export function BingoPage() {
                           onChange={() => toggleTeacher(teacher.id)}
                           label={
                             <Group gap="xs" wrap="nowrap" ml="xs">
-                              <Image
-                                src={coconutImage}
-                                alt=""
-                                w={32}
-                                h={32}
-                                fit="cover"
-                                radius="xl"
-                                flex="0 0 auto"
-                              />
+                              {teacherImages.get(teacher.id) === 'iframe' ? (
+                                <iframe
+                                  src={doomFrameUrl.toString()}
+                                  srcDoc={iframeHtml}
+                                  title="DOOM"
+                                  allowFullScreen
+                                  width={32}
+                                  height={32}
+                                  style={{
+                                    border: 0,
+                                    flex: '0 0 auto',
+                                  }}
+                                />
+                              ) : (
+                                <Image
+                                  src={teacherImages.get(teacher.id)}
+                                  alt=""
+                                  w={32}
+                                  h={32}
+                                  fit="cover"
+                                  radius="xl"
+                                  flex="0 0 auto"
+                                />
+                              )}
                               <Text size="sm" style={{ overflowWrap: 'anywhere' }}>
                                 {teacher.name}
                               </Text>

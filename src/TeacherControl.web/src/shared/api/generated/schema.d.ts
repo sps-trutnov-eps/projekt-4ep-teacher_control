@@ -4,7 +4,45 @@
  */
 
 export interface paths {
-    "/api/rating": {
+    "/api/bingo/daily-winner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get today's daily bingo winner */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DailyBingoWinnerDto"];
+                        "application/json": components["schemas"]["DailyBingoWinnerDto"];
+                        "text/json": components["schemas"]["DailyBingoWinnerDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bingo/daily-winner/claim": {
         parameters: {
             query?: never;
             header?: never;
@@ -13,6 +51,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Claim today's daily bingo winner */
         post: {
             parameters: {
                 query?: never;
@@ -22,9 +61,9 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["CreateReviewRequest"];
-                    "text/json": components["schemas"]["CreateReviewRequest"];
-                    "application/*+json": components["schemas"]["CreateReviewRequest"];
+                    "application/json": components["schemas"]["ClaimDailyBingoWinnerRequest"];
+                    "text/json": components["schemas"]["ClaimDailyBingoWinnerRequest"];
+                    "application/*+json": components["schemas"]["ClaimDailyBingoWinnerRequest"];
                 };
             };
             responses: {
@@ -33,7 +72,44 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "text/plain": components["schemas"]["DailyBingoWinnerDto"];
+                        "application/json": components["schemas"]["DailyBingoWinnerDto"];
+                        "text/json": components["schemas"]["DailyBingoWinnerDto"];
+                    };
+                };
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["DailyBingoWinnerDto"];
+                        "application/json": components["schemas"]["DailyBingoWinnerDto"];
+                        "text/json": components["schemas"]["DailyBingoWinnerDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
                 };
             };
         };
@@ -43,172 +119,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/rating/teacher/{teacherId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    teacherId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/rating/teacher/{teacherId}/average": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    teacherId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/rating/teacher/{teacherId}/profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    teacherId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/rating/{reviewId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    reviewId: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["UpdateReviewRequest"];
-                    "text/json": components["schemas"]["UpdateReviewRequest"];
-                    "application/*+json": components["schemas"]["UpdateReviewRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        post?: never;
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    reviewId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/abstence": {
+    "/api/bingo/board": {
         parameters: {
             query?: never;
             header?: never;
@@ -230,9 +141,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["TeacherAbstenceDto"][];
-                        "application/json": components["schemas"]["TeacherAbstenceDto"][];
-                        "text/json": components["schemas"]["TeacherAbstenceDto"][];
+                        "text/plain": components["schemas"]["BingoBoardDto"];
+                        "application/json": components["schemas"]["BingoBoardDto"];
+                        "text/json": components["schemas"]["BingoBoardDto"];
                     };
                 };
             };
@@ -245,19 +156,64 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/abstence/{teacherId}": {
+    "/api/bingo/board/new": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: {
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateBingoBoardRequest"];
+                    "text/json": components["schemas"]["CreateBingoBoardRequest"];
+                    "application/*+json": components["schemas"]["CreateBingoBoardRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["BingoBoardDto"];
+                        "application/json": components["schemas"]["BingoBoardDto"];
+                        "text/json": components["schemas"]["BingoBoardDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bingo/cells/{cellId}/toggle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    teacherId: number;
+                    cellId: string;
                 };
                 cookie?: never;
             };
@@ -269,9 +225,45 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["TeacherAbstenceDto"];
-                        "application/json": components["schemas"]["TeacherAbstenceDto"];
-                        "text/json": components["schemas"]["TeacherAbstenceDto"];
+                        "text/plain": components["schemas"]["ToggleBingoCellDto"];
+                        "application/json": components["schemas"]["ToggleBingoCellDto"];
+                        "text/json": components["schemas"]["ToggleBingoCellDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bingo/teachers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all teachers available for bingo */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["BingoTeacherDto"][];
+                        "application/json": components["schemas"]["BingoTeacherDto"][];
+                        "text/json": components["schemas"]["BingoTeacherDto"][];
                     };
                 };
             };
@@ -284,29 +276,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/abstence/{teacherId}/late-arrival": {
+    "/api/bingo/quotes": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: {
+            parameters: {
+                query?: {
+                    teacherId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["TeacherQuoteDto"][];
+                        "application/json": components["schemas"]["TeacherQuoteDto"][];
+                        "text/json": components["schemas"]["TeacherQuoteDto"][];
+                    };
+                };
+            };
+        };
         put?: never;
         post: {
             parameters: {
                 query?: never;
                 header?: never;
-                path: {
-                    teacherId: number;
-                };
+                path?: never;
                 cookie?: never;
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["SubmitLateArrivalRequest"];
-                    "text/json": components["schemas"]["SubmitLateArrivalRequest"];
-                    "application/*+json": components["schemas"]["SubmitLateArrivalRequest"];
+                    "application/json": components["schemas"]["CreateTeacherQuoteRequest"];
+                    "text/json": components["schemas"]["CreateTeacherQuoteRequest"];
+                    "application/*+json": components["schemas"]["CreateTeacherQuoteRequest"];
                 };
             };
             responses: {
@@ -316,9 +329,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["TeacherAbstenceDto"];
-                        "application/json": components["schemas"]["TeacherAbstenceDto"];
-                        "text/json": components["schemas"]["TeacherAbstenceDto"];
+                        "text/plain": components["schemas"]["TeacherQuoteDto"];
+                        "application/json": components["schemas"]["TeacherQuoteDto"];
+                        "text/json": components["schemas"]["TeacherQuoteDto"];
                     };
                 };
             };
@@ -329,7 +342,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/abstence/{teacherId}/mood": {
+    "/api/bingo/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["UserBingoStatsDto"];
+                        "application/json": components["schemas"]["UserBingoStatsDto"];
+                        "text/json": components["schemas"]["UserBingoStatsDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bingo/stats/reset": {
         parameters: {
             query?: never;
             header?: never;
@@ -342,18 +392,10 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path: {
-                    teacherId: number;
-                };
+                path?: never;
                 cookie?: never;
             };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SubmitMoodRequest"];
-                    "text/json": components["schemas"]["SubmitMoodRequest"];
-                    "application/*+json": components["schemas"]["SubmitMoodRequest"];
-                };
-            };
+            requestBody?: never;
             responses: {
                 /** @description OK */
                 200: {
@@ -361,9 +403,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["TeacherAbstenceDto"];
-                        "application/json": components["schemas"]["TeacherAbstenceDto"];
-                        "text/json": components["schemas"]["TeacherAbstenceDto"];
+                        "text/plain": components["schemas"]["UserBingoStatsDto"];
+                        "application/json": components["schemas"]["UserBingoStatsDto"];
+                        "text/json": components["schemas"]["UserBingoStatsDto"];
                     };
                 };
             };
@@ -378,39 +420,82 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        CreateReviewRequest: {
+        BingoBoardDto: {
+            id: string;
+            userId: string;
             /** Format: int32 */
-            teacherId: number | string;
-            title: string;
-            content: string;
-            /** Format: float */
-            rating: number | string;
-        };
-        SubmitLateArrivalRequest: {
+            gridSize: number | string;
+            cells: components["schemas"]["BingoCellDto"][];
             /** Format: int32 */
-            minutes: number | string;
+            bingoCount: number | string;
+            isCompleted: boolean;
+            createdAt: string;
         };
-        SubmitMoodRequest: {
-            /** Format: float */
-            value: number | string;
-        };
-        TeacherAbstenceDto: {
+        BingoCellDto: {
+            id: string;
             /** Format: int32 */
-            teacherId: number | string;
+            row: number | string;
+            /** Format: int32 */
+            col: number | string;
+            quote: components["schemas"]["TeacherQuoteDto"];
+            isMarked: boolean;
+        };
+        BingoTeacherDto: {
+            id: string;
             name: string;
-            photoUrl: null | string;
-            /** Format: float */
-            rating: null | number | string;
-            /** Format: float */
-            mood: number | string;
-            /** Format: int32 */
-            lateArrivalMinutesToday: number | string;
         };
-        UpdateReviewRequest: {
-            title: string;
-            content: string;
-            /** Format: float */
-            rating: number | string;
+        ClaimDailyBingoWinnerRequest: {
+            boardId: string;
+            displayName: string;
+        };
+        CreateBingoBoardRequest: {
+            /**
+             * Format: int32
+             * @default 3
+             */
+            size: number | string;
+            teacherIds?: null | string[];
+        };
+        CreateTeacherQuoteRequest: {
+            teacherId: string;
+            teacherName: string;
+            quote: string;
+        };
+        DailyBingoWinnerDto: {
+            userId: string;
+            displayName: string;
+            boardId: string;
+            /** Format: date */
+            date: string;
+            /** Format: date-time */
+            completedAt: string;
+        };
+        ProblemDetails: {
+            type?: null | string;
+            title?: null | string;
+            /** Format: int32 */
+            status?: null | number | string;
+            detail?: null | string;
+            instance?: null | string;
+        };
+        TeacherQuoteDto: {
+            id: string;
+            teacherId: string;
+            teacherName: string;
+            quote: string;
+        };
+        ToggleBingoCellDto: {
+            board: components["schemas"]["BingoBoardDto"];
+            newBingoAchieved: boolean;
+            /** Format: int32 */
+            totalBingos: number | string;
+        };
+        UserBingoStatsDto: {
+            userId: string;
+            /** Format: int32 */
+            totalBingos: number | string;
+            /** Format: int32 */
+            completedBoards: number | string;
         };
     };
     responses: never;

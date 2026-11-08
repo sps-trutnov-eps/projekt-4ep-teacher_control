@@ -1,24 +1,37 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchJson } from '@/shared/api'
-import type {
-  BingoBoard,
-  ClaimDailyBingoWinnerRequest,
-  CreateQuoteRequest,
-  DailyBingoWinner,
-  QuoteFilters,
-  TeacherQuote,
-  ToggleCellResponse,
-  UserBingoStats,
-} from './types'
+import { api } from '@/shared/api'
+import type { ClaimDailyBingoWinnerRequest, CreateQuoteRequest, QuoteFilters } from './types'
 
 /** Query key konvence: [featura, typ, ...parametry]. */
 export const bingoKeys = {
   all: ['bingo'] as const,
+  teachers: () => ['bingo', 'teachers'] as const,
   board: () => ['bingo', 'board'] as const,
   stats: () => ['bingo', 'stats'] as const,
   dailyWinner: () => ['bingo', 'daily-winner'] as const,
   quotes: (teacherId?: string) =>
     teacherId ? (['bingo', 'quotes', teacherId] as const) : (['bingo', 'quotes'] as const),
+}
+
+function requireApiData<T>(data: T | undefined, response: Response, operation: string): T {
+  if (!response.ok || data === undefined) {
+    throw new Error(`${operation} skončilo ${response.status}.`)
+  }
+
+  return data
+}
+
+/**
+ * Načte učitele dostupné pro bingo.
+ */
+export function useBingoTeachers() {
+  return useQuery({
+    queryKey: bingoKeys.teachers(),
+    queryFn: async ({ signal }) => {
+      const { data, response } = await api.GET('/api/bingo/teachers', { signal })
+      return requireApiData(data, response, 'GET /api/bingo/teachers')
+    },
+  })
 }
 
 /**
@@ -27,7 +40,10 @@ export const bingoKeys = {
 export function useBingoBoard() {
   return useQuery({
     queryKey: bingoKeys.board(),
-    queryFn: () => fetchJson<BingoBoard>('/bingo/board'),
+    queryFn: async ({ signal }) => {
+      const { data, response } = await api.GET('/api/bingo/board', { signal })
+      return requireApiData(data, response, 'GET /api/bingo/board')
+    },
   })
 }
 
@@ -38,12 +54,12 @@ export function useNewBingoBoard() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (options?: { size?: number; teacherIds?: string[] }) => {
+    mutationFn: async (options?: { size?: number; teacherIds?: string[] }) => {
       const targetSize = options?.size ?? 3
-      return fetchJson<BingoBoard>('/bingo/board/new', {
-        method: 'POST',
-        body: JSON.stringify({ size: targetSize, teacherIds: options?.teacherIds }),
+      const { data, response } = await api.POST('/api/bingo/board/new', {
+        body: { size: targetSize, teacherIds: options?.teacherIds },
       })
+      return requireApiData(data, response, 'POST /api/bingo/board/new')
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bingoKeys.board() })
@@ -58,10 +74,12 @@ export function useToggleBingoCell() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (cellId: string) =>
-      fetchJson<ToggleCellResponse>(`/bingo/cells/${encodeURIComponent(cellId)}/toggle`, {
-        method: 'POST',
-      }),
+    mutationFn: async (cellId: string) => {
+      const { data, response } = await api.POST('/api/bingo/cells/{cellId}/toggle', {
+        params: { path: { cellId } },
+      })
+      return requireApiData(data, response, 'POST /api/bingo/cells/{cellId}/toggle')
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bingoKeys.board() })
       queryClient.invalidateQueries({ queryKey: bingoKeys.stats() })
@@ -73,14 +91,17 @@ export function useToggleBingoCell() {
  * Načte seznam všech učitelských hlášek, případně filtrovaných podle teacherId.
  */
 export function useTeacherQuotes(filters: QuoteFilters = {}) {
+  const teacherId = filters.teacherId
+
   return useQuery({
-    queryKey: bingoKeys.quotes(filters.teacherId),
-    queryFn: () =>
-      fetchJson<TeacherQuote[]>(
-        filters.teacherId
-          ? `/bingo/quotes?teacherId=${encodeURIComponent(filters.teacherId)}`
-          : '/bingo/quotes',
-      ),
+    queryKey: bingoKeys.quotes(teacherId),
+    queryFn: async ({ signal }) => {
+      const { data, response } = await api.GET('/api/bingo/quotes', {
+        params: { query: teacherId ? { teacherId } : {} },
+        signal,
+      })
+      return requireApiData(data, response, 'GET /api/bingo/quotes')
+    },
   })
 }
 
@@ -91,8 +112,10 @@ export function useCreateTeacherQuote() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (values: CreateQuoteRequest) =>
-      fetchJson<TeacherQuote>('/bingo/quotes', { method: 'POST', body: JSON.stringify(values) }),
+    mutationFn: async (values: CreateQuoteRequest) => {
+      const { data, response } = await api.POST('/api/bingo/quotes', { body: values })
+      return requireApiData(data, response, 'POST /api/bingo/quotes')
+    },
     onSuccess: () => {
       // Invaliduje všechny dotazy na hlášky (filtrované i celkové)
       queryClient.invalidateQueries({ queryKey: bingoKeys.quotes() })
@@ -106,7 +129,10 @@ export function useCreateTeacherQuote() {
 export function useBingoStats() {
   return useQuery({
     queryKey: bingoKeys.stats(),
-    queryFn: () => fetchJson<UserBingoStats>('/bingo/stats'),
+    queryFn: async ({ signal }) => {
+      const { data, response } = await api.GET('/api/bingo/stats', { signal })
+      return requireApiData(data, response, 'GET /api/bingo/stats')
+    },
   })
 }
 
@@ -116,7 +142,10 @@ export function useBingoStats() {
 export function useDailyBingoWinner() {
   return useQuery({
     queryKey: bingoKeys.dailyWinner(),
-    queryFn: () => fetchJson<DailyBingoWinner | null>('/bingo/daily-winner'),
+    queryFn: async ({ signal }) => {
+      const { data, response } = await api.GET('/api/bingo/daily-winner', { signal })
+      return requireApiData(data, response, 'GET /api/bingo/daily-winner')
+    },
   })
 }
 
@@ -127,11 +156,12 @@ export function useClaimDailyBingoWinner() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (request: ClaimDailyBingoWinnerRequest) =>
-      fetchJson<DailyBingoWinner>('/bingo/daily-winner/claim', {
-        method: 'POST',
-        body: JSON.stringify(request),
-      }),
+    mutationFn: async (request: ClaimDailyBingoWinnerRequest) => {
+      const { data, response } = await api.POST('/api/bingo/daily-winner/claim', {
+        body: request,
+      })
+      return requireApiData(data, response, 'POST /api/bingo/daily-winner/claim')
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: bingoKeys.dailyWinner() })
     },
