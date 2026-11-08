@@ -6,6 +6,15 @@ namespace TeacherControl.Api.Features.TeacherBingo.Services;
 
 public sealed partial class TeacherBingoService
 {
+    public async Task<IReadOnlyList<BingoTeacherDto>> GetTeachersAsync(CancellationToken cancellationToken)
+    {
+        return await db.Teachers
+            .AsNoTracking()
+            .OrderBy(teacher => teacher.Name)
+            .Select(teacher => new BingoTeacherDto(teacher.Id.ToString(), teacher.Name))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<TeacherQuoteDto>> GetQuotesAsync(
         int? teacherId,
         CancellationToken cancellationToken)

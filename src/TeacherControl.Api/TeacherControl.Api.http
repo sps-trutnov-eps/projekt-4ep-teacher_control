@@ -5,6 +5,12 @@ Accept: application/json
 
 ###
 
+### Get all teachers available for bingo, including teachers without quotes
+GET {{TeacherControl.Api_HostAddress}}/api/bingo/teachers
+Accept: application/json
+
+###
+
 ### Get today's daily bingo winner (authenticated)
 GET {{TeacherControl.Api_HostAddress}}/api/bingo/daily-winner
 Accept: application/json

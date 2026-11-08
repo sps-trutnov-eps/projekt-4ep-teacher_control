@@ -262,6 +262,45 @@
         }
       }
     },
+    "/api/bingo/teachers": {
+      "get": {
+        "tags": [
+          "TeacherBingo"
+        ],
+        "summary": "Get all teachers available for bingo",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BingoTeacherDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BingoTeacherDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BingoTeacherDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/bingo/quotes": {
       "get": {
         "tags": [
@@ -499,6 +538,21 @@
           },
           "isMarked": {
             "type": "boolean"
+          }
+        }
+      },
+      "BingoTeacherDto": {
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
           }
         }
       },

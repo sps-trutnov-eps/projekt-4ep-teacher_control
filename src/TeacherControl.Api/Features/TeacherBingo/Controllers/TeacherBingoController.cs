@@ -106,6 +106,15 @@ public class TeacherBingoController : ControllerBase
         return result is null ? NotFound() : Ok(result);
     }
 
+    [HttpGet("teachers")]
+    [EndpointSummary("Get all teachers available for bingo")]
+    public async Task<ActionResult<IReadOnlyList<BingoTeacherDto>>> GetTeachers(
+        CancellationToken cancellationToken)
+    {
+        var teachers = await _teacherBingoService.GetTeachersAsync(cancellationToken);
+        return Ok(teachers);
+    }
+
     [HttpGet("quotes")]
     public async Task<ActionResult<IReadOnlyList<TeacherQuoteDto>>> GetQuotes(
         [FromQuery] string? teacherId,
