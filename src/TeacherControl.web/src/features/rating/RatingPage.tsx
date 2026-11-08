@@ -14,7 +14,7 @@ export function RatingPage() {
   const { data: teacherDetails, isLoading: isLoadingDetails } = useTeacherDetails(selectedTeacherId)
 
   // Učitel se bere přímo z paměti (ze seznamu načteného přes /api/rating/teachers)
-  const selectedTeacher = teachers?.find((t) => t.id === selectedTeacherId) ?? null
+  const selectedTeacher = teachers?.find((t) => Number(t.id) === selectedTeacherId) ?? null
 
   const handleSelectTeacher = (id: number) => {
     setSearchParams({ teacher: String(id) })

@@ -54,19 +54,19 @@ export function TeacherDetail({ teacher, details, onBack }: TeacherDetailProps) 
               <Text size="sm" c="dimmed">
                 Recenze:
               </Text>
-              <Rating value={teacher.review ?? 0} readOnly fractions={2} />
+              <Rating value={Number(teacher.review) || 0} readOnly fractions={2} />
             </Group>
             <Group justify="space-between" mb="xs">
               <Text size="sm" c="dimmed">
                 Abstence:
               </Text>
-              <Rating value={details.abstention} readOnly fractions={2} />
+              <Rating value={Number(details.abstention) || 0} readOnly fractions={2} />
             </Group>
             <Group justify="space-between">
               <Text size="sm" c="dimmed">
                 Bingovost:
               </Text>
-              <Rating value={details.binginess} readOnly fractions={2} />
+              <Rating value={Number(details.binginess) || 0} readOnly fractions={2} />
             </Group>
           </Box>
 
@@ -76,12 +76,12 @@ export function TeacherDetail({ teacher, details, onBack }: TeacherDetailProps) 
             </Title>
             {details.awards.length > 0 ? (
               details.awards.map((item, idx) => {
-                const displayYear =
-                  typeof item.year === 'number'
-                    ? item.year < 1000
-                      ? 2026 + item.year
-                      : item.year
-                    : null
+                const yearNum = Number(item.year)
+                const displayYear = !isNaN(yearNum)
+                  ? yearNum < 1000
+                    ? 2026 + yearNum
+                    : yearNum
+                  : null
                 return (
                   <Text key={idx} size="md" mb="xs">
                     {item.award}

@@ -5,20 +5,20 @@ const teachers: TeacherListItem[] = [
   {
     id: 1,
     full_name: 'Jan Novák',
-    image_url: null,
+    image_url: '',
     review: 4.5,
   },
   {
     id: 2,
     full_name: 'Petr Svoboda',
-    image_url: null,
+    image_url: '',
     review: 5,
   },
   {
     id: 3,
     full_name: 'Marie Dvořáková',
-    image_url: null,
-    review: null,
+    image_url: '',
+    review: 0,
   },
 ]
 
@@ -72,7 +72,7 @@ export const ratingHandlers = [
   http.get('*/api/rating/teacher/:teacherId/profile', ({ params }) => {
     const id = Number(params.teacherId)
     const details = teacherDetails[id]
-    const teacher = teachers.find((t) => t.id === id)
+    const teacher = teachers.find((t) => Number(t.id) === id)
     if (details && teacher) {
       return HttpResponse.json({ ...teacher, ...details })
     }
