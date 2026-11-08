@@ -4,6 +4,39 @@
  */
 
 export interface paths {
+    "/api/version": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rating": {
         parameters: {
             query?: never;
@@ -28,12 +61,49 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description OK */
-                200: {
+                /** @description Created */
+                201: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "text/plain": components["schemas"]["ReviewResponse"];
+                        "application/json": components["schemas"]["ReviewResponse"];
+                        "text/json": components["schemas"]["ReviewResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
                 };
             };
         };
@@ -65,7 +135,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["TeacherListItemDto"][];
+                        "text/plain": components["schemas"]["TeacherListItemResponse"][];
+                        "application/json": components["schemas"]["TeacherListItemResponse"][];
+                        "text/json": components["schemas"]["TeacherListItemResponse"][];
                     };
                 };
             };
@@ -102,7 +174,20 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
+                        "text/plain": components["schemas"]["TeacherProfileResponse"];
                         "application/json": components["schemas"]["TeacherProfileResponse"];
+                        "text/json": components["schemas"]["TeacherProfileResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
                     };
                 };
             };
@@ -138,43 +223,10 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/rating/teacher/{teacherId}/profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    teacherId: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
                     content: {
-                        "application/json": components["schemas"]["TeacherProfileResponse"];
+                        "text/plain": number | string;
+                        "application/json": number | string;
+                        "text/json": number | string;
                     };
                 };
             };
@@ -217,7 +269,55 @@ export interface paths {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "text/plain": components["schemas"]["ReviewResponse"];
+                        "application/json": components["schemas"]["ReviewResponse"];
+                        "text/json": components["schemas"]["ReviewResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
                 };
             };
         };
@@ -233,12 +333,45 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description OK */
-                200: {
+                /** @description No Content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content?: never;
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                        "text/json": components["schemas"]["ProblemDetails"];
+                    };
                 };
             };
         };
@@ -425,6 +558,25 @@ export interface components {
             /** Format: float */
             rating: number | string;
         };
+        ProblemDetails: {
+            type?: null | string;
+            title?: null | string;
+            /** Format: int32 */
+            status?: null | number | string;
+            detail?: null | string;
+            instance?: null | string;
+        };
+        ReviewResponse: {
+            /** Format: int32 */
+            id: number | string;
+            title: string;
+            content: string;
+            /** Format: float */
+            rating: number | string;
+            /** Format: int32 */
+            teacherId: number | string;
+            studentId: string;
+        };
         SubmitLateArrivalRequest: {
             /** Format: int32 */
             minutes: number | string;
@@ -445,36 +597,32 @@ export interface components {
             /** Format: int32 */
             lateArrivalMinutesToday: number | string;
         };
+        TeacherAwardResponse: {
+            award: string;
+            /** Format: int32 */
+            year: number | string;
+        };
+        TeacherListItemResponse: {
+            /** Format: int32 */
+            id: number | string;
+            full_name: string;
+            image_url: string;
+            /** Format: int32 */
+            review: number | string;
+        };
+        TeacherProfileResponse: {
+            bio: string;
+            /** Format: int32 */
+            abstention: number | string;
+            /** Format: int32 */
+            binginess: number | string;
+            awards: components["schemas"]["TeacherAwardResponse"][];
+        };
         UpdateReviewRequest: {
             title: string;
             content: string;
             /** Format: float */
             rating: number | string;
-        };
-        TeacherAwardDto: {
-            award: string;
-            /** Format: int32 */
-            year: number;
-        };
-        TeacherListItemDto: {
-            /** Format: int32 */
-            id: number;
-            full_name: string;
-            image_url: null | string;
-            /** Format: float */
-            review: null | number;
-        };
-        TeacherProfileResponse: {
-            full_name: string;
-            image_url?: null | string;
-            bio: string;
-            /** Format: float */
-            review: number;
-            /** Format: float */
-            abstention: number;
-            /** Format: float */
-            binginess: number;
-            awards: components["schemas"]["TeacherAwardDto"][];
         };
     };
     responses: never;
