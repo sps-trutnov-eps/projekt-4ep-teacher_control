@@ -1,4 +1,4 @@
-import { Alert, Avatar, Group, Loader, NavLink, Stack, Text } from '@mantine/core'
+import { Alert, Avatar, Group, Loader, Stack, Text, UnstyledButton } from '@mantine/core'
 import { usePololetiTeachers } from '../api'
 
 interface TeacherListProps {
@@ -26,20 +26,35 @@ export function TeacherList({ selectedTeacherId, onSelect }: TeacherListProps) {
   }
 
   return (
-    <Stack gap={4} component="nav" aria-label="Učitelé">
-      {data.map((teacher) => (
-        <NavLink
-          key={teacher.teacherId}
-          active={teacher.teacherId === selectedTeacherId}
-          onClick={() => onSelect(teacher.teacherId)}
-          label={
-            <Group gap="sm" wrap="nowrap">
-              <Avatar src={teacher.photoUrl} name={teacher.name} alt={teacher.name} radius="xl" />
+    <Stack gap={0} component="nav" aria-label="Učitelé" bd="1px solid var(--mantine-color-gray-3)">
+      {data.map((teacher) => {
+        const isSelected = teacher.teacherId === selectedTeacherId
+
+        return (
+          <UnstyledButton
+            key={teacher.teacherId}
+            onClick={() => onSelect(teacher.teacherId)}
+            aria-current={isSelected ? 'true' : undefined}
+            p="md"
+            bg={isSelected ? 'var(--mantine-color-blue-0)' : 'white'}
+            style={{
+              borderBottom: '1px solid var(--mantine-color-gray-3)',
+              transition: 'background-color 150ms ease',
+            }}
+          >
+            <Group gap="sm" wrap="nowrap" align="center">
+              <Avatar
+                src={teacher.photoUrl}
+                name={teacher.name}
+                alt={teacher.name}
+                radius="xl"
+                color="blue"
+              />
               <Text fw={500}>{teacher.name}</Text>
             </Group>
-          }
-        />
-      ))}
+          </UnstyledButton>
+        )
+      })}
     </Stack>
   )
 }

@@ -692,6 +692,7 @@ export interface components {
             teacherId: number | string;
             name: string;
             photoUrl: null | string;
+        };
         ProblemDetails: {
             type?: null | string;
             title?: null | string;
@@ -731,6 +732,11 @@ export interface components {
             /** Format: int32 */
             lateArrivalMinutesToday: number | string;
         };
+        TeacherAwardResponse: {
+            award: string;
+            /** Format: int32 */
+            year: number | string;
+        };
         TeacherCardDto: {
             /** Format: int32 */
             teacherId: number | string;
@@ -741,19 +747,6 @@ export interface components {
             pololeti: number | string;
             pololetiText: string;
             titles: components["schemas"]["TitleVotesDto"][];
-        };
-        TitleVotesDto: {
-            /** Format: int32 */
-            teacherTitleId: number | string;
-            title: string;
-            /** Format: int32 */
-            votes: number | string;
-            /** Format: int32 */
-            myVoteTeacherId: null | number | string;
-        TeacherAwardResponse: {
-            award: string;
-            /** Format: int32 */
-            year: number | string;
         };
         TeacherListItemResponse: {
             /** Format: int32 */
@@ -770,6 +763,15 @@ export interface components {
             /** Format: int32 */
             binginess: number | string;
             awards: components["schemas"]["TeacherAwardResponse"][];
+        };
+        TitleVotesDto: {
+            /** Format: int32 */
+            teacherTitleId: number | string;
+            title: string;
+            /** Format: int32 */
+            votes: number | string;
+            /** Format: int32 */
+            myVoteTeacherId: null | number | string;
         };
         UpdateReviewRequest: {
             title: string;
