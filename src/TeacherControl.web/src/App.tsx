@@ -1,6 +1,7 @@
 import {
   AppShell,
   Avatar,
+  Box,
   Burger,
   Button,
   Group,
@@ -13,6 +14,7 @@ import {
 import { useDisclosure } from '@mantine/hooks'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { RequireAuth, useAuth } from '@/shared/auth'
+import { AppVersion } from './AppVersion'
 import { APP_ROUTES, AppRoutes } from './routes'
 
 export function App() {
@@ -101,6 +103,9 @@ export function App() {
             onClick={closeNavbar}
           />
         ))}
+        <Box mt="auto" p="xs">
+          <AppVersion />
+        </Box>
       </AppShell.Navbar>
 
       <AppShell.Main>

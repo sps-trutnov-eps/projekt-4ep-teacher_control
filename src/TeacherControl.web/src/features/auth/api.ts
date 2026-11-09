@@ -41,7 +41,7 @@ export function useConfirmCode() {
         throw new Error(error.detail ?? error.title ?? 'Ověření kódu se nezdařilo.')
       }
 
-      return data
+      return data as ConfirmCodeResponse
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authKeys.all })
@@ -74,7 +74,7 @@ export function useLoginMutation() {
         throw new Error(error.detail ?? error.title ?? 'Přihlášení se nezdařilo.')
       }
 
-      return data
+      return data as LoginResponse
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: authKeys.all })

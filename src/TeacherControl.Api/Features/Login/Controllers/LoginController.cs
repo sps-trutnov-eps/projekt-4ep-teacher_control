@@ -23,7 +23,9 @@ public class LoginController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
         try
         {
@@ -43,7 +45,9 @@ public class LoginController : ControllerBase
     }
 
     [HttpPost("confirm-code")]
-    public async Task<IActionResult> ConfirmCode([FromBody] ConfirmCodeRequest request)
+    [ProducesResponseType(typeof(ConfirmCodeResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ConfirmCodeResponse>> ConfirmCode([FromBody] ConfirmCodeRequest request)
     {
         try
         {
@@ -68,7 +72,9 @@ public class LoginController : ControllerBase
     }
 
     [HttpPost("resend-code")]
-    public async Task<IActionResult> ResendCode([FromBody] ResendCodeRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ResendCodeResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ResendCodeResponse>> ResendCode([FromBody] ResendCodeRequest request, CancellationToken cancellationToken)
     {
         try
         {
@@ -88,7 +94,9 @@ public class LoginController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
     {
         try
         {
@@ -103,6 +111,7 @@ public class LoginController : ControllerBase
     }
 
     [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> Logout()
     {
         await _loginService.LogoutAsync();
@@ -111,7 +120,9 @@ public class LoginController : ControllerBase
 
     [HttpGet("me")]
     [Authorize]
-    public async Task<IActionResult> GetCurrentUser()
+    [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<UserDto>> GetCurrentUser()
     {
         var user = await _loginService.GetCurrentUserAsync(User);
         if (user is null)
