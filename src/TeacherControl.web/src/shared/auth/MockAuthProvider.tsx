@@ -54,7 +54,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(
     async (u?: User) => {
       if (u) {
-        storeUserId(u.id)
+        storeUser(u)
         setUser(u)
       } else {
         switchUser(DEFAULT_MOCK_USER_ID)
