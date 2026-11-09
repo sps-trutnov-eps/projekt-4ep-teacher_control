@@ -20,6 +20,16 @@ public class Program
 
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "http://127.0.0.1:5173", "https://127.0.0.1:5173")
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            });
+        });
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Configure ConnectionStrings:DefaultConnection.")));
@@ -89,6 +99,8 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseRouting();
+
+        app.UseCors();
 
         app.UseAuthentication();
         app.UseAuthorization();
