@@ -12,7 +12,8 @@ public sealed class DailyBingoWinnerService(AppDbContext db) : IDailyBingoWinner
 
     public async Task<DailyBingoWinnerDto?> GetTodayAsync(CancellationToken cancellationToken)
     {
-        var today = BingoDate.GetPragueDate();
+        var today = DateOnly.FromDateTime(
+            TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Europe/Prague"));
         var winner = await db.DailyBingoWinners
             .AsNoTracking()
             .FirstOrDefaultAsync(item => item.Date == today, cancellationToken);
@@ -28,7 +29,8 @@ public sealed class DailyBingoWinnerService(AppDbContext db) : IDailyBingoWinner
         if (!int.TryParse(request.BoardId, out var boardId) || string.IsNullOrWhiteSpace(request.DisplayName))
             return null;
 
-        var today = BingoDate.GetPragueDate();
+        var today = DateOnly.FromDateTime(
+            TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Europe/Prague"));
         var existingWinner = await db.DailyBingoWinners
             .AsNoTracking()
             .FirstOrDefaultAsync(item => item.Date == today, cancellationToken);
