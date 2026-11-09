@@ -119,7 +119,8 @@ public sealed partial class TeacherBingoService
 
     private IQueryable<BingoBoardEntity> GetTodaysBoardQuery(string studentId)
     {
-        var today = BingoDate.GetPragueDate();
+        var today = DateOnly.FromDateTime(
+            TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Europe/Prague"));
         return db.BingoBoards
             .AsNoTracking()
             .Include(board => board.Quotes)
