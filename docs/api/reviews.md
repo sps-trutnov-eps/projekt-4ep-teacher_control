@@ -29,8 +29,7 @@ Chyby: 400 neplatný vstup, 401 nepřihlášený, 403 úprava/smazání cizí re
 Unikátní databázový index chrání proti souběžnému vytvoření dvou recenzí;
 hlasy používají atomický PostgreSQL upsert.
 
-Nová migrace přidává tabulky TextReviews a TeacherReactions. Existující rating ani jeho data nemění.
-Při spuštění API se migrace aplikují podle existující konfigurace Program.cs.
+Recenze a reakce vyžadují v databázi tabulky `TextReviews` a `TeacherReactions`.
 Po úspěšném sestavení se musí aktualizovat OpenAPI export a frontendové typy (`pnpm gen:api`).
 
 ## Ověření na běžící databázi
