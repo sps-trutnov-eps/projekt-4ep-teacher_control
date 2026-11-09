@@ -118,6 +118,7 @@ export const authHandlers = [
     const user: User = {
       id: `usr-${Date.now()}`,
       displayName: formattedName || 'Student',
+      email,
       roles: ['student'],
     }
 
@@ -184,6 +185,7 @@ export const authHandlers = [
     const user: User = existing ?? {
       id: 'usr-demo',
       displayName: formattedName,
+      email,
       roles: ['student'],
     }
 

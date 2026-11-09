@@ -168,6 +168,7 @@ public class LoginService
             {
                 Id = user.Id,
                 DisplayName = user.FullName ?? user.UserName ?? user.Email ?? "student",
+                Email = user.Email,
                 Roles = roles
             }
         };
@@ -247,6 +248,7 @@ public class LoginService
             {
                 Id = user.Id,
                 DisplayName = user.FullName ?? user.UserName ?? user.Email ?? "student",
+                Email = user.Email,
                 Roles = roles
             }
         };
@@ -275,6 +277,7 @@ public class LoginService
         {
             Id = user.Id,
             DisplayName = user.FullName ?? user.UserName ?? user.Email ?? "student",
+            Email = user.Email,
             Roles = roles
         };
     }

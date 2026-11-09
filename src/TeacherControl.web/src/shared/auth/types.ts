@@ -3,6 +3,7 @@ export type Role = 'student' | 'teacher' | 'admin'
 export interface User {
   id: string
   displayName: string
+  email?: string
   roles: Role[]
 }
 

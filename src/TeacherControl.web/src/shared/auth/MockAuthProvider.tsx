@@ -5,6 +5,7 @@ import { DEFAULT_MOCK_USER_ID, MOCK_USERS } from './mockUsers'
 import type { AuthContextValue, Role, User } from './types'
 
 const STORAGE_KEY = 'teacher-control.mock-user-id'
+const STORAGE_USER_KEY = 'teacher-control.mock-user-data'
 
 function findUser(id: string | null): User | null {
   return MOCK_USERS.find((user) => user.id === id) ?? null
@@ -12,18 +13,24 @@ function findUser(id: string | null): User | null {
 
 function readStoredUser(): User | null {
   try {
+    const raw = sessionStorage.getItem(STORAGE_USER_KEY)
+    if (raw) {
+      return JSON.parse(raw) as User
+    }
     return findUser(sessionStorage.getItem(STORAGE_KEY))
   } catch {
     return null
   }
 }
 
-function storeUserId(id: string | null): void {
+function storeUser(user: User | null): void {
   try {
-    if (id === null) {
+    if (user === null) {
       sessionStorage.removeItem(STORAGE_KEY)
+      sessionStorage.removeItem(STORAGE_USER_KEY)
     } else {
-      sessionStorage.setItem(STORAGE_KEY, id)
+      sessionStorage.setItem(STORAGE_KEY, user.id)
+      sessionStorage.setItem(STORAGE_USER_KEY, JSON.stringify(user))
     }
   } catch {
     // sessionStorage je jen pohodlí ve vývoji, když nejde, nic se neděje.
@@ -40,7 +47,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
 
   const switchUser = useCallback((id: string) => {
     const next = findUser(id)
-    storeUserId(next?.id ?? null)
+    storeUser(next)
     setUser(next)
   }, [])
 
@@ -57,7 +64,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   )
 
   const logout = useCallback(async () => {
-    storeUserId(null)
+    storeUser(null)
     setUser(null)
   }, [])
 

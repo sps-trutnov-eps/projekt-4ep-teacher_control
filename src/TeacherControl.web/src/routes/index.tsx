@@ -3,6 +3,7 @@ import { VzorPage } from '@/features/vzor'
 import { AbstencePage } from '@/features/abstence'
 import { RatingPage } from '@/features/rating'
 import { LoginPage, RegisterPage } from '@/features/auth'
+import { UserPage } from '@/features/user'
 import { FeatureTodo } from './FeatureTodo'
 
 /**
@@ -16,6 +17,8 @@ export const APP_ROUTES = [
   { path: '/recenze', label: 'F3 Recenze', element: <FeatureTodo code="F3" name="Recenze" /> },
   { path: '/abstence', label: 'F4 Abstence', element: <AbstencePage /> },
   { path: '/pololeti', label: 'F5 Pololetí', element: <FeatureTodo code="F5" name="Pololetí" /> },
+  { path: '/user', label: 'Můj profil', element: <UserPage /> },
+  { path: '/profile', element: <UserPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
 ]
