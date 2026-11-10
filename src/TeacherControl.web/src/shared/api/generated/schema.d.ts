@@ -65,9 +65,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["TeacherResponse"][];
-                        "application/json": components["schemas"]["TeacherResponse"][];
-                        "text/json": components["schemas"]["TeacherResponse"][];
+                        "text/plain": components["schemas"]["ReviewsTeacherResponse"][];
+                        "application/json": components["schemas"]["ReviewsTeacherResponse"][];
+                        "text/json": components["schemas"]["ReviewsTeacherResponse"][];
                     };
                 };
             };
@@ -104,9 +104,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["TeacherProfileResponse"];
-                        "application/json": components["schemas"]["TeacherProfileResponse"];
-                        "text/json": components["schemas"]["TeacherProfileResponse"];
+                        "text/plain": components["schemas"]["ReviewsTeacherProfileResponse"];
+                        "application/json": components["schemas"]["ReviewsTeacherProfileResponse"];
+                        "text/json": components["schemas"]["ReviewsTeacherProfileResponse"];
                     };
                 };
             };
@@ -143,9 +143,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ReviewResponse"][];
-                        "application/json": components["schemas"]["ReviewResponse"][];
-                        "text/json": components["schemas"]["ReviewResponse"][];
+                        "text/plain": components["schemas"]["ReviewsReviewResponse"][];
+                        "application/json": components["schemas"]["ReviewsReviewResponse"][];
+                        "text/json": components["schemas"]["ReviewsReviewResponse"][];
                     };
                 };
             };
@@ -174,9 +174,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ReviewResponse"];
-                        "application/json": components["schemas"]["ReviewResponse"];
-                        "text/json": components["schemas"]["ReviewResponse"];
+                        "text/plain": components["schemas"]["ReviewsReviewResponse"];
+                        "application/json": components["schemas"]["ReviewsReviewResponse"];
+                        "text/json": components["schemas"]["ReviewsReviewResponse"];
                     };
                 };
             };
@@ -218,9 +218,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/plain": components["schemas"]["ReviewResponse"];
-                        "application/json": components["schemas"]["ReviewResponse"];
-                        "text/json": components["schemas"]["ReviewResponse"];
+                        "text/plain": components["schemas"]["ReviewsReviewResponse"];
+                        "application/json": components["schemas"]["ReviewsReviewResponse"];
+                        "text/json": components["schemas"]["ReviewsReviewResponse"];
                     };
                 };
             };
@@ -843,6 +843,17 @@ export interface components {
         ReviewResponse: {
             /** Format: int32 */
             id: number | string;
+            title: string;
+            content: string;
+            /** Format: float */
+            rating: number | string;
+            /** Format: int32 */
+            teacherId: number | string;
+            studentId: string;
+        };
+        ReviewsReviewResponse: {
+            /** Format: int32 */
+            id: number | string;
             /** Format: int32 */
             teacherId: number | string;
             content: string;
@@ -851,6 +862,44 @@ export interface components {
             /** Format: date-time */
             updatedAt: null | string;
             isMine: boolean;
+        };
+        ReviewsTeacherProfileResponse: {
+            /** Format: int32 */
+            id: number | string;
+            name: string;
+            nickname: null | string;
+            photoUrl: null | string;
+            description: string;
+            /** Format: float */
+            mood: number | string;
+            /** Format: double */
+            averageRating: null | number | string;
+            /** Format: int32 */
+            reviewCount: number | string;
+            /** Format: int32 */
+            likes: number | string;
+            /** Format: int32 */
+            dislikes: number | string;
+            /** Format: int32 */
+            myReaction: null | number | string;
+            reviews: components["schemas"]["ReviewsReviewResponse"][];
+        };
+        ReviewsTeacherResponse: {
+            /** Format: int32 */
+            id: number | string;
+            name: string;
+            photoUrl: null | string;
+            description: string;
+            /** Format: double */
+            averageRating: null | number | string;
+            /** Format: int32 */
+            reviewCount: number | string;
+            /** Format: int32 */
+            likes: number | string;
+            /** Format: int32 */
+            dislikes: number | string;
+            /** Format: int32 */
+            myReaction: null | number | string;
         };
         SubmitLateArrivalRequest: {
             /** Format: int32 */
@@ -872,6 +921,11 @@ export interface components {
             /** Format: int32 */
             lateArrivalMinutesToday: number | string;
         };
+        TeacherAwardResponse: {
+            award: string;
+            /** Format: int32 */
+            year: number | string;
+        };
         TeacherListItemResponse: {
             /** Format: int32 */
             id: number | string;
@@ -881,42 +935,12 @@ export interface components {
             review: number | string;
         };
         TeacherProfileResponse: {
+            bio: string;
             /** Format: int32 */
-            id: number | string;
-            name: string;
-            nickname: null | string;
-            photoUrl: null | string;
-            description: string;
-            /** Format: float */
-            mood: number | string;
-            /** Format: double */
-            averageRating: null | number | string;
+            abstention: number | string;
             /** Format: int32 */
-            reviewCount: number | string;
-            /** Format: int32 */
-            likes: number | string;
-            /** Format: int32 */
-            dislikes: number | string;
-            /** Format: int32 */
-            myReaction: null | number | string;
-            reviews: components["schemas"]["ReviewResponse"][];
-        };
-        TeacherResponse: {
-            /** Format: int32 */
-            id: number | string;
-            name: string;
-            photoUrl: null | string;
-            description: string;
-            /** Format: double */
-            averageRating: null | number | string;
-            /** Format: int32 */
-            reviewCount: number | string;
-            /** Format: int32 */
-            likes: number | string;
-            /** Format: int32 */
-            dislikes: number | string;
-            /** Format: int32 */
-            myReaction: null | number | string;
+            binginess: number | string;
+            awards: components["schemas"]["TeacherAwardResponse"][];
         };
         UpdateReviewRequest: {
             title: string;

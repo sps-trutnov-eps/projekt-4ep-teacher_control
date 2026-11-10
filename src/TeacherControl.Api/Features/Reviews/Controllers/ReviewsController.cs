@@ -24,12 +24,12 @@ public class ReviewsController : ControllerBase
     private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
     [HttpGet("teachers")]
-    public async Task<ActionResult<List<TeacherResponse>>> GetTeachers(
+    public async Task<ActionResult<List<ReviewsTeacherResponse>>> GetTeachers(
         [FromQuery, StringLength(100)] string? search, CancellationToken cancellationToken) =>
         Ok(await _reviewsService.GetTeachersAsync(UserId, search, cancellationToken));
 
     [HttpGet("teachers/{teacherId:int}")]
-    public async Task<ActionResult<TeacherProfileResponse>> GetTeacher(
+    public async Task<ActionResult<ReviewsTeacherProfileResponse>> GetTeacher(
         int teacherId, CancellationToken cancellationToken)
     {
         var teacher = await _reviewsService.GetTeacherAsync(teacherId, UserId, cancellationToken);
@@ -37,7 +37,7 @@ public class ReviewsController : ControllerBase
     }
 
     [HttpGet("teachers/{teacherId:int}/reviews")]
-    public async Task<ActionResult<List<ReviewResponse>>> GetReviews(
+    public async Task<ActionResult<List<ReviewsReviewResponse>>> GetReviews(
         int teacherId, CancellationToken cancellationToken)
     {
         var result = await _reviewsService.GetReviewsAsync(teacherId, UserId, cancellationToken);
@@ -45,7 +45,7 @@ public class ReviewsController : ControllerBase
     }
 
     [HttpPost("teachers/{teacherId:int}/reviews")]
-    public async Task<ActionResult<ReviewResponse>> CreateReview(
+    public async Task<ActionResult<ReviewsReviewResponse>> CreateReview(
         int teacherId, ReviewRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Content)) return BadRequest("Recenze nesmí být prázdná.");
@@ -60,7 +60,7 @@ public class ReviewsController : ControllerBase
     }
 
     [HttpPut("{reviewId:int}")]
-    public async Task<ActionResult<ReviewResponse>> UpdateReview(
+    public async Task<ActionResult<ReviewsReviewResponse>> UpdateReview(
         int reviewId, ReviewRequest request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request.Content)) return BadRequest("Recenze nesmí být prázdná.");

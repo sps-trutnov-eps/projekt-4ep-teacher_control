@@ -126,7 +126,7 @@ function toDetail(teacher: MockTeacher): ReviewTeacherDetail {
 const notFound = () => HttpResponse.json({ message: 'Nenalezeno.' }, { status: 404 })
 
 /**
- * MSW handlery featury Recenze — kopírují chování backendu (`/api/reviews`, docs/api/reviews.md):
+ * MSW handlery featury Recenze — kopírují chování backendu (`/api/reviews`, docs/features/recenze.md):
  * jedna recenze na učitele (409), cizí recenzi nejde upravit (403), hlas 1 / -1.
  * Hvězdička na začátku cesty je potřeba kvůli testům v Node.
  */

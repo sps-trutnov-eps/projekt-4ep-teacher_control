@@ -17,7 +17,7 @@ public sealed class ReviewsService
         _db = db;
     }
 
-    public async Task<List<TeacherResponse>> GetTeachersAsync(
+    public async Task<List<ReviewsTeacherResponse>> GetTeachersAsync(
         string userId, string? search, CancellationToken cancellationToken)
     {
         var query = _db.Teachers.AsNoTracking().AsQueryable();
@@ -31,7 +31,7 @@ public sealed class ReviewsService
         return await ProjectTeachers(query, userId).OrderBy(t => t.Name).ToListAsync(cancellationToken);
     }
 
-    public async Task<TeacherProfileResponse?> GetTeacherAsync(
+    public async Task<ReviewsTeacherProfileResponse?> GetTeacherAsync(
         int teacherId, string userId, CancellationToken cancellationToken)
     {
         var teacher = await _db.Teachers.AsNoTracking().Where(t => t.Id == teacherId)
@@ -54,12 +54,12 @@ public sealed class ReviewsService
         if (teacher is null) return null;
 
         var reviews = await GetTeacherReviewsAsync(teacherId, userId, cancellationToken);
-        return new TeacherProfileResponse(teacher.Id, teacher.Name, teacher.LoginName, teacher.PhotoUrl,
+        return new ReviewsTeacherProfileResponse(teacher.Id, teacher.Name, teacher.LoginName, teacher.PhotoUrl,
             teacher.Description, teacher.Mood, teacher.AverageRating, teacher.ReviewCount, teacher.Likes,
             teacher.Dislikes, teacher.MyReaction, reviews);
     }
 
-    public async Task<List<ReviewResponse>?> GetReviewsAsync(
+    public async Task<List<ReviewsReviewResponse>?> GetReviewsAsync(
         int teacherId, string userId, CancellationToken cancellationToken)
     {
         if (!await _db.Teachers.AnyAsync(t => t.Id == teacherId, cancellationToken)) return null;
@@ -149,8 +149,8 @@ public sealed class ReviewsService
                 .Select(r => (int?)r.Value).SingleOrDefault())).SingleAsync(cancellationToken);
     }
 
-    private IQueryable<TeacherResponse> ProjectTeachers(IQueryable<TeacherEntity> query, string userId) =>
-        query.Select(t => new TeacherResponse(t.Id, t.Name, t.PhotoUrl, t.Description,
+    private IQueryable<ReviewsTeacherResponse> ProjectTeachers(IQueryable<TeacherEntity> query, string userId) =>
+        query.Select(t => new ReviewsTeacherResponse(t.Id, t.Name, t.PhotoUrl, t.Description,
             _db.Reviews.Where(r => r.TeacherId == t.Id).Select(r => (double?)r.Rating).Average(),
             _db.TextReviews.Count(r => r.TeacherId == t.Id),
             _db.TeacherReactions.Count(r => r.TeacherId == t.Id && r.Value == 1),
@@ -158,13 +158,13 @@ public sealed class ReviewsService
             _db.TeacherReactions.Where(r => r.TeacherId == t.Id && r.UserId == userId)
                 .Select(r => (int?)r.Value).SingleOrDefault()));
 
-    private Task<List<ReviewResponse>> GetTeacherReviewsAsync(
+    private Task<List<ReviewsReviewResponse>> GetTeacherReviewsAsync(
         int teacherId, string userId, CancellationToken cancellationToken) =>
         _db.TextReviews.AsNoTracking().Where(r => r.TeacherId == teacherId)
             .OrderByDescending(r => r.CreatedAt).ThenByDescending(r => r.Id)
-            .Select(r => new ReviewResponse(r.Id, r.TeacherId, r.Content, r.CreatedAt, r.UpdatedAt, r.AuthorId == userId))
+            .Select(r => new ReviewsReviewResponse(r.Id, r.TeacherId, r.Content, r.CreatedAt, r.UpdatedAt, r.AuthorId == userId))
             .ToListAsync(cancellationToken);
 
-    private static ReviewResponse ToResponse(TextReviewEntity review, string userId) =>
+    private static ReviewsReviewResponse ToResponse(TextReviewEntity review, string userId) =>
         new(review.Id, review.TeacherId, review.Content, review.CreatedAt, review.UpdatedAt, review.AuthorId == userId);
 }

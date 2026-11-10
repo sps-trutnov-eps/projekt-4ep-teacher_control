@@ -47,12 +47,16 @@ export function useReviewTeachers() {
   })
 }
 
-export function useReviewTeacher(teacherId: number | null) {
+/**
+ * Profil učitele. Hook přijímá jen platné ID — kdo ID ještě nemá, komponentu s hookem
+ * nevykreslí, takže se do API nikdy nepošle `teacherId = 0`.
+ */
+export function useReviewTeacher(teacherId: number) {
   return useQuery({
-    queryKey: recenzeKeys.teacher(teacherId ?? 0),
+    queryKey: recenzeKeys.teacher(teacherId),
     queryFn: async ({ signal }) => {
       const { data, response } = await api.GET('/api/reviews/teachers/{teacherId}', {
-        params: { path: { teacherId: teacherId ?? 0 } },
+        params: { path: { teacherId } },
         signal,
       })
 
@@ -62,7 +66,6 @@ export function useReviewTeacher(teacherId: number | null) {
 
       return data as ReviewTeacherDetail
     },
-    enabled: teacherId !== null,
   })
 }
 
@@ -84,11 +87,16 @@ export function useCreateReview(teacherId: number) {
   })
 }
 
-export function useUpdateReview(reviewId: number) {
+interface UpdateReviewInput {
+  reviewId: number
+  values: ReviewFormValues
+}
+
+export function useUpdateReview() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (values: ReviewFormValues) => {
+    mutationFn: async ({ reviewId, values }: UpdateReviewInput) => {
       const { response } = await api.PUT('/api/reviews/{reviewId}', {
         params: { path: { reviewId } },
         body: { content: values.content },

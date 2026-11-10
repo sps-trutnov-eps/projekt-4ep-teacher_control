@@ -34,7 +34,7 @@ function errorMessage(error: Error | null) {
 export function ReviewForm({ teacherId, review, onBack, onSubmitted }: ReviewFormProps) {
   const { data: teacher } = useReviewTeacher(teacherId)
   const createReview = useCreateReview(teacherId)
-  const updateReview = useUpdateReview(review?.id ?? 0)
+  const updateReview = useUpdateReview()
   const mutation = review ? updateReview : createReview
 
   const {
@@ -50,7 +50,11 @@ export function ReviewForm({ teacherId, review, onBack, onSubmitted }: ReviewFor
   const textLength = useWatch({ control, name: 'content' }).length
 
   const onSubmit = handleSubmit(async (values) => {
-    await mutation.mutateAsync(values)
+    if (review) {
+      await updateReview.mutateAsync({ reviewId: review.id, values })
+    } else {
+      await createReview.mutateAsync(values)
+    }
     notifications.show({
       color: BRAND.success,
       message: review ? 'Recenze byla upravena.' : 'Recenze byla odeslána. Díky!',

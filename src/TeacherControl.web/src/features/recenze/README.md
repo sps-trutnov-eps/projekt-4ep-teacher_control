@@ -21,7 +21,7 @@ podle `docs/design/design_rules.md`.
 
 ## Napojení na data
 
-Featura volá backend `/api/reviews` (Synáč, `docs/api/reviews.md`) přes `api.GET()` / `api.POST()` /
+Featura volá backend `/api/reviews` (Synáč, `docs/features/recenze.md`) přes `api.GET()` / `api.POST()` /
 `api.PUT()` / `api.DELETE()`. Typy se berou z `docs/api/TeacherControl.Api.json`
 (`pnpm gen:api`), mapování je v `types.ts`. Ve vývoji odpovídá MSW z `mocks.ts`, které kopíruje
 chování backendu (409 na druhou recenzi, 403 na cizí).
@@ -31,7 +31,7 @@ chování backendu (409 na druhou recenzi, 403 na cizí).
 | `useReviewTeachers()`  | `GET /api/reviews/teachers`                                      |
 | `useReviewTeacher(id)` | `GET /api/reviews/teachers/{id}` (profil včetně recenzí)         |
 | `useCreateReview(id)`  | `POST /api/reviews/teachers/{id}/reviews` s `{ content }`        |
-| `useUpdateReview(id)`  | `PUT /api/reviews/{reviewId}` s `{ content }`                    |
+| `useUpdateReview()`    | `PUT /api/reviews/{reviewId}` s `{ content }`                    |
 | `useDeleteReview()`    | `DELETE /api/reviews/{reviewId}`                                 |
 | `useSetReaction()`     | `PUT /api/reviews/teachers/{id}/reaction` s `{ value: 1 \| -1 }` |
 
