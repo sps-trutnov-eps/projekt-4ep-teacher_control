@@ -1,6 +1,7 @@
 // Handlery se importují přímo z mocks.ts featury, ne z jejího index.ts.
 // Přes barrel by se MSW protáhl do produkčního bundlu.
 import { vzorHandlers } from '@/features/vzor/mocks'
+import { bingoHandlers } from '@/features/bingo/mocks'
 import { abstenceHandlers } from '@/features/abstence/mocks'
 import { ratingHandlers } from '@/features/rating/mocks'
 import { versionHandlers } from './version'
@@ -9,6 +10,7 @@ import { versionHandlers } from './version'
 export const handlers = [
   ...versionHandlers,
   ...vzorHandlers,
+  ...bingoHandlers,
   ...abstenceHandlers,
   ...ratingHandlers,
 ]
