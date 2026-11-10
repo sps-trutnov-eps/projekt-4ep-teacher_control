@@ -58,6 +58,7 @@ public class Program
         // takhle si registrujte service soubory pro DependencyInjection
         builder.Services.AddScoped<AbstenceService>();
         builder.Services.AddScoped<TeacherBingoService>();
+        builder.Services.AddScoped<IDailyBingoWinnerService, DailyBingoWinnerService>();
         builder.Services.AddScoped<RatingService>();
         builder.Services.AddScoped<ReviewsService>();
         builder.Services.AddScoped<VersionService>();

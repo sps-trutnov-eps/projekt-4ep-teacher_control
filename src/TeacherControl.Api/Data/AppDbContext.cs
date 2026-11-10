@@ -30,8 +30,9 @@ public class AppDbContext : IdentityDbContext<UserEntity>
     /// </summary>
     public DbSet<TeacherQuoteEntity> TeacherQuotes { get; set; }
     public DbSet<BingoBoardEntity> BingoBoards { get; set; }
-    // tabulka s hláškami konkrétního binga
     public DbSet<BingoBoardQuoteEntity> BingoBoardQuotes { get; set; }
+    public DbSet<BingoBoardQuoteMarkEntity> BingoBoardQuoteMarks { get; set; }
+    public DbSet<DailyBingoWinnerEntity> DailyBingoWinners { get; set; }
 
     /// <summary>
     /// feat/pololeti
@@ -68,6 +69,10 @@ public class AppDbContext : IdentityDbContext<UserEntity>
 
         modelBuilder.Entity<BingoBoardQuoteEntity>()
             .HasIndex(q => new { q.BingoBoardId, q.Position }).IsUnique();
+        modelBuilder.Entity<BingoBoardQuoteMarkEntity>()
+            .HasKey(mark => new { mark.StudentId, mark.BingoBoardQuoteId });
+        modelBuilder.Entity<DailyBingoWinnerEntity>()
+            .HasKey(winner => winner.Date);
 
         modelBuilder.Entity<UserEntity>()
             .HasOne(u => u.Teacher).WithOne()
@@ -86,13 +91,22 @@ public class AppDbContext : IdentityDbContext<UserEntity>
             .HasOne(a => a.Student).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<TeacherQuoteEntity>()
             .HasOne(q => q.Teacher).WithMany().OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<BingoBoardEntity>()
-            .HasOne(b => b.Student).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<BingoBoardQuoteEntity>()
             .HasOne(q => q.Quote).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<BingoBoardQuoteEntity>()
             .HasOne(q => q.BingoBoard).WithMany(b => b.Quotes)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<BingoBoardQuoteMarkEntity>()
+            .HasOne(mark => mark.Student).WithMany().OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<BingoBoardQuoteMarkEntity>()
+            .HasOne(mark => mark.BingoBoardQuote).WithMany(quote => quote.Marks)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<DailyBingoWinnerEntity>()
+            .HasOne(winner => winner.User).WithMany()
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<DailyBingoWinnerEntity>()
+            .HasOne(winner => winner.Board).WithMany()
+            .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<TitleVoteEntity>()
             .HasOne(v => v.Student).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<TitleVoteEntity>()

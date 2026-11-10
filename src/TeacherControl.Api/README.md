@@ -28,3 +28,14 @@ nějaký víceslovný název, tak lze jej přejmenovat do formátu `{word-word-w
 
 API popisujeme pomocí OpenAPI. Specifikace je dostupná v development prostředí na `/openapi/v1.json`
 a při buildu se exportuje do souboru `openapi.json` v /docs/api/.
+
+## Příprava na PR
+
+Před otevření PR je vždy potřeba projet menší checklist, který zajistí, že kód dodržuje požadavky repozitáře.
+
+Celý proces je pro backend automatizovaný. Před provedení commitu je potřeba za prvé spustit `dotnet build` pro případné
+upozornění na build errory a hlavně pro vygenerování API schématu pro frontend. Za druhé je potřeba spustit `dotnet format`,
+který zaručí, že kód používá stejné formátovaní jako zbytek repozitáře.
+
+Pokud už jste commit udělali, je přijatelné udělat jednoduchý commit s názvem např. `format` nebo `update api schema` se
+změnami, které udělají `dotnet format` a `dotnet build`.
