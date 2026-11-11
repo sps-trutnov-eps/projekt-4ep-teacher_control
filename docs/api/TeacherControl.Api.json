@@ -1312,6 +1312,146 @@
         }
       }
     },
+    "/api/pololeti/teachers": {
+      "get": {
+        "tags": [
+          "Pololeti"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PololetiTeacherDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PololetiTeacherDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PololetiTeacherDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pololeti/teachers/{teacherId}": {
+      "get": {
+        "tags": [
+          "Pololeti"
+        ],
+        "parameters": [
+          {
+            "name": "teacherId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherCardDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherCardDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherCardDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pololeti/teachers/{teacherId}/votes": {
+      "post": {
+        "tags": [
+          "Pololeti"
+        ],
+        "parameters": [
+          {
+            "name": "teacherId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CastVoteRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CastVoteRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CastVoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherCardDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherCardDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeacherCardDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/abstence": {
       "get": {
         "tags": [
@@ -1616,6 +1756,22 @@
           }
         }
       },
+      "CastVoteRequest": {
+        "required": [
+          "teacherTitleId"
+        ],
+        "type": "object",
+        "properties": {
+          "teacherTitleId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "ClaimDailyBingoWinnerRequest": {
         "required": [
           "boardId",
@@ -1739,6 +1895,33 @@
           "completedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "PololetiTeacherDto": {
+        "required": [
+          "teacherId",
+          "name",
+          "photoUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "teacherId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -2221,6 +2404,57 @@
           }
         }
       },
+      "TeacherCardDto": {
+        "required": [
+          "teacherId",
+          "name",
+          "photoUrl",
+          "description",
+          "pololeti",
+          "pololetiText",
+          "titles"
+        ],
+        "type": "object",
+        "properties": {
+          "teacherId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "pololeti": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pololetiText": {
+            "type": "string"
+          },
+          "titles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TitleVotesDto"
+            }
+          }
+        }
+      },
       "TeacherListItemResponse": {
         "required": [
           "id",
@@ -2310,6 +2544,45 @@
           },
           "quote": {
             "type": "string"
+          }
+        }
+      },
+      "TitleVotesDto": {
+        "required": [
+          "teacherTitleId",
+          "title",
+          "votes",
+          "myVoteTeacherId"
+        ],
+        "type": "object",
+        "properties": {
+          "teacherTitleId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "title": {
+            "type": "string"
+          },
+          "votes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "myVoteTeacherId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -2441,6 +2714,9 @@
     },
     {
       "name": "Rating"
+    },
+    {
+      "name": "Pololeti"
     },
     {
       "name": "Abstence"

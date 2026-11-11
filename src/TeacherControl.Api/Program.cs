@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using TeacherControl.Api.Features.Abstence.Services;
+using TeacherControl.Api.Features.Pololeti.Services;
 using TeacherControl.Api.Features.Rating.Services;
 using TeacherControl.Api.Features.Reviews.Services;
 using TeacherControl.Api.Features.TeacherBingo.Services;
@@ -62,6 +63,7 @@ public class Program
         builder.Services.AddScoped<RatingService>();
         builder.Services.AddScoped<ReviewsService>();
         builder.Services.AddScoped<VersionService>();
+        builder.Services.AddScoped<PololetiService>();
 
         var app = builder.Build();
         var isOpenApiGeneration = Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
