@@ -10,7 +10,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import { App } from './App'
 import { queryClient } from '@/shared/api'
-import { MockAuthProvider } from '@/shared/auth'
+import { AuthProvider } from '@/shared/auth'
 import { cssVariablesResolver, theme } from '@/shared/theme'
 
 /** MSW jede ve vývoji defaultně. Vypneš ho v .env.local přes VITE_USE_MOCKS=false. */
@@ -35,11 +35,11 @@ const render = () => {
       <MantineProvider theme={theme} cssVariablesResolver={cssVariablesResolver}>
         <Notifications />
         <QueryClientProvider client={queryClient}>
-          <MockAuthProvider>
+          <AuthProvider>
             <BrowserRouter>
               <App />
             </BrowserRouter>
-          </MockAuthProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </MantineProvider>
     </StrictMode>,

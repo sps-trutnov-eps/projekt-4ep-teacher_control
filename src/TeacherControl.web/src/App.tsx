@@ -1,14 +1,30 @@
-import { AppShell, Box, Burger, Group, NavLink, Text, Title } from '@mantine/core'
+import {
+  AppShell,
+  Avatar,
+  Box,
+  Burger,
+  Button,
+  Group,
+  Menu,
+  NavLink,
+  Text,
+  Title,
+  UnstyledButton,
+} from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { Link, useLocation } from 'react-router'
-import { DevUserSwitcher, RequireAuth, useAuth } from '@/shared/auth'
+import { Link, useLocation, useNavigate } from 'react-router'
+import { RequireAuth, useAuth } from '@/shared/auth'
 import { AppVersion } from './AppVersion'
 import { APP_ROUTES, AppRoutes } from './routes'
 
 export function App() {
-  const { user } = useAuth()
+  const { user, isAuthenticated, logout } = useAuth()
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const [navbarOpened, { toggle: toggleNavbar, close: closeNavbar }] = useDisclosure()
+
+  const navRoutes = APP_ROUTES.filter((route) => 'label' in route && route.label)
+  const isPublicRoute = pathname === '/login' || pathname === '/register'
 
   return (
     <AppShell
@@ -30,17 +46,54 @@ export function App() {
               Teacher Control
             </Title>
           </Group>
-          <Group gap="sm" wrap="nowrap">
-            <Text size="sm" visibleFrom="sm">
-              {user?.displayName ?? 'Nepřihlášen'}
-            </Text>
-            <DevUserSwitcher />
-          </Group>
+
+          {isAuthenticated && user ? (
+            <Menu shadow="md" width={200} position="bottom-end">
+              <Menu.Target>
+                <UnstyledButton>
+                  <Group gap="xs" wrap="nowrap">
+                    <Avatar color="blue" radius="xl" size="sm">
+                      {user.displayName.charAt(0).toUpperCase()}
+                    </Avatar>
+                    <Text size="sm" fw={500} visibleFrom="sm">
+                      {user.displayName}
+                    </Text>
+                  </Group>
+                </UnstyledButton>
+              </Menu.Target>
+
+              <Menu.Dropdown>
+                <Menu.Label>{user.displayName}</Menu.Label>
+                <Menu.Item component={Link} to="/user">
+                  Můj profil
+                </Menu.Item>
+                <Menu.Divider />
+                <Menu.Item
+                  color="red"
+                  onClick={() => {
+                    void logout()
+                    navigate('/login')
+                  }}
+                >
+                  Odhlásit se
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          ) : (
+            <Group gap="sm" wrap="nowrap">
+              <Button variant="subtle" component={Link} to="/login" size="sm">
+                Přihlásit se
+              </Button>
+              <Button component={Link} to="/register" size="sm">
+                Registrace
+              </Button>
+            </Group>
+          )}
         </Group>
       </AppShell.Header>
 
       <AppShell.Navbar p="xs">
-        {APP_ROUTES.map((route) => (
+        {navRoutes.map((route) => (
           <NavLink
             key={route.path}
             component={Link}
@@ -56,9 +109,13 @@ export function App() {
       </AppShell.Navbar>
 
       <AppShell.Main>
-        <RequireAuth>
+        {isPublicRoute ? (
           <AppRoutes />
-        </RequireAuth>
+        ) : (
+          <RequireAuth>
+            <AppRoutes />
+          </RequireAuth>
+        )}
       </AppShell.Main>
     </AppShell>
   )

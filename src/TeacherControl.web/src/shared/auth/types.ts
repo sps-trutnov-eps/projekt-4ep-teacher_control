@@ -3,6 +3,7 @@ export type Role = 'student' | 'teacher' | 'admin'
 export interface User {
   id: string
   displayName: string
+  email?: string | null
   roles: Role[]
 }
 
@@ -11,6 +12,6 @@ export interface AuthContextValue {
   isAuthenticated: boolean
   roles: Role[]
   hasRole: (role: Role) => boolean
-  login: () => Promise<void>
+  login: (user?: User) => Promise<void>
   logout: () => Promise<void>
 }

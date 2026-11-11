@@ -4,8 +4,11 @@ import { VzorPage } from '@/features/vzor'
 import { AbstencePage } from '@/features/abstence'
 import { PololetiPage } from '@/features/pololeti'
 import { RatingPage } from '@/features/rating'
+import { LoginPage, RegisterPage } from '@/features/auth'
+import { UserPage } from '@/features/user'
 import { RecenzePage } from '@/features/recenze'
-import { FeatureTodo } from './FeatureTodo'
+
+// import { FeatureTodo } from './FeatureTodo'
 
 /**
  * Jediné místo, kde se přidávají stránky featur.
@@ -18,7 +21,10 @@ export const APP_ROUTES = [
   { path: '/recenze', label: 'F3 Recenze', element: <RecenzePage /> },
   { path: '/abstence', label: 'F4 Abstence', element: <AbstencePage /> },
   { path: '/pololeti', label: 'F5 Pololetí', element: <PololetiPage /> },
-  { path: '/login', label: 'F6 Login', element: <FeatureTodo code="F6" name="Login" /> },
+  { path: '/register', element: <RegisterPage /> },
+  { path: '/user', label: 'Můj profil', element: <UserPage /> },
+  { path: '/profile', element: <UserPage /> },
+  { path: '/login', element: <LoginPage /> },
 ]
 
 export function AppRoutes() {

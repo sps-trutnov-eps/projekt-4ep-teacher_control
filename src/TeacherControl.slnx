@@ -9,4 +9,5 @@
     <File Path="TeacherControl.Api/README.md" />
   </Folder>
   <Project Path="TeacherControl.Api/TeacherControl.Api.csproj" />
+  <Project Path="TeacherControl.Api.Tests/TeacherControl.Api.Tests.csproj" />
 </Solution>

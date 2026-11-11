@@ -5,6 +5,7 @@ import { bingoHandlers } from '@/features/bingo/mocks'
 import { abstenceHandlers } from '@/features/abstence/mocks'
 import { pololetiHandlers } from '@/features/pololeti/mocks'
 import { ratingHandlers } from '@/features/rating/mocks'
+import { authHandlers } from '@/features/auth/mocks'
 import { recenzeHandlers } from '@/features/recenze/mocks'
 import { versionHandlers } from './version'
 
@@ -15,6 +16,7 @@ export const handlers = [
   ...bingoHandlers,
   ...abstenceHandlers,
   ...ratingHandlers,
+  ...authHandlers,
   ...pololetiHandlers,
   ...recenzeHandlers,
 ]

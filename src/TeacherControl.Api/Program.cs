@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using TeacherControl.Api.Features.Abstence.Services;
+using TeacherControl.Api.Features.Login.Services;
 using TeacherControl.Api.Features.Pololeti.Services;
 using TeacherControl.Api.Features.Rating.Services;
 using TeacherControl.Api.Features.Reviews.Services;
@@ -22,14 +23,33 @@ public class Program
 
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "http://127.0.0.1:5173", "https://127.0.0.1:5173")
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            });
+        });
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")
                               ?? throw new InvalidOperationException(
                                   "Configure ConnectionStrings:DefaultConnection.")));
         builder.Services.AddIdentity<UserEntity, IdentityRole>(options =>
-                options.User.RequireUniqueEmail = true)
+        {
+            options.User.RequireUniqueEmail = true;
+            options.Password.RequiredLength = 8;
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.SignIn.RequireConfirmedEmail = true;
+        })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
+        builder.Services.AddMemoryCache();
         builder.Services.ConfigureApplicationCookie(options =>
         {
             options.Cookie.HttpOnly = true;
@@ -48,7 +68,6 @@ public class Program
         });
         builder.Services.AddAuthorization();
 
-        builder.Services.AddMemoryCache();
         builder.Services.AddHttpClient("github", c =>
         {
             c.BaseAddress = new Uri("https://api.github.com/");
@@ -57,6 +76,8 @@ public class Program
         });
 
         // takhle si registrujte service soubory pro DependencyInjection
+        builder.Services.AddScoped<IEmailService, MockEmailService>();
+        builder.Services.AddScoped<LoginService>();
         builder.Services.AddScoped<AbstenceService>();
         builder.Services.AddScoped<TeacherBingoService>();
         builder.Services.AddScoped<IDailyBingoWinnerService, DailyBingoWinnerService>();
@@ -88,13 +109,13 @@ public class Program
             {
                 await DevelopmentAuthentication.SeedAsync(app.Services, app.Configuration);
             }
-
-            app.MapDevelopmentAuthentication();
         }
 
         app.UseHttpsRedirection();
 
         app.UseRouting();
+
+        app.UseCors();
 
         app.UseAuthentication();
         app.UseAuthorization();
