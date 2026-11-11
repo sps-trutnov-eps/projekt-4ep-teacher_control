@@ -453,6 +453,261 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/reviews/teachers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    search?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReviewsTeacherResponse"][];
+                        "application/json": components["schemas"]["ReviewsTeacherResponse"][];
+                        "text/json": components["schemas"]["ReviewsTeacherResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews/teachers/{teacherId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    teacherId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReviewsTeacherProfileResponse"];
+                        "application/json": components["schemas"]["ReviewsTeacherProfileResponse"];
+                        "text/json": components["schemas"]["ReviewsTeacherProfileResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews/teachers/{teacherId}/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    teacherId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReviewsReviewResponse"][];
+                        "application/json": components["schemas"]["ReviewsReviewResponse"][];
+                        "text/json": components["schemas"]["ReviewsReviewResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    teacherId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReviewRequest"];
+                    "text/json": components["schemas"]["ReviewRequest"];
+                    "application/*+json": components["schemas"]["ReviewRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReviewsReviewResponse"];
+                        "application/json": components["schemas"]["ReviewsReviewResponse"];
+                        "text/json": components["schemas"]["ReviewsReviewResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews/{reviewId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    reviewId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReviewRequest"];
+                    "text/json": components["schemas"]["ReviewRequest"];
+                    "application/*+json": components["schemas"]["ReviewRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReviewsReviewResponse"];
+                        "application/json": components["schemas"]["ReviewsReviewResponse"];
+                        "text/json": components["schemas"]["ReviewsReviewResponse"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    reviewId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reviews/teachers/{teacherId}/reaction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    teacherId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReactionRequest"];
+                    "text/json": components["schemas"]["ReactionRequest"];
+                    "application/*+json": components["schemas"]["ReactionRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/plain": components["schemas"]["ReactionResponse"];
+                        "application/json": components["schemas"]["ReactionResponse"];
+                        "text/json": components["schemas"]["ReactionResponse"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/rating": {
         parameters: {
             query?: never;
@@ -1032,6 +1287,21 @@ export interface components {
             detail?: null | string;
             instance?: null | string;
         };
+        ReactionRequest: {
+            /** Format: int32 */
+            value?: number | string;
+        };
+        ReactionResponse: {
+            /** Format: int32 */
+            likes: number | string;
+            /** Format: int32 */
+            dislikes: number | string;
+            /** Format: int32 */
+            myReaction: null | number | string;
+        };
+        ReviewRequest: {
+            content: string;
+        };
         ReviewResponse: {
             /** Format: int32 */
             id: number | string;
@@ -1042,6 +1312,56 @@ export interface components {
             /** Format: int32 */
             teacherId: number | string;
             studentId: string;
+        };
+        ReviewsReviewResponse: {
+            /** Format: int32 */
+            id: number | string;
+            /** Format: int32 */
+            teacherId: number | string;
+            content: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: null | string;
+            isMine: boolean;
+        };
+        ReviewsTeacherProfileResponse: {
+            /** Format: int32 */
+            id: number | string;
+            name: string;
+            nickname: null | string;
+            photoUrl: null | string;
+            description: string;
+            /** Format: float */
+            mood: number | string;
+            /** Format: double */
+            averageRating: null | number | string;
+            /** Format: int32 */
+            reviewCount: number | string;
+            /** Format: int32 */
+            likes: number | string;
+            /** Format: int32 */
+            dislikes: number | string;
+            /** Format: int32 */
+            myReaction: null | number | string;
+            reviews: components["schemas"]["ReviewsReviewResponse"][];
+        };
+        ReviewsTeacherResponse: {
+            /** Format: int32 */
+            id: number | string;
+            name: string;
+            photoUrl: null | string;
+            description: string;
+            /** Format: double */
+            averageRating: null | number | string;
+            /** Format: int32 */
+            reviewCount: number | string;
+            /** Format: int32 */
+            likes: number | string;
+            /** Format: int32 */
+            dislikes: number | string;
+            /** Format: int32 */
+            myReaction: null | number | string;
         };
         SubmitLateArrivalRequest: {
             /** Format: int32 */
