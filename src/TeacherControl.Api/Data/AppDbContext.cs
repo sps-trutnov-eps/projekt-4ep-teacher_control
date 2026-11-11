@@ -12,6 +12,8 @@ public class AppDbContext : IdentityDbContext<UserEntity>
     }
 
     public DbSet<TeacherEntity> Teachers { get; set; }
+    public DbSet<TextReviewEntity> TextReviews { get; set; }
+    public DbSet<TeacherReactionEntity> TeacherReactions { get; set; }
 
     /// <summary>
     /// feat/recenze
@@ -28,8 +30,9 @@ public class AppDbContext : IdentityDbContext<UserEntity>
     /// </summary>
     public DbSet<TeacherQuoteEntity> TeacherQuotes { get; set; }
     public DbSet<BingoBoardEntity> BingoBoards { get; set; }
-    // tabulka s hláškami konkrétního binga
     public DbSet<BingoBoardQuoteEntity> BingoBoardQuotes { get; set; }
+    public DbSet<BingoBoardQuoteMarkEntity> BingoBoardQuoteMarks { get; set; }
+    public DbSet<DailyBingoWinnerEntity> DailyBingoWinners { get; set; }
 
     /// <summary>
     /// feat/pololeti
@@ -42,11 +45,34 @@ public class AppDbContext : IdentityDbContext<UserEntity>
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<TextReviewEntity>(entity =>
+        {
+            entity.HasIndex(r => new { r.TeacherId, r.AuthorId }).IsUnique();
+            entity.Property(r => r.Content).HasMaxLength(5000);
+            entity.HasOne(r => r.Teacher).WithMany().HasForeignKey(r => r.TeacherId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(r => r.Author).WithMany().HasForeignKey(r => r.AuthorId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<TeacherReactionEntity>(entity =>
+        {
+            entity.HasKey(r => new { r.TeacherId, r.UserId });
+            entity.HasOne(r => r.Teacher).WithMany().HasForeignKey(r => r.TeacherId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(r => r.User).WithMany().HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.ToTable(t => t.HasCheckConstraint("CK_TeacherReactions_Value", "\"Value\" IN (-1, 1)"));
+        });
+
         modelBuilder.Entity<TitleVoteEntity>()
             .HasKey(v => new { v.StudentId, v.TeacherTitleId, v.Pololeti });
 
         modelBuilder.Entity<BingoBoardQuoteEntity>()
             .HasIndex(q => new { q.BingoBoardId, q.Position }).IsUnique();
+        modelBuilder.Entity<BingoBoardQuoteMarkEntity>()
+            .HasKey(mark => new { mark.StudentId, mark.BingoBoardQuoteId });
+        modelBuilder.Entity<DailyBingoWinnerEntity>()
+            .HasKey(winner => winner.Date);
 
         modelBuilder.Entity<UserEntity>()
             .HasOne(u => u.Teacher).WithOne()
@@ -65,13 +91,22 @@ public class AppDbContext : IdentityDbContext<UserEntity>
             .HasOne(a => a.Student).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<TeacherQuoteEntity>()
             .HasOne(q => q.Teacher).WithMany().OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<BingoBoardEntity>()
-            .HasOne(b => b.Student).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<BingoBoardQuoteEntity>()
             .HasOne(q => q.Quote).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<BingoBoardQuoteEntity>()
             .HasOne(q => q.BingoBoard).WithMany(b => b.Quotes)
             .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<BingoBoardQuoteMarkEntity>()
+            .HasOne(mark => mark.Student).WithMany().OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<BingoBoardQuoteMarkEntity>()
+            .HasOne(mark => mark.BingoBoardQuote).WithMany(quote => quote.Marks)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<DailyBingoWinnerEntity>()
+            .HasOne(winner => winner.User).WithMany()
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<DailyBingoWinnerEntity>()
+            .HasOne(winner => winner.Board).WithMany()
+            .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<TitleVoteEntity>()
             .HasOne(v => v.Student).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<TitleVoteEntity>()
