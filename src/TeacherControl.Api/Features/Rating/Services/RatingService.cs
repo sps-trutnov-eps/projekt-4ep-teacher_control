@@ -122,9 +122,8 @@ public class RatingService
     /// </summary>
     private async Task<float> CalculateBinginessAsync(int teacherId)
     {
-        var counts = await _db.BingoBoardQuotes
-            .Where(q => q.Marked)
-            .GroupBy(q => q.Quote.TeacherId)
+        var counts = await _db.BingoBoardQuoteMarks
+            .GroupBy(mark => mark.BingoBoardQuote.Quote.TeacherId)
             .Select(g => new { TeacherId = g.Key, Count = g.Count() })
             .ToListAsync();
 

@@ -8,6 +8,7 @@ using TeacherControl.Api.Entities;
 using TeacherControl.Api.Features.Abstence.Services;
 using TeacherControl.Api.Features.Pololeti.Services;
 using TeacherControl.Api.Features.Rating.Services;
+using TeacherControl.Api.Features.Reviews.Services;
 using TeacherControl.Api.Features.TeacherBingo.Services;
 using TeacherControl.Api.Features.Versioning.Services;
 
@@ -58,7 +59,9 @@ public class Program
         // takhle si registrujte service soubory pro DependencyInjection
         builder.Services.AddScoped<AbstenceService>();
         builder.Services.AddScoped<TeacherBingoService>();
+        builder.Services.AddScoped<IDailyBingoWinnerService, DailyBingoWinnerService>();
         builder.Services.AddScoped<RatingService>();
+        builder.Services.AddScoped<ReviewsService>();
         builder.Services.AddScoped<VersionService>();
         builder.Services.AddScoped<PololetiService>();
 
