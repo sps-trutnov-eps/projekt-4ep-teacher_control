@@ -12,6 +12,8 @@ namespace TeacherControl.Api.Features.Abstence.Controllers;
 [Route("api/abstence")]
 public class AbstenceController : ControllerBase
 {
+    private const int MaxLateMinutes = 480; // jeden školní den
+
     private readonly ILogger<AbstenceController> _logger;
     private readonly AbstenceService _abstenceService;
     private readonly UserManager<UserEntity> _userManager;
@@ -23,10 +25,27 @@ public class AbstenceController : ControllerBase
         _userManager = userManager;
     }
 
+    // Údaje o učitelích vidí jen přihlášený uživatel — nepřihlášený dostane 401.
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<List<TeacherAbstenceDto>>> GetTeachers()
         => Ok(await _abstenceService.GetTeachersAsync());
 
+    [Authorize]
+    [HttpGet("{teacherId:int}/late-arrivals")]
+    public async Task<ActionResult<List<LateArrivalRecordDto>>> GetLateArrivals(int teacherId)
+    {
+        var records = await _abstenceService.GetLateArrivalsAsync(teacherId);
+        if (records is null)
+        {
+            _logger.LogError("Učitel {TeacherId} nebyl nalezen", teacherId);
+            return NotFound();
+        }
+
+        return Ok(records);
+    }
+
+    [Authorize]
     [HttpGet("{teacherId:int}")]
     public async Task<ActionResult<TeacherAbstenceDto>> GetTeacher(int teacherId)
     {
@@ -40,16 +59,15 @@ public class AbstenceController : ControllerBase
         return Ok(teacher);
     }
 
-    // Zápis vyžaduje přihlášení — potřebujeme StudentId k uložení a k cooldownu;
-    // čtení (GetTeachers/GetTeacher výše) je úmyslně veřejné, přihlášení k tomu není potřeba.
+    // Zápis i čtení vyžadují přihlášení — u zápisu potřebujeme StudentId k uložení.
     [Authorize]
     [HttpPost("{teacherId:int}/late-arrival")]
     public async Task<ActionResult<TeacherAbstenceDto>> SubmitLateArrival(int teacherId, [FromBody] SubmitLateArrivalRequest request)
     {
-        if (request.Minutes <= 0)
+        if (request.Minutes is <= 0 or > MaxLateMinutes)
         {
             _logger.LogError("Neplatný počet minut ({Minutes}) pro učitele {TeacherId}", request.Minutes, teacherId);
-            return BadRequest("Minutes must be greater than zero.");
+            return BadRequest($"Minutes must be between 1 and {MaxLateMinutes}.");
         }
 
         var userId = _userManager.GetUserId(User);

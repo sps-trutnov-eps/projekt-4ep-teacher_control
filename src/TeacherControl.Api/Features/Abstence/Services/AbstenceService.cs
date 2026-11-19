@@ -38,10 +38,29 @@ public class AbstenceService
             .FirstOrDefaultAsync();
     }
 
+    // Vrací null, pokud učitel neexistuje.
+    public async Task<List<LateArrivalRecordDto>?> GetLateArrivalsAsync(int teacherId)
+    {
+        if (!await _context.Teachers.AnyAsync(t => t.Id == teacherId))
+            return null;
+
+        var arrivals = await _context.LateArrivals
+            .Where(a => a.TeacherId == teacherId)
+            .OrderByDescending(a => a.Date)
+            .ThenByDescending(a => a.Id)
+            .Select(a => new { a.Date, a.TimeSpan })
+            .ToListAsync();
+
+        return arrivals
+            .Select(a => new LateArrivalRecordDto(a.Date, (int)Math.Round(a.TimeSpan.TotalMinutes)))
+            .ToList();
+    }
+
     public async Task<AbstenceWriteResult> SubmitLateArrivalAsync(int teacherId, string studentId, int minutes)
     {
-        var now = DateTime.Now;
-        var today = DateOnly.FromDateTime(now);
+        // Časové razítko do timestamptz musí být UTC (Npgsql odmítne Kind=Local); "today" je školní den v lokálním čase.
+        var now = DateTime.UtcNow;
+        var today = DateOnly.FromDateTime(DateTime.Now);
 
         var teacher = await _context.Teachers
             .Include(t => t.Reviews)
@@ -77,8 +96,8 @@ public class AbstenceService
 
     public async Task<AbstenceWriteResult> SubmitMoodAsync(int teacherId, string studentId, float value)
     {
-        var now = DateTime.Now;
-        var today = DateOnly.FromDateTime(now);
+        var now = DateTime.UtcNow;
+        var today = DateOnly.FromDateTime(DateTime.Now);
 
         var teacher = await _context.Teachers
             .Include(t => t.Reviews)
