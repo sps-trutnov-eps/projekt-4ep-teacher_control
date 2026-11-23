@@ -51,6 +51,9 @@ pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm build
 
 Chybí endpoint? Zamockuj si ho v `mocks.ts` své featury, ať nečekáš na backend.
 
+Výběr učitele, jeho avatar a zapojení sekce do profilu `/ucitel/<id>` jsou v
+`src/shared/teachers`, návod v tamním `README.md`.
+
 ## Kde se ptát
 
 Cokoli kolem frontendu, knihoven a `shared/` → **Karel** (frontend master).
