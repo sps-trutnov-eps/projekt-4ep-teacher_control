@@ -10,8 +10,9 @@ TanStack Query v5, React Hook Form + Zod, Mantine, openapi-fetch, pnpm. Verze No
 ## Pracuj jen ve své featuře
 
 Tvoje území je `src/features/<tvoje-featura>/`. Nesahej na cizí featury, na `src/shared/`, na
-konfiguraci ani na `src/routes/` — jedinou výjimkou je jeden řádek v `src/routes/index.tsx`, kde
-svoji stránku zapojíš do routingu.
+konfiguraci ani na `src/routes/` — výjimkou je jeden řádek v `src/routes/index.tsx`, kde svoji
+stránku zapojíš do routingu, a jeden řádek v `src/routes/teacherSections.tsx`, kde zapojíš svoji
+sekci do profilu učitele.
 
 Povinné soubory ve featuře: `api.ts`, `mocks.ts`, `index.ts`, `<Něco>Page.tsx`.
 Volitelné, až budou potřeba: `components/`, `hooks/`, `types.ts`, `schema.ts`.
@@ -98,10 +99,21 @@ uživatele.
 
 Co na co:
 
-- `RequireAuth` — celá appka, je už v `App.tsx`, znovu ji nebalíš.
+- `RequireAuth` — všechny stránky kromě `/login` a `/register`, balí je `src/routes/index.tsx`,
+  znovu ji nebalíš. Nepřihlášeného pošle na `/login`.
 - `RequireRole` — celá stránka jen pro jednu roli, obal jí obsah své `<Něco>Page.tsx`.
 - `hasRole()` — jen část stránky (tlačítko, formulář). Když něco schováš, napiš uživateli proč,
   viz `VzorPage.tsx`.
+
+## Učitelé
+
+Seznam učitelů, avatar ani výběr učitele si nepiš sám. Ber je ze `src/shared/teachers`:
+`useTeachers()`, `useTeacher(id)`, `<TeacherAvatar />`, `<TeacherSelect />` a `teacherProfilePath(id)`
+pro odkaz na profil. Učitele všude drž jako číselné `id`.
+
+Profil učitele `/ucitel/<id>` skládá `src/features/ucitel`. Tvoje featura do něj dodává jednu sekci:
+komponentu s props `{ teacherId }`, vyexportovanou z `index.ts` a zapsanou do svého řádku v
+`src/routes/teacherSections.tsx`. Postup je v `src/shared/teachers/README.md`.
 
 ## Formuláře
 

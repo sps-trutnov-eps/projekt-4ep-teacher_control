@@ -3,7 +3,7 @@
 Vlastník: _Karel_ (frontend master)
 
 Není to featura projektu, je to ukázka. **Kopíruj tvar, ne obsah.** Pravidla jsou v `AGENTS.md`,
-routa: `/vzor`.
+routa: `/vzor`. Běží jen při `pnpm dev` a v navigaci není, adresu napiš ručně.
 
 Co kde najdeš:
 

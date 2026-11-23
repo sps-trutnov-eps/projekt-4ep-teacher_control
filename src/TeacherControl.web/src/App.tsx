@@ -13,7 +13,7 @@ import {
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { Link, useLocation, useNavigate } from 'react-router'
-import { RequireAuth, useAuth } from '@/shared/auth'
+import { useAuth } from '@/shared/auth'
 import { AppVersion } from './AppVersion'
 import { APP_ROUTES, AppRoutes } from './routes'
 
@@ -24,27 +24,35 @@ export function App() {
   const [navbarOpened, { toggle: toggleNavbar, close: closeNavbar }] = useDisclosure()
 
   const navRoutes = APP_ROUTES.filter((route) => 'label' in route && route.label)
-  const isPublicRoute = pathname === '/login' || pathname === '/register'
 
   return (
     <AppShell
       header={{ height: 56 }}
-      navbar={{ width: 220, breakpoint: 'sm', collapsed: { mobile: !navbarOpened } }}
+      // Nepřihlášený uživatel navigaci nemá, vidí jen přihlášení a registraci.
+      navbar={
+        isAuthenticated
+          ? { width: 220, breakpoint: 'sm', collapsed: { mobile: !navbarOpened } }
+          : undefined
+      }
       padding="md"
     >
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between" wrap="nowrap">
           <Group gap="sm" wrap="nowrap" miw={0}>
-            <Burger
-              opened={navbarOpened}
-              onClick={toggleNavbar}
-              hiddenFrom="sm"
-              size="sm"
-              aria-label="Menu"
-            />
-            <Title order={4} style={{ whiteSpace: 'nowrap' }}>
-              Teacher Control
-            </Title>
+            {isAuthenticated ? (
+              <Burger
+                opened={navbarOpened}
+                onClick={toggleNavbar}
+                hiddenFrom="sm"
+                size="sm"
+                aria-label="Menu"
+              />
+            ) : null}
+            <UnstyledButton component={Link} to="/">
+              <Title order={4} style={{ whiteSpace: 'nowrap' }}>
+                Teacher Control
+              </Title>
+            </UnstyledButton>
           </Group>
 
           {isAuthenticated && user ? (
@@ -81,7 +89,7 @@ export function App() {
             </Menu>
           ) : (
             <Group gap="sm" wrap="nowrap">
-              <Button variant="subtle" component={Link} to="/login" size="sm">
+              <Button variant="subtle" component={Link} to="/login" size="sm" visibleFrom="xs">
                 Přihlásit se
               </Button>
               <Button component={Link} to="/register" size="sm">
@@ -92,29 +100,30 @@ export function App() {
         </Group>
       </AppShell.Header>
 
-      <AppShell.Navbar p="xs">
-        {navRoutes.map((route) => (
-          <NavLink
-            key={route.path}
-            component={Link}
-            to={route.path}
-            label={route.label}
-            active={pathname === route.path}
-            onClick={closeNavbar}
-          />
-        ))}
-        <Box mt="auto" p="xs">
-          <AppVersion />
-        </Box>
-      </AppShell.Navbar>
+      {isAuthenticated ? (
+        <AppShell.Navbar p="xs">
+          {navRoutes.map((route) => (
+            <NavLink
+              key={route.path}
+              component={Link}
+              to={route.path}
+              label={route.label}
+              active={pathname === route.path}
+              onClick={closeNavbar}
+            />
+          ))}
+          <Box mt="auto" p="xs">
+            <AppVersion />
+          </Box>
+        </AppShell.Navbar>
+      ) : null}
 
       <AppShell.Main>
-        {isPublicRoute ? (
-          <AppRoutes />
-        ) : (
-          <RequireAuth>
-            <AppRoutes />
-          </RequireAuth>
+        <AppRoutes />
+        {isAuthenticated ? null : (
+          <Box mt="lg" ta="center">
+            <AppVersion />
+          </Box>
         )}
       </AppShell.Main>
     </AppShell>

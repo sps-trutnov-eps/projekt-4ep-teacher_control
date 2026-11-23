@@ -1,4 +1,5 @@
-import { Route, Routes } from 'react-router'
+import { Navigate, Route, Routes } from 'react-router'
+import { RequireAuth } from '@/shared/auth'
 import { BingoPage } from '@/features/bingo'
 import { VzorPage } from '@/features/vzor'
 import { AbstencePage } from '@/features/abstence'
@@ -7,33 +8,48 @@ import { RatingPage } from '@/features/rating'
 import { LoginPage, RegisterPage } from '@/features/auth'
 import { UserPage } from '@/features/user'
 import { RecenzePage } from '@/features/recenze'
+import { HomePage } from '@/features/home'
+import { TeacherProfilePage } from '@/features/ucitel'
+import { TEACHER_SECTIONS } from './teacherSections'
 
-// import { FeatureTodo } from './FeatureTodo'
+/** Jediné stránky, které vidí nepřihlášený uživatel. */
+export const PUBLIC_ROUTES = [
+  { path: '/login', element: <LoginPage /> },
+  { path: '/register', element: <RegisterPage /> },
+]
 
 /**
- * Jediné místo, kde se přidávají stránky featur.
- * Až budeš mít stránku hotovou, nahraď u své featury `element` za svoji komponentu.
+ * Jediné místo, kde se přidávají stránky featur. Všechny jsou jen pro přihlášené.
+ * Stránka s `label` je v navigaci.
  */
 export const APP_ROUTES = [
-  { path: '/vzor', label: 'Vzor', element: <VzorPage /> },
-  { path: '/bingo', label: 'F1 Bingo', element: <BingoPage /> },
-  { path: '/rating', label: 'F2 Rating', element: <RatingPage /> },
-  { path: '/recenze', label: 'F3 Recenze', element: <RecenzePage /> },
-  { path: '/abstence', label: 'F4 Abstence', element: <AbstencePage /> },
-  { path: '/pololeti', label: 'F5 Pololetí', element: <PololetiPage /> },
-  { path: '/register', element: <RegisterPage /> },
+  { path: '/', label: 'Domů', element: <HomePage /> },
+  { path: '/bingo', label: 'Bingo', element: <BingoPage /> },
+  { path: '/rating', label: 'Hodnocení', element: <RatingPage /> },
+  { path: '/recenze', label: 'Recenze', element: <RecenzePage /> },
+  { path: '/abstence', label: 'Abstence', element: <AbstencePage /> },
+  { path: '/pololeti', label: 'Pololetní hlasování', element: <PololetiPage /> },
+  { path: '/ucitel/:id', element: <TeacherProfilePage sections={TEACHER_SECTIONS} /> },
   { path: '/user', label: 'Můj profil', element: <UserPage /> },
   { path: '/profile', element: <UserPage /> },
-  { path: '/login', element: <LoginPage /> },
+  // Referenční featura běží jen na mockách, na nasazené aplikaci by neměla co ukázat.
+  ...(import.meta.env.DEV ? [{ path: '/vzor', element: <VzorPage /> }] : []),
 ]
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<VzorPage />} />
-      {APP_ROUTES.map((route) => (
+      {PUBLIC_ROUTES.map((route) => (
         <Route key={route.path} path={route.path} element={route.element} />
       ))}
+      {APP_ROUTES.map((route) => (
+        <Route
+          key={route.path}
+          path={route.path}
+          element={<RequireAuth>{route.element}</RequireAuth>}
+        />
+      ))}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
