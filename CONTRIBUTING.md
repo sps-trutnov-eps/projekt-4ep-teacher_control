@@ -12,7 +12,7 @@ Po review s core týmem se vám pravdě podobně vrátí pár požadavků a změ
 
 ---
 
-Pokud budete potřebovat kód nebo změny z jiného týmu (nebo jiného člená vašeho týmu), můžete udělat merge z `main` na vaší osobní větev, tím uděláte "update" a můžete pracovat se všemi změnami co udělali ostatní.
+Pokud budete potřebovat kód nebo změny z jiného týmu (nebo jiného člená vašeho týmu), můžete udělat merge z `main` na vaší osobní větev, tím uděláte "update" a můžete pracovat se všemi změnami co udělali ostatní. Merge commity z `staging` jsou přijatelné pouze v případech merge conflictů a jejich řešení (github ui a git interactive merge), přesto by vždy měl `main` být preferován před `staging` pokud možno.
 
 ## Pro Feature Leads
 
