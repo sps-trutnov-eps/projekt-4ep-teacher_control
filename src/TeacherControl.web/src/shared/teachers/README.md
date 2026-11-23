@@ -18,10 +18,63 @@ Ve formuláři přes `Controller` z React Hook Form: `value={field.value}`, `onC
 
 ## Sekce v profilu učitele
 
-Profil `/ucitel/<id>` má pro každou featuru jednu sekci. Nadpis a kartu kreslí profil, tým dodá jen obsah:
+Profil `/ucitel/<id>` skládá `src/features/ucitel/TeacherProfilePage.tsx` ze seznamu `TEACHER_SECTIONS`
+v `src/routes/teacherSections.tsx`. Každá featura tam má jeden záznam `{ id, title, Component? }`.
+Profil pro každý záznam vykreslí `<Card component="section" id={id}>` s nadpisem `<Title order={2}>`
+a do karty vloží `<Component teacherId={teacher.id} />`. Dokud `Component` chybí, je v kartě jen text,
+že sekce ještě není hotová.
 
-1. Ve své featuře napiš komponentu, která bere `TeacherSectionProps`, tedy `{ teacherId }`, a data si načte sama.
-2. Vyexportuj ji z `index.ts` své featury.
-3. V `src/routes/teacherSections.tsx` ji doplň do svého řádku jako `Component`.
+Postup na příkladu Recenzí:
 
-Seznam učitelů se zatím bere z `/api/pololeti/teachers`, společný endpoint backend nemá.
+1. Komponenta ve featuře. Props jsou `TeacherSectionProps`, tedy `{ teacherId: number }`.
+   `useTeacherReviews` je tady vlastní hook featury z jejího `api.ts`.
+
+```tsx
+// src/features/recenze/components/TeacherReviewsSection.tsx
+import { Alert, Loader, Text } from '@mantine/core'
+import type { TeacherSectionProps } from '@/shared/teachers'
+import { useTeacherReviews } from '../api'
+
+export function TeacherReviewsSection({ teacherId }: TeacherSectionProps) {
+  const { data: reviews, isPending, isError } = useTeacherReviews(teacherId)
+
+  if (isPending) return <Loader size="sm" />
+  if (isError) return <Alert color="red">Recenze se nepodařilo načíst.</Alert>
+  if (reviews.length === 0) return <Text c="dimmed">Zatím žádná recenze.</Text>
+
+  return reviews.map((review) => <Text key={review.id}>{review.text}</Text>)
+}
+```
+
+2. Export z barrelu featury.
+
+```ts
+// src/features/recenze/index.ts
+export { TeacherReviewsSection } from './components/TeacherReviewsSection'
+```
+
+3. Zápis do seznamu sekcí.
+
+```tsx
+// src/routes/teacherSections.tsx
+import { TeacherReviewsSection } from '@/features/recenze'
+
+export const TEACHER_SECTIONS: TeacherSection[] = [
+  // …
+  { id: 'recenze', title: 'Recenze', Component: TeacherReviewsSection },
+]
+```
+
+Co platí pro každou sekci:
+
+- `teacherId` je vždy id existujícího učitele. Sekce se vykreslí až po načtení učitele, neplatnou adresu
+  řeší profil.
+- Načítání, chybu a prázdný stav řeší sekce sama uvnitř své karty.
+- Sekce nekreslí vlastní `Card`, `PageHeader` ani svůj nadpis. Podnadpisy uvnitř začínají na
+  `<Title order={3}>`.
+- Query key obsahuje `teacherId`, třeba `['recenze', 'teacher', teacherId]`, aby se nepletla data dvou
+  učitelů.
+- `id` záznamu je zároveň kotva v adrese: `/ucitel/3#recenze`.
+- Odkaz na profil odjinud: `<Link to={teacherProfilePath(teacher.id)}>`.
+
+Seznam učitelů se bere z `/api/pololeti/teachers`. Volá se na jediném místě, v `api.ts` v téhle složce.
