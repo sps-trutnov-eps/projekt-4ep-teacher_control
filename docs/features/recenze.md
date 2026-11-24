@@ -33,57 +33,66 @@ Cíl týmu: učitel má jedno hodnocení, tedy hvězdičky a text v jednom formu
 správce ho dohledá. Správce je uživatel s rolí `Admin`. Bez přihlášení není o učitelích
 vidět nic.
 
-### 1. Jedno hodnocení: hvězdičky a text v profilu učitele
-- **Vlastník:** Uher
-- **Co přesně umí:** V profilu učitele `/ucitel/<id>` je sekce Recenze s jedním formulářem.
-  Žák v něm zadá 1–5 hvězdiček a text recenze a odešle obojí najednou. Dosavadní dvě oddělená
-  hodnocení (hvězdičky z Ratingu a textová recenze z Recenzí) jsou sloučená do jednoho, takže
-  každý žák má u učitele nejvýš jedno hodnocení. Průměr hvězdiček v profilu i v seznamu učitelů
-  se počítá z těchto hodnocení. Své hodnocení může žák upravit nebo smazat.
-- **Hotovo, když:**
-  - Přihlášený žák otevře `/ucitel/<id>`, v sekci Recenze vybere hvězdičky, napíše text
-    a odešle. Recenze se hned objeví v seznamu i s jeho hvězdičkami a průměr učitele
-    v profilu i v seznamu na `/recenze` se přepočítá.
-  - Formulář bez hvězdiček nebo bez textu nejde odeslat a u chybějícího pole se ukáže chyba.
-  - Žák, který už hodnocení má, vidí místo prázdného formuláře své hodnocení s tlačítky
-    Upravit a Smazat a druhé hodnocení stejnému učiteli napsat nejde. Upravené hvězdičky
-    i text zůstanou i po obnovení stránky. Po smazání se zase ukáže prázdný formulář.
-  - Nepřihlášený uživatel na `/ucitel/<id>` ani na `/recenze` žádné recenze ani hodnocení
-    neuvidí a aplikace ho pošle na přihlášení.
-
-### 2. Nahlášení nevhodné recenze a skrytí správcem
+### 1. Backend: jedno hodnocení, nahlašování a skrytý autor
 - **Vlastník:** Synáč
-- **Co přesně umí:** U každé cizí recenze je tlačítko Nahlásit, kterým žák odešle nahlášení
-  s důvodem. Správce má stránku Nahlášené recenze, kde vidí nahlášené recenze s textem,
-  učitelem a důvody nahlášení a u každé zvolí Skrýt nebo Ponechat. Skrytá recenze zmizí
-  ostatním žákům a nepočítá se do průměru hvězdiček. Správce ji může znovu zobrazit.
+- **Co přesně umí:** API ukládá jedno hodnocení žáka u učitele, které obsahuje 1–5 hvězdiček
+  a text. Dosavadní dvě oddělená hodnocení (hvězdičky z Ratingu a textová recenze
+  z Recenzí) jsou sloučená a průměr hvězdiček se počítá jen z viditelných hodnocení. API
+  přijímá nahlášení recenze s důvodem a správci vrací přehled nahlášených recenzí. Recenzi umí
+  skrýt, ponechat nebo znovu zobrazit. Žákům API nikdy nepošle jméno, e-mail ani ID autora,
+  správci je posílá. Všechny endpointy vyžadují přihlášení a správcovské endpointy roli
+  `Admin`. Endpointy jsou popsané v OpenAPI (`docs/api/TeacherControl.Api.json`).
 - **Hotovo, když:**
-  - Žák u cizí recenze klikne na Nahlásit, napíše důvod a odešle. Uvidí potvrzení
-    a stejnou recenzi už znovu nahlásit nemůže. U vlastní recenze tlačítko Nahlásit není.
-  - Správce otevře stránku Nahlášené recenze a nahlášenou recenzi tam vidí i s důvodem.
-    Běžný žák tuto stránku v menu nemá a po zadání její adresy uvidí hlášku, že na ni nemá
-    oprávnění.
-  - Když správce klikne na Skrýt, recenze z přehledu zmizí. Jiný žák ji po obnovení profilu
-    učitele už nevidí a průměr hvězdiček se přepočítá bez ní. Když správce klikne na Ponechat,
-    recenze zůstane vidět a z přehledu nahlášených zmizí.
-  - Správce skrytou recenzi najde v přehledu pod filtrem Skryté a tlačítkem Zobrazit ji
-    vrátí, takže ji žáci zase vidí.
+  - Žák odešle v profilu učitele hvězdičky s textem a po obnovení stránky tam jeho hodnocení
+    pořád je. Průměr učitele se změní podle jeho hvězdiček. Druhé hodnocení stejnému učiteli
+    se neuloží a aplikace ukáže chybu.
+  - Odeslání bez hvězdiček, s hodnotou mimo 1–5 nebo bez textu skončí chybou a nic se neuloží.
+  - Žák nahlásí cizí recenzi a ta se objeví v přehledu správce i s důvodem. Druhé nahlášení
+    téže recenze stejným žákem se nezapočítá. Vlastní recenzi nahlásit nejde.
+  - Po skrytí správcem recenzi ostatní žáci po obnovení profilu nevidí a průměr hvězdiček se
+    přepočítá bez ní. Po opětovném zobrazení je recenze zase vidět.
+  - V nástrojích prohlížeče (F12, záložka Síť) žák v odpovědi s recenzemi nenajde jméno,
+    e-mail ani ID autora, kdežto správce je tam u každé recenze vidí.
+  - Nepřihlášený uživatel nedostane žádná data o učitelích ani recenzích. Žák, který otevře
+    adresu správcovského endpointu, dostane chybu 403.
 
-### 3. Skrytý autor recenze a jeho dohledání správcem
+### 2. Design: formulář hodnocení, nahlášení a přehled pro správce
 - **Vlastník:** Zbitek
-- **Co přesně umí:** Žákům se u recenzí nezobrazuje, kdo je napsal. Místo jména vidí
-  „Anonymní žák“ a jméno, e-mail ani ID autora nepřijde ani v odpovědi API. Vlastní recenzi
-  žák pozná podle štítku „Tvoje recenze“. Správce u každé recenze, v profilu učitele
-  i v přehledu nahlášených, vidí jméno a školní e-mail autora a může si zobrazit všechny
-  recenze tohoto autora.
+- **Co přesně umí:** Návrh (v Canvě) a vzhled všech nových částí: sekce Recenze v profilu
+  učitele `/ucitel/<id>` s jedním formulářem (hvězdičky a text), zobrazení vlastního
+  hodnocení s tlačítky Upravit a Smazat, recenze s „Anonymní žák“ a štítkem „Tvoje recenze“,
+  tlačítko a okno Nahlásit a stránka správce Nahlášené recenze se jménem autora a tlačítky
+  Skrýt, Ponechat a Zobrazit. Návrh dodržuje `docs/design/design_rules.md` a je i pro mobil.
 - **Hotovo, když:**
-  - Žák v profilu učitele vidí u cizích recenzí jen „Anonymní žák“. Ani v nástrojích
-    prohlížeče (F12, záložka Síť) není v odpovědi s recenzemi jméno, e-mail ani ID autora.
-  - Žák u své recenze vidí štítek „Tvoje recenze“.
-  - Správce u stejné recenze vidí jméno a e-mail autora. Po kliknutí na jméno uvidí seznam
-    všech recenzí tohoto autora u všech učitelů.
-  - Žák, který otevře adresu přehledu recenzí autora, uvidí hlášku, že na ni nemá oprávnění,
-    a žádná jména se mu nezobrazí.
+  - Návrh všech uvedených obrazovek je hotový v Canvě a odkaz na něj je v tomto souboru.
+  - Sekce Recenze v profilu učitele, okno Nahlásit a stránka Nahlášené recenze na nasazené
+    aplikaci vypadají jako návrh, včetně stavů hover, active a focus u hvězdiček a tlačítek.
+  - Na šířce telefonu (kolem 375 px) se formulář, recenze i přehled správce vejdou na obrazovku
+    bez vodorovného posouvání a všechna tlačítka jde pohodlně stisknout.
+  - Designér shodu s návrhem potvrdí schválením (review) frontendového PR.
+
+### 3. Frontend: formulář v profilu, nahlašování a stránka pro správce
+- **Vlastník:** Uher
+- **Co přesně umí:** Sekce Recenze v profilu učitele `/ucitel/<id>` načítá recenze a průměr
+  z API a má jeden formulář na hvězdičky a text. Žák v ní své hodnocení upraví nebo smaže
+  a cizí recenzi nahlásí s důvodem. U cizích recenzí ukazuje „Anonymní žák“ a u vlastní štítek
+  „Tvoje recenze“. Správci ukazuje u recenzí jméno a e-mail autora a nabízí stránku Nahlášené
+  recenze s filtrem Skryté a tlačítky Skrýt, Ponechat a Zobrazit. Po každé akci se data na
+  stránce hned obnoví bez načítání celé stránky.
+- **Hotovo, když:**
+  - Přihlášený žák v profilu učitele vybere hvězdičky, napíše text a odešle. Recenze se hned
+    objeví v seznamu a průměr se přepočítá. Formulář bez hvězdiček nebo textu nejde odeslat
+    a u chybějícího pole se ukáže chyba.
+  - Žák, který už hodnocení má, vidí místo prázdného formuláře své hodnocení s tlačítky Upravit
+    a Smazat. Po smazání se zase ukáže prázdný formulář.
+  - Žák u cizí recenze klikne na Nahlásit, napíše důvod a odešle. Uvidí potvrzení a tlačítko
+    u té recenze zmizí. U cizích recenzí vidí jen „Anonymní žák“, u své „Tvoje recenze“.
+  - Správce má v menu stránku Nahlášené recenze, vidí tam recenze s důvodem a jménem autora.
+    Po kliknutí na Skrýt nebo Ponechat recenze z přehledu hned zmizí a skrytou najde pod
+    filtrem Skryté. Žák tuto stránku v menu nemá a po zadání její adresy uvidí hlášku, že na ni
+    nemá oprávnění.
+  - Nepřihlášený uživatel na `/ucitel/<id>` ani na `/recenze` žádné recenze neuvidí a aplikace
+    ho pošle na přihlášení.
 
 ## API (backend `/api/reviews`, stav D2)
 
