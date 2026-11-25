@@ -32,3 +32,16 @@ a `PORT` (port webu, výchozí `80`).
 
 Spojení s databází je šifrované pomocí TLS. Pokud server používá self-signed certifikát, nastav
 `POSTGRES_SSL_MODE` na `Require` nebo `VerifyCA` a poskytni kořenový certifikát.
+
+## E-mail (ověřovací kódy)
+
+Platí pro `docker-compose.yaml` i `app.docker-compose.yaml`. Do `.env` přidej:
+
+```env
+Email__Host=smtp.office365.com
+Email__Port=587
+Email__Username=jmeno@spstrutnov.cz
+Email__Password=heslo
+```
+
+Bez `Email__Host` se kód jen vypíše do logu API.
