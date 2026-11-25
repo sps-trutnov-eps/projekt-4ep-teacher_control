@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TeacherControl.Api.Data;
 using TeacherControl.Api.Entities;
 using TeacherControl.Api.Features.Abstence.Services;
+using TeacherControl.Api.Features.Login.Models;
 using TeacherControl.Api.Features.Login.Services;
 using TeacherControl.Api.Features.Pololeti.Services;
 using TeacherControl.Api.Features.Rating.Services;
@@ -76,7 +77,8 @@ public class Program
         });
 
         // takhle si registrujte service soubory pro DependencyInjection
-        builder.Services.AddScoped<IEmailService, MockEmailService>();
+        builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection(EmailOptions.SectionName));
+        builder.Services.AddScoped<IEmailService, SmtpEmailService>();
         builder.Services.AddScoped<LoginService>();
         builder.Services.AddScoped<AbstenceService>();
         builder.Services.AddScoped<TeacherBingoService>();
