@@ -14,6 +14,10 @@ public class AbstenceController : ControllerBase
 {
     private const int MaxLateMinutes = 480; // jeden školní den
 
+    // Varování pro uživatele — zobrazuje se místo chyby, zbývající čas je v hlavičce Retry-After.
+    public const string CooldownMessage =
+        "Zápis pro tohoto učitele už byl v posledních 30 minutách odeslán. Zkus to prosím znovu později.";
+
     private readonly ILogger<AbstenceController> _logger;
     private readonly AbstenceService _abstenceService;
     private readonly UserManager<UserEntity> _userManager;
@@ -129,7 +133,6 @@ public class AbstenceController : ControllerBase
         if (retryAfter is { } wait)
             Response.Headers.RetryAfter = ((int)Math.Ceiling(wait.TotalSeconds)).ToString();
 
-        return StatusCode(StatusCodes.Status429TooManyRequests,
-            "A submission for this teacher was made less than 30 minutes ago.");
+        return StatusCode(StatusCodes.Status429TooManyRequests, CooldownMessage);
     }
 }

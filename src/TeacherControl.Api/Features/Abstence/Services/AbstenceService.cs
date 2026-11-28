@@ -62,19 +62,31 @@ public class AbstenceService
         var now = DateTime.UtcNow;
         var today = DateOnly.FromDateTime(DateTime.Now);
 
-        var teacher = await _context.Teachers
-            .Include(t => t.Reviews)
-            .Include(t => t.LateArrivals.Where(a => a.Date == today))
-            .FirstOrDefaultAsync(t => t.Id == teacherId);
-        if (teacher is null)
+        if (!await _context.Teachers.AnyAsync(t => t.Id == teacherId))
             return new AbstenceWriteResult(AbstenceWriteOutcome.TeacherNotFound);
-
-        if (TryGetCooldownRemaining(teacher.LastLateArrivalSubmissionAt, now, out var remaining))
-            return new AbstenceWriteResult(AbstenceWriteOutcome.TooSoon, RetryAfter: remaining);
 
         var student = await _context.Users.FindAsync(studentId);
         if (student is null)
             return new AbstenceWriteResult(AbstenceWriteOutcome.InternalError);
+
+        // Zámek se bere jedním podmíněným UPDATE (kontrola cooldownu i zápis času v jednom kroku)
+        // a řádek učitele zůstane zamčený do commitu. Souběžný požadavek proto počká a po commitu
+        // už podmínku nesplní, takže se stejné zpoždění nikdy nezapíše dvakrát. Pokud zápis záznamu
+        // selže, transakce se vrátí a zámek se neodčerpá.
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
+        var cutoff = now - SubmissionCooldown;
+        var claimed = await _context.Teachers
+            .Where(t => t.Id == teacherId
+                        && (t.LastLateArrivalSubmissionAt == null || t.LastLateArrivalSubmissionAt <= cutoff))
+            .ExecuteUpdateAsync(s => s.SetProperty(t => t.LastLateArrivalSubmissionAt, now));
+        if (claimed == 0)
+            return await RejectAsync(teacherId, t => t.LastLateArrivalSubmissionAt, now);
+
+        var teacher = await _context.Teachers
+            .Include(t => t.Reviews)
+            .Include(t => t.LateArrivals.Where(a => a.Date == today))
+            .FirstAsync(t => t.Id == teacherId);
 
         // Přidáním do trackované navigační kolekce si EF entitu sám označí jako Added,
         // není potřeba volat i _context.LateArrivals.Add(...) zvlášť.
@@ -87,9 +99,9 @@ public class AbstenceService
             Student = student,
             TimeSpan = TimeSpan.FromMinutes(minutes)
         });
-        teacher.LastLateArrivalSubmissionAt = now;
 
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return new AbstenceWriteResult(AbstenceWriteOutcome.Success, ToDto(teacher));
     }
@@ -99,40 +111,49 @@ public class AbstenceService
         var now = DateTime.UtcNow;
         var today = DateOnly.FromDateTime(DateTime.Now);
 
-        var teacher = await _context.Teachers
-            .Include(t => t.Reviews)
-            .Include(t => t.LateArrivals.Where(a => a.Date == today))
-            .FirstOrDefaultAsync(t => t.Id == teacherId);
-        if (teacher is null)
+        if (!await _context.Teachers.AnyAsync(t => t.Id == teacherId))
             return new AbstenceWriteResult(AbstenceWriteOutcome.TeacherNotFound);
-
-        if (TryGetCooldownRemaining(teacher.LastMoodSubmissionAt, now, out var remaining))
-            return new AbstenceWriteResult(AbstenceWriteOutcome.TooSoon, RetryAfter: remaining);
 
         var student = await _context.Users.FindAsync(studentId);
         if (student is null)
             return new AbstenceWriteResult(AbstenceWriteOutcome.InternalError);
 
-        teacher.Mood = value;
-        teacher.LastMoodSubmissionAt = now;
+        // Jeden atomický UPDATE: kontrola cooldownu, zápis nálady i času zápisu najednou.
+        var cutoff = now - SubmissionCooldown;
+        var claimed = await _context.Teachers
+            .Where(t => t.Id == teacherId
+                        && (t.LastMoodSubmissionAt == null || t.LastMoodSubmissionAt <= cutoff))
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(t => t.Mood, value)
+                .SetProperty(t => t.LastMoodSubmissionAt, now));
+        if (claimed == 0)
+            return await RejectAsync(teacherId, t => t.LastMoodSubmissionAt, now);
 
-        await _context.SaveChangesAsync();
+        var teacher = await _context.Teachers
+            .AsNoTracking()
+            .Include(t => t.Reviews)
+            .Include(t => t.LateArrivals.Where(a => a.Date == today))
+            .FirstAsync(t => t.Id == teacherId);
 
         return new AbstenceWriteResult(AbstenceWriteOutcome.Success, ToDto(teacher));
     }
 
-    // Pozdní příchod a nálada mají od sebe nezávislé cooldowny — volá se zvlášť pro
-    // LastLateArrivalSubmissionAt a zvlášť pro LastMoodSubmissionAt.
-    private static bool TryGetCooldownRemaining(DateTime? lastSubmission, DateTime now, out TimeSpan remaining)
+    // Pozdní příchod a nálada mají od sebe nezávislé cooldowny — volající říká, který čas
+    // (LastLateArrivalSubmissionAt / LastMoodSubmissionAt) se má použít pro zbývající dobu.
+    private async Task<AbstenceWriteResult> RejectAsync(
+        int teacherId, Func<TeacherEntity, DateTime?> lastSubmission, DateTime now)
     {
-        if (lastSubmission is { } last && now - last < SubmissionCooldown)
-        {
-            remaining = SubmissionCooldown - (now - last);
-            return true;
-        }
+        var teacher = await _context.Teachers.AsNoTracking().FirstOrDefaultAsync(t => t.Id == teacherId);
+        if (teacher is null)
+            return new AbstenceWriteResult(AbstenceWriteOutcome.TeacherNotFound);
 
-        remaining = TimeSpan.Zero;
-        return false;
+        var remaining = lastSubmission(teacher) is { } last
+            ? SubmissionCooldown - (now - last)
+            : TimeSpan.Zero;
+        if (remaining < TimeSpan.Zero)
+            remaining = TimeSpan.Zero;
+
+        return new AbstenceWriteResult(AbstenceWriteOutcome.TooSoon, RetryAfter: remaining);
     }
 
     // Pro zápis (SubmitLateArrivalAsync/SubmitMoodAsync) už máme trackovanou entitu po uložení
